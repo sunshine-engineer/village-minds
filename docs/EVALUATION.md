@@ -196,3 +196,7 @@ python scripts/check_speed.py
 The speed integration check uses an actual renderer and Panda3D messenger events,
 not OS keyboard automation or a human playtest. Evaluation tests use fake responses
 for deterministic metrics and real spawned processes for timeout/cleanup checks.
+
+## Harder cooperation scenario
+
+Use `--config configs/cooperation-siege.json` for earlier, stronger waves and limited starting supplies. The [cooperation siege guide](COOPERATION_SCENARIO.md) includes Windows/Linux commands, evaluation-only controls (`--control no-sharing`, `no-defense`, `no-repairs`, `idle`), and limits on interpreting results. Ordinary runs default to `--control cooperative`.

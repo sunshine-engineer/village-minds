@@ -161,12 +161,22 @@ def run_scenario(
     suite_deadline=math.inf,
     request=bounded_decision,
 ):
-    from .world import World
+    from .evaluation_controls import EvaluationWorld
     from .brains import BrainScheduler
     from .telemetry import DecisionLog
 
     if mode not in MODES:
         raise ValueError(f"Unknown evaluation mode: {mode}")
+    control_name = options.get("control", "cooperative")
+    control = options["controls"][control_name]
+    if mode != "scripted" and (
+        control_name != "cooperative"
+        or not control["routines"]
+        or control["disabled_actions"]
+    ):
+        raise ValueError(
+            "Intervention controls require scripted mode; compare AI in the cooperative control"
+        )
     started = time.monotonic()
     deadline = min(suite_deadline, started + options["run_wall_seconds"])
     logger = DecisionLog(
@@ -176,8 +186,9 @@ def run_scenario(
     )
     # All conditions start in the same world. Only the model observation's lesson
     # field differs; local routines/chatter never receive extra remembered lessons.
-    world = World(
+    world = EvaluationWorld(
         seed=seed,
+        disabled_actions=control["disabled_actions"],
         decision_log=logger,
         campaign={
             "attempt": 2 if (lesson_fixture or {}).get("failed") else 1,
@@ -203,6 +214,10 @@ def run_scenario(
         world.time,
         seed=seed,
         mode=mode,
+        control=control_name,
+        scenario_name=options["scenario_name"],
+        disabled_actions=control["disabled_actions"],
+        routines=control["routines"],
         timing_policy="paused_checkpoints",
         memory_available=bool(memory),
         checkpoint_strategy=schedule.strategy,
@@ -292,7 +307,8 @@ def run_scenario(
             dt = min(options["step_seconds"], options["duration_seconds"] - world.time)
             metrics.step(world, dt)
             world.tick(dt)
-            brains.tick()
+            if control["routines"]:
+                brains.tick()
             metrics.after_step(world)
         if world.failed:
             reason = "village_destroyed"
@@ -303,6 +319,9 @@ def run_scenario(
         result = {
             "seed": seed,
             "mode": mode,
+            "control": control_name,
+            "scenario_name": options["scenario_name"],
+            "blocked_actions": dict(world.blocked_actions),
             "stop_reason": reason,
             "failed": world.failed,
             "completed_horizon": completed,
@@ -368,11 +387,18 @@ def run_scenario(
 
 def aggregate(results):
     rows = []
-    for mode in dict.fromkeys(r["mode"] for r in results):
-        group = [r for r in results if r["mode"] == mode]
+    for mode, control in dict.fromkeys(
+        (r["mode"], r.get("control", "cooperative")) for r in results
+    ):
+        group = [
+            r
+            for r in results
+            if r["mode"] == mode and r.get("control", "cooperative") == control
+        ]
         rows.append(
             {
                 "mode": mode,
+                "control": control,
                 "runs": len(group),
                 "horizons_completed": sum(r["completed_horizon"] for r in group),
                 "village_losses": sum(r["failed"] for r in group),
@@ -434,6 +460,8 @@ def write_report(output, results, manifest):
     fields = [
         "seed",
         "mode",
+        "control",
+        "scenario_name",
         "stop_reason",
         "simulated_seconds",
         "wall_seconds",
@@ -472,14 +500,20 @@ def write_report(output, results, manifest):
             }
             for r in results
         )
+    scenario_name = manifest.get("options", {}).get("scenario_name", "standard")
+    control_names = ", ".join(
+        dict.fromkeys(r.get("control", "cooperative") for r in results)
+    ) or manifest.get("options", {}).get("control", "cooperative")
     lines = [
         "# Village AI evaluation",
+        "",
+        f"Scenario: {scenario_name}. Controls: {control_names}",
         "",
         "Fixed substeps without rendering; simulation pauses at bounded model checkpoints.",
         "Observed durations include censored runs: they are not mean time-to-failure estimates.",
         "",
-        "| Mode | Runs | Horizon completed | Village lost | Wall limited | Model requests | Accepted AI | Timeouts | Errors |",
-        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+        "| Mode | Control | Runs | Horizon completed | Village lost | Wall limited | Model requests | Accepted AI | Timeouts | Errors |",
+        "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
     for row in comparison:
         lines.append(
@@ -488,6 +522,7 @@ def write_report(output, results, manifest):
                 str(row[k])
                 for k in (
                     "mode",
+                    "control",
                     "runs",
                     "horizons_completed",
                     "village_losses",
@@ -502,8 +537,8 @@ def write_report(output, results, manifest):
         )
     lines += [
         "",
-        "| Mode | Roles requested | Requested coverage | Threat calls | Quiet calls | Unused budget |",
-        "| --- | --- | --- | ---: | ---: | ---: |",
+        "| Mode | Control | Roles requested | Requested coverage | Threat calls | Quiet calls | Unused budget |",
+        "| --- | --- | --- | --- | ---: | ---: | ---: |",
     ]
     for row in comparison:
         coverage = (
@@ -512,7 +547,30 @@ def write_report(output, results, manifest):
             else "n/a"
         )
         lines.append(
-            f"| {row['mode']} | {', '.join(row['roles_requested']) or '-'} | {coverage} | {row['active_threat_requests']} | {row['quiet_requests']} | {row['unused_model_calls']} |"
+            f"| {row['mode']} | {row['control']} | {', '.join(row['roles_requested']) or '-'} | {coverage} | {row['active_threat_requests']} | {row['quiet_requests']} | {row['unused_model_calls']} |"
+        )
+    lines += [
+        "",
+        "| Seed | Mode | Control | Village health | Food shared | Wood shared | Repairs | Kills | Rallies |",
+        "| ---: | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |",
+    ]
+    for result in results:
+        totals = Counter()
+        for contribution in result["contributions"].values():
+            totals.update(contribution)
+        lines.append(
+            f"| {result['seed']} | {result['mode']} | {result.get('control', 'cooperative')} | {result['village_health']:.1f} | "
+            + " | ".join(
+                str(totals[key])
+                for key in (
+                    "deposited_food",
+                    "deposited_wood",
+                    "repairs",
+                    "kills",
+                    "rallies",
+                )
+            )
+            + " |"
         )
     lines += [
         "",
@@ -521,6 +579,8 @@ def write_report(output, results, manifest):
         "",
         f"Skipped scenarios: {manifest['skipped_scenarios']}. Interrupted: {manifest['interrupted']}.",
         "",
+        "Interventions disable configured actions or routines; blocked attempts remain in logs and results.",
+        "Control losses show dependencies of the tested policy, not proof that every possible strategy needs every role.",
         "A short/call-limited run is a smoke check, not evidence of improved cooperation.",
         "Memory uses factual lessons from a separate idle-failure fixture; no model training occurs.",
         "Changing models, call counts or checkpoint timing changes the experiment.",
@@ -544,6 +604,12 @@ def main():
         choices=("threats", "interval"),
         default=defaults["checkpoint_strategy"],
         help="Threat-aware horizon slots or fixed intervals",
+    )
+    parser.add_argument(
+        "--control",
+        choices=tuple(defaults["controls"]),
+        default=defaults["control"],
+        help="Scripted intervention control; cooperative allows AI modes",
     )
     parser.add_argument("--seeds", nargs="+", type=int, default=defaults["seeds"])
     parser.add_argument(
@@ -597,8 +663,15 @@ def main():
         "suite_wall_seconds": args.suite_seconds,
         "full_observations": args.full_observations,
         "checkpoint_strategy": args.checkpoint_strategy,
+        "control": args.control,
     }
     modes = list(dict.fromkeys(MODES if "all" in args.modes else args.modes))
+    if any(mode != "scripted" for mode in modes) and (
+        args.control != "cooperative"
+        or not defaults["controls"][args.control]["routines"]
+        or defaults["controls"][args.control]["disabled_actions"]
+    ):
+        parser.error("Intervention controls require --modes scripted")
     seeds = list(dict.fromkeys(args.seeds))
     options.update(seeds=seeds, modes=modes)
     output = Path(args.output).expanduser().resolve() / (

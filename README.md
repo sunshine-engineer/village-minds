@@ -309,3 +309,5 @@ References: [Panda3D tasks](https://docs.panda3d.org/1.10/python/programming/tas
 
 Project code and documentation are available under the [MIT License](LICENSE).
 Panda3D, Ollama and downloaded models retain their own licenses.
+
+For a harder benchmark, try the [cooperation siege scenario](docs/COOPERATION_SCENARIO.md). It combines earlier, stronger waves with scarce reserves and includes controls that remove sharing, defense or repairs to test which systems survival depends on.

@@ -63,6 +63,16 @@ class ConfigurationTests(unittest.TestCase):
             {"ai": {"villager_profiles": {"missing": "local_qwen"}}},
             {"rules": {"wave_growth_every": 1.5}},
             {"evaluation": {"checkpoint_strategy": "unknown"}},
+            {"evaluation": {"control": "missing"}},
+            {"evaluation": {"scenario_name": " "}},
+            {
+                "evaluation": {
+                    "controls": {
+                        "no-sharing": {"disabled_actions": ["deposit", "deposit"]}
+                    }
+                }
+            },
+            {"evaluation": {"controls": {"no-sharing": {"disabled_actions": [7]}}}},
             {"evaluation": {"role_order": []}},
             {"evaluation": {"role_order": ["soldier", "soldier"]}},
             {"evaluation": {"role_order": ["missing"]}},

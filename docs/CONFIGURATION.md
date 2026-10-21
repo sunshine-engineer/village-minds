@@ -122,3 +122,7 @@ current order instead of generating retries or idle wandering.
 service arrival now uses the action's actual legality/range, so that legacy value
 does not control task completion. Save format and gameplay configuration
 fingerprints are unchanged by these code-only policy improvements.
+
+### Cooperation siege preset
+
+`configs/cooperation-siege.json` overrides survival balance and uses a separate campaign slot. See [the scenario guide](COOPERATION_SCENARIO.md). `evaluation.scenario_name` labels the report; `evaluation.control` selects an entry in `evaluation.controls`. Each control configures a `routines` boolean and a list of `disabled_actions`. Interventions affect only headless evaluations; noncooperative controls require scripted mode. Model timeout and wall budgets still apply.

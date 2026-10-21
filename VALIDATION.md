@@ -1,5 +1,15 @@
 # Validation evidence
 
+## Cooperation siege and intervention controls — 21 October 2026
+
+- **92 tests passed on Linux and native Windows.** The new integration test loads the siege preset through fresh CLI processes, verifies seed 7 survives with normal routines and loses without sharing, defense or repairs, and keeps intervention controls separate in aggregates. Unit checks cover blocked-action state safety and prohibit labeling intervention runs as AI comparisons. Invalid scenario/control settings are rejected.
+- A 15-run scripted comparison covered seeds 7, 19 and 31 at a 900-second horizon, using cooperative, no-sharing, no-defense, no-repairs and idle controls. Cooperative routines survived **2/3**; every intervention control survived **0/3**. No run was wall limited. Seed 19 still defeated the cooperative baseline at 675.5 simulated seconds. This establishes dependencies of the tested fallback policy, not indispensability of every role or AI cooperation.
+- Evidence: local `artifacts/cooperation-siege-validation/report.md`, `summary.json`, `results.csv` and per-run decision logs/results. The report now includes the control label and shared-resource/combat/support contributions.
+- A live native Windows hybrid siege check completed 900 simulated seconds in 25.07 seconds, but its first request timed out at the 20-second limit. The circuit opened and left three calls unused: **zero accepted AI actions**, so survival is credited to local routines. Evidence: `artifacts/evaluations/run-20261021T231125-80f950fe/`.
+- Native Windows offscreen startup/rendering passed with the siege preset, `--demo --no-save --smoke-test`. The preset resolves to a separate campaign slot; the evaluator never loads campaign saves. This is not a human playtest.
+- The final wheel build includes `evaluation_controls.py` and the configured controls. Compile checks, Python 3.11 grammar checks, documentation links and CLI intervention guards passed. Actual runtime tests used the installed Python 3.14 environments.
+- One full-suite attempt during concurrent model/validation work hit the existing five-second successful-worker startup deadline. The unchanged test passed in the subsequent full Linux run; the final full native Windows run also passed. Model timeouts remain reported rather than counted as successes.
+
 ## Crop policy and threat-aware role coverage — 21 October 2026
 
 - **89 tests passed on Linux and native Windows.** New regression cases were first run against the old implementation and reproduced the out-of-range harvest stall. They now cover local planting alternatives, reaching ripe/distant plots, blocked plot centers, work cooldowns and finishing movement inside one rounded grid cell.

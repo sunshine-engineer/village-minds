@@ -74,3 +74,5 @@ Evaluation uses the same rules, local routines and model-result validation as ga
 with a different timing policy: the simulation pauses at fixed strategic checkpoints.
 Requests run in spawned processes so a hung adapter cannot stall the suite indefinitely.
 Compare results within that policy; see [evaluation](EVALUATION.md) for limitations.
+
+`evaluation_controls.py` owns evaluation-only action interventions through an `EvaluationWorld` subclass. It logs blocked actions without changing ordinary `World` behavior or campaign persistence. `configs/cooperation-siege.json` supplies the opt-in siege balance; no scenario constants are embedded in survival code.

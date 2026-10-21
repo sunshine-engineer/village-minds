@@ -548,6 +548,37 @@
       "worker",
       "farmer",
       "elder"
-    ]
+    ],
+    "scenario_name": "standard",
+    "control": "cooperative",
+    "controls": {
+      "cooperative": {
+        "routines": true,
+        "disabled_actions": []
+      },
+      "no-sharing": {
+        "routines": true,
+        "disabled_actions": [
+          "deposit"
+        ]
+      },
+      "no-defense": {
+        "routines": true,
+        "disabled_actions": [
+          "guard",
+          "attack"
+        ]
+      },
+      "no-repairs": {
+        "routines": true,
+        "disabled_actions": [
+          "repair"
+        ]
+      },
+      "idle": {
+        "routines": false,
+        "disabled_actions": []
+      }
+    }
   }
 }

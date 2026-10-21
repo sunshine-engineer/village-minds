@@ -161,6 +161,18 @@ def validate(config, reference):
         v not in ("scripted", "hybrid", "hybrid-memory") for v in evaluation["modes"]
     ):
         raise ValueError("Unknown evaluation mode")
+    if evaluation["control"] not in evaluation["controls"]:
+        raise ValueError("Unknown evaluation control")
+    if not evaluation["scenario_name"].strip():
+        raise ValueError("evaluation.scenario_name cannot be empty")
+    for control in evaluation["controls"].values():
+        actions = control["disabled_actions"]
+        if any(not isinstance(a, str) or not a for a in actions) or len(
+            set(actions)
+        ) != len(actions):
+            raise ValueError(
+                "Control disabled_actions must contain unique action names"
+            )
     if evaluation["checkpoint_strategy"] not in ("threats", "interval"):
         raise ValueError("evaluation.checkpoint_strategy must be threats or interval")
     roles = evaluation["role_order"]
