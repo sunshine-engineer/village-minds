@@ -286,6 +286,7 @@ class BrainScheduler:
             )
             self.request_context = None
         # This runs regardless of model latency, errors, or request cooldowns.
+        world.task_board.coordinate()
         self._routines()
         if self.demo or world.time < self.retry_at or self.busy:
             return

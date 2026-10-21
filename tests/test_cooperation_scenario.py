@@ -51,6 +51,8 @@ class CooperationTests(unittest.TestCase):
                         "scripted",
                         "--seeds",
                         "7",
+                        "--coordination",
+                        "independent",
                         "--control",
                         control,
                         "--output",

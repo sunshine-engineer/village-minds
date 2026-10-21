@@ -35,6 +35,9 @@ class World(SurvivalRules):
         self.rng = random.Random(seed)
         self.villagers = [Villager(*entry) for entry in CAST]
         self.time = 0.0
+        from .coordination import TaskBoard
+
+        self.task_board = TaskBoard(self)
         self.controlled = None
         self.events = deque(maxlen=S["memory"]["event_capacity"])
         self.resources = {"orchard": R["orchard_capacity"]}
@@ -96,6 +99,20 @@ class World(SurvivalRules):
             "hunger": round(bot.hunger),
             "wood": bot.wood,
             "available_actions": self.available_actions(bot),
+            "task_board": self.task_board.observe(),
+            "coordination_mode": self.task_board.mode,
+            "coordination_roster": [
+                dict(
+                    name=v.name,
+                    role=v.role,
+                    position=v.position,
+                    hunger=round(v.hunger),
+                    energy=round(v.energy),
+                    action=v.action,
+                )
+                for v in self.villagers
+                if v.alive
+            ],
             "village": {
                 "health": round(self.village_health),
                 "gates": self.gates.copy(),
@@ -178,13 +195,18 @@ class World(SurvivalRules):
         self, bot, decision, *, source="external", request_id=None, observation=None
     ):
         if self.decision_log is None:
-            return self._apply(bot, decision)
+            accepted = self._apply(bot, decision)
+            if accepted:
+                self.task_board.note_progress(bot, decision)
+            return accepted
         from .telemetry import state_summary
 
         before = state_summary(self, bot)
         if observation is None and self.decision_log.full_observations:
             observation = self.observe(bot)
         accepted = self._apply(bot, decision)
+        if accepted:
+            self.task_board.note_progress(bot, decision)
         self.decision_log.record(
             "decision",
             self.time,
@@ -207,6 +229,8 @@ class World(SurvivalRules):
         action = decision.get("action")
         if not isinstance(action, str):
             return False
+        if action in ("request_help", "assign_task", "claim_task", "release_task"):
+            return self.task_board.execute(bot, decision)
         if action in self.extensions.actions:
             hook = self.extensions.actions[action]
             target = decision.get("target", "")
@@ -330,6 +354,7 @@ class World(SurvivalRules):
         dt = max(0, min(dt, S["runtime"]["max_step_seconds"]))
         self.time += dt
         self.survival_tick(dt)
+        self.task_board.maintain()
         if self.failed:
             return
         for tick in self.extensions.systems.values():
@@ -385,6 +410,11 @@ class World(SurvivalRules):
         return point if walkable(*point) else (x, y)
 
     def fallback(self, bot):
+        task = self.task_board.policy(bot)
+        if task is False:
+            return None
+        if task is not None:
+            return task
         policy = self.extensions.policies.get(bot.role, default_policy)
         return policy(self, bot)
 

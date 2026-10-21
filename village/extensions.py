@@ -28,6 +28,10 @@ BUILTIN_ACTIONS = frozenset(
         "guard",
         "attack",
         "rally",
+        "request_help",
+        "assign_task",
+        "claim_task",
+        "release_task",
     }
 )
 

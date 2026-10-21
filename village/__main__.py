@@ -39,6 +39,12 @@ def main():
         default=settings["telemetry"]["decision_log"],
         help="Append local/model/player decisions to a JSONL trace",
     )
+    parser.add_argument(
+        "--coordination",
+        choices=("independent", "requests", "assigned"),
+        default=settings["coordination"]["mode"],
+        help="Automatic shared task strategy",
+    )
     args = parser.parse_args()
     attach_profile(parser, args)
     if not 0.1 <= args.pace <= settings["runtime"]["max_pace"]:

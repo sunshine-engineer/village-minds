@@ -137,6 +137,7 @@ Select the game window before pressing keys.
 | J | Repair a nearby damaged gate using shared wood |
 | K | Attack a nearby monster |
 | L | Elder rally; uses one shared food to support nearby villagers |
+| Q / U / Y / X | Request help / elder offers task / accept task / release task |
 | P | Pause / resume simulation |
 | F5 | Save immediately |
 | Escape | Cancel dialogue, or quit and save |
@@ -310,4 +311,4 @@ References: [Panda3D tasks](https://docs.panda3d.org/1.10/python/programming/tas
 Project code and documentation are available under the [MIT License](LICENSE).
 Panda3D, Ollama and downloaded models retain their own licenses.
 
-For a harder benchmark, try the [cooperation siege scenario](docs/COOPERATION_SCENARIO.md). It combines earlier, stronger waves with scarce reserves and includes controls that remove sharing, defense or repairs to test which systems survival depends on.
+For a harder benchmark, try the [cooperation siege scenario](docs/COOPERATION_SCENARIO.md). It combines earlier, stronger waves with scarce reserves. Compare independent routines, volunteers responding to requests, and elder-assigned tasks while keeping all survival actions enabled. See [task coordination](docs/COORDINATION.md) for player/model actions and save behavior.

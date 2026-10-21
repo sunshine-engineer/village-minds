@@ -56,6 +56,9 @@ class VillageGame(SceneBuilder, ShowBase):
             if self.save_store
             else None
         ) or World()
+        self.world.task_board.mode = getattr(
+            args, "coordination", get_settings()["coordination"]["mode"]
+        )
         from .telemetry import DecisionLog
         from .timing import SimulationClock
 
@@ -300,6 +303,7 @@ class VillageGame(SceneBuilder, ShowBase):
             + f"\nSpeed {self.pace:g}x | Local actions {self.brains.local_decisions} | AI decisions {self.brains.model_decisions}"
             + f"\nVillage {int(self.world.village_health)}/{R['village_health']:g} | Attempt {self.world.campaign['attempt']} | Wave {self.world.wave}"
             + f"\nShared food {self.world.store['food']} | Wood {self.world.store['wood']} | Next wave {max(0,int(self.world.next_wave-self.world.time))}s"
+            + f"\nTasks: {self.world.task_board.mode} | Active {sum(t['status'] in ('open', 'offered', 'accepted') for t in self.world.task_board.tasks)}"
             + "\n"
             + self.save_status
         )

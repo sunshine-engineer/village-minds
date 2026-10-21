@@ -21,45 +21,41 @@ Farmers must grow and deliver food, workers must replenish shared wood and repai
 
 ## Run the comparison
 
-From the repository root, run the cooperative baseline first. It does not need Docker or a model.
+Keep every survival action enabled and compare **how villagers organize**, rather than removing essential mechanics. This scripted comparison needs no model or Docker.
 
 Linux:
 
 ```bash
-.venv/bin/python -m village.evaluation --config configs/cooperation-siege.json --modes scripted --seeds 7 19 31
+.venv/bin/python -m village.evaluation --config configs/cooperation-siege.json --compare-coordination --modes scripted --seeds 7 19 31 43 59 71 83 97 109 127 --suite-seconds 240
 ```
 
 Windows PowerShell:
 
 ```powershell
-.\.venv-win\Scripts\python.exe -m village.evaluation --config configs/cooperation-siege.json --modes scripted --seeds 7 19 31
+.\.venv-win\Scripts\python.exe -m village.evaluation --config configs/cooperation-siege.json --compare-coordination --modes scripted --seeds 7 19 31 43 59 71 83 97 109 127 --suite-seconds 240
 ```
 
-Then repeat the same command with each `--control` value:
+This runs 30 scenarios: ten matched seeds under `independent`, `requests` and `assigned`. All retain farming, sharing, repairs and defense. Map, balance, action validation, starting resources, seed and horizon are identical; only automatic task coordination changes. See [how requests and assignments work](COORDINATION.md).
 
-| Control | Intervention |
-| --- | --- |
-| `cooperative` (default) | All normal routines and actions remain available |
-| `no-sharing` | Block deposits into the shared storehouse |
-| `no-defense` | Block guard and attack orders |
-| `no-repairs` | Block gate repairs |
-| `idle` | Disable local routines; simulation still advances |
+The report includes survival/losses, final health, starvation, gate breaches, unguarded threat time, task progress and model provenance. `uncovered_threat_gate_seconds` counts each threatened gate while no living guard with attack energy stands within attack range of that gate. `uncovered_threat_fraction` divides that by total threatened-gate seconds; it describes coverage, not actual monster damage.
 
-For example, append `--control no-sharing` to the baseline command. Controls are evaluation-only and require `--modes scripted`. They intentionally block actions without rewriting the fallback policy; blocked retries are logged as interventions and rejected decisions. These are system ablations, not optimized selfish agents.
+Paired comparisons show survival gains **and regressions**, mean final-health differences, and mean uncovered-fraction differences against the same seed's independent run. Deadline-limited/missing pairs are excluded explicitly. Task acknowledgement is separate from actual productive response. Latency means use the most recent `history_capacity` samples. More requests alone do not earn a better result.
 
-Each invocation prints its own report path. Reports identify the scenario and control, include per-villager contributions, and show shared food/wood, repairs, kills, rallies, starvation, breaches and model provenance. Compare equal seeds, settings and horizons. A wall-limited run is inconclusive, not a survival success.
+To run one strategy, use `--coordination requests` (or `independent` / `assigned`) instead of `--compare-coordination`. Each invocation prints its report path. Keep complete seed sets and report individual failures; ten seeds are still a small sample.
+
+See the [recorded ten-seed comparison](COORDINATION_RESULTS.md) for results and regressions. The preset currently selects volunteer requests; use `--coordination assigned` for automatic elder offers.
 
 ## Add model decisions
 
 With the configured local model running, use four checkpoints to give all four roles a chance to act. This is a bounded single-seed check:
 
 ```powershell
-.\.venv-win\Scripts\python.exe -m village.evaluation --config configs/cooperation-siege.json --modes hybrid --seeds 7 --max-model-calls 4 --model-timeout 20 --wall-seconds 90 --suite-seconds 100
+.\.venv-win\Scripts\python.exe -m village.evaluation --config configs/cooperation-siege.json --modes hybrid --coordination requests --seeds 7 --max-model-calls 4 --model-timeout 20 --wall-seconds 90 --suite-seconds 100
 ```
 
 On Linux, replace the executable with `.venv/bin/python`. For a 900-second horizon, planned slots are 60, 270, 480 and 690 seconds; requests wait for real active threats. Failure or model timeouts can leave calls unused. `hybrid-memory` uses factual failure lessons from an idle attempt under these same siege rules.
 
-The full scripted routines still run underneath model decisions. Surviving with accepted AI actions does not establish that AI caused survival. Compare scripted and AI modes over more seeds before claiming improvement.
+The full scripted routines still run underneath model decisions. Surviving with accepted AI actions does not establish that AI caused survival. Compare scripted and AI modes using the same `--coordination` strategy, seeds, checkpoint plan and budgets before claiming improvement. `--compare-coordination` can also be combined with AI modes, but multiplies inference work; choose an explicit suite budget and inspect skipped scenarios.
 
 ## Play it
 
@@ -69,6 +65,8 @@ The full scripted routines still run underneath model decisions. Surviving with 
 
 On Linux, use `.venv/bin/python`. Remove `--demo` to enable the configured model. This preset has its own save slot, `saves/cooperation-siege.json`; it does not load the standard village campaign. Later edits to gameplay rules require a compatible save or an explicit `--new-game`.
 
-## What the controls establish
+## Legacy mechanics diagnostics
 
-On the initial three-seed scripted check, cooperative routines survived two of three 900-second runs. Removing sharing, defense, or repairs caused village destruction in all three runs for each control. This demonstrates dependencies of the tested policy under this preset. It does not prove that every possible strategy requires those actions, that every role is indispensable, or that models learned to cooperate. The seed that still defeats the baseline is useful headroom for improving strategy.
+`--control no-sharing`, `no-defense`, `no-repairs` and `idle` remain available for scripted mechanics diagnostics. They deliberately disable actions or routines and **are not the primary cooperation benchmark**. Removing defense against monsters is not evidence that an AI coordinator is useful. These controls cannot be combined with `--compare-coordination`.
+
+The original 2/3 survival result measured independent routines with all actions enabled. Later coordination comparisons must identify the strategy explicitly. Do not mix the old disabled-action results into a claim about model quality.

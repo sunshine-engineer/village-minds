@@ -76,3 +76,5 @@ Requests run in spawned processes so a hung adapter cannot stall the suite indef
 Compare results within that policy; see [evaluation](EVALUATION.md) for limitations.
 
 `evaluation_controls.py` owns evaluation-only action interventions through an `EvaluationWorld` subclass. It logs blocked actions without changing ordinary `World` behavior or campaign persistence. `configs/cooperation-siege.json` supplies the opt-in siege balance; no scenario constants are embedded in survival code.
+
+`coordination.py` owns structured requests, exclusive task ownership, assignment/acceptance, progress, expiry, task policies and validated save state. `World` exposes board actions and public observations; `BrainScheduler` drives automation. Existing role routines remain the independent baseline and handle urgent needs. Evaluation compares the three strategies with a fixed action set and records paired seed differences.

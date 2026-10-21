@@ -87,6 +87,7 @@ def snapshot(world):
             "campaign": world.campaign,
             "world": {
                 "extension_state": world.extension_state,
+                "task_board": world.task_board.snapshot(),
                 "time": world.time,
                 "villagers": [asdict(bot) for bot in world.villagers],
                 "crops": [asdict(crop) for crop in world.crops],
@@ -254,6 +255,8 @@ def restore(data):
 
     world.rng.setstate(tuples(state["rng_state"]))
     world.controlled = None
+    if "task_board" in state:
+        world.task_board.restore(state["task_board"])
     return world
 
 

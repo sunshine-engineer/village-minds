@@ -119,6 +119,11 @@ def _validate_types(value, reference, path="config"):
             "run_wall_seconds",
             "suite_wall_seconds",
             "lesson_seconds",
+            "update_seconds",
+            "maintenance_seconds",
+            "task_ttl_seconds",
+            "history_capacity",
+            "max_active_tasks",
         }
         if value < 0 or (path.rsplit(".", 1)[-1] in positive and value == 0):
             raise ValueError(f"{path} is outside its valid range")
@@ -142,6 +147,24 @@ def _vector(value, length, name, low=None, high=None):
 
 def validate(config, reference):
     _validate_types(config, reference)
+    coordination = config["coordination"]
+    if coordination["mode"] not in ("independent", "requests", "assigned"):
+        raise ValueError("Unknown coordination mode")
+    if (
+        set(coordination["priority"]) != {"defend", "repair", "wood", "food"}
+        or len(coordination["priority"]) != 4
+    ):
+        raise ValueError("coordination.priority must contain each task kind once")
+    for roles in [
+        coordination["assigner_roles"],
+        *coordination["role_preferences"].values(),
+    ]:
+        if (
+            not roles
+            or any(not isinstance(r, str) or r not in config["roles"] for r in roles)
+            or len(set(roles)) != len(roles)
+        ):
+            raise ValueError("Invalid coordination role preferences")
     world, display = config["world"], config["display"]
     runtime, evaluation = config["runtime"], config["evaluation"]
     if not runtime["speed_steps"] or any(

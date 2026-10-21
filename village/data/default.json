@@ -359,7 +359,11 @@
     "strategic_actions": [
       "move",
       "guard",
-      "talk"
+      "talk",
+      "request_help",
+      "assign_task",
+      "claim_task",
+      "release_task"
     ],
     "routine_seconds": 0.8,
     "routine_stagger_seconds": 0.06,
@@ -497,7 +501,11 @@
       "guard": "g",
       "repair": "j",
       "attack": "k",
-      "rally": "l"
+      "rally": "l",
+      "request_help": "q",
+      "assign_task": "u",
+      "claim_task": "y",
+      "release_task": "x"
     },
     "speed": "v"
   },
@@ -580,5 +588,53 @@
         "disabled_actions": []
       }
     }
+  },
+  "coordination": {
+    "enabled": true,
+    "mode": "independent",
+    "update_seconds": 5.0,
+    "task_ttl_seconds": 90.0,
+    "request_cooldown_seconds": 5.0,
+    "history_capacity": 100,
+    "max_active_tasks": 12,
+    "food_target": 12,
+    "wood_target": 12,
+    "role_distance_weight": 40.0,
+    "priority": [
+      "defend",
+      "repair",
+      "wood",
+      "food"
+    ],
+    "role_preferences": {
+      "defend": [
+        "soldier",
+        "elder",
+        "worker",
+        "farmer"
+      ],
+      "repair": [
+        "worker",
+        "elder",
+        "farmer",
+        "soldier"
+      ],
+      "wood": [
+        "worker",
+        "elder",
+        "farmer",
+        "soldier"
+      ],
+      "food": [
+        "farmer",
+        "elder",
+        "worker",
+        "soldier"
+      ]
+    },
+    "maintenance_seconds": 1.0,
+    "assigner_roles": [
+      "elder"
+    ]
   }
 }

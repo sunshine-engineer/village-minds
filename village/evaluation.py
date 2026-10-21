@@ -132,9 +132,26 @@ class Metrics:
         self.starvation_villager_seconds = 0.0
         self.gate_breaches = 0
         self.previous_gates = world.gates.copy()
+        self.uncovered_threat_gate_seconds = 0.0
+        self.threat_gate_seconds = 0.0
 
     def step(self, world, dt):
         # Intervals use the state at the start of a substep.
+        from .map_data import GATES
+        from .navigation import distance
+
+        rules = get_settings()["rules"]
+        self.threat_gate_seconds += dt * len(world.gate_threats())
+        self.uncovered_threat_gate_seconds += dt * sum(
+            not any(
+                v.alive
+                and v.action == f"guarding {gate}"
+                and v.energy >= rules["attack_energy"]
+                and distance(v.position, GATES[gate]) <= rules["attack_range"]
+                for v in world.villagers
+            )
+            for gate in world.gate_threats()
+        )
         if world.store["food"] == 0:
             self.food_shortage_seconds += dt
         threshold = get_settings()["rules"]["starvation_threshold"]
@@ -196,6 +213,9 @@ def run_scenario(
             "lessons": {},
         },
     )
+    world.task_board.mode = options.get(
+        "coordination_mode", get_settings()["coordination"]["mode"]
+    )
     brains = BrainScheduler(
         world, profile["url"], profile["model"], demo=True, profile=profile
     )
@@ -215,6 +235,7 @@ def run_scenario(
         seed=seed,
         mode=mode,
         control=control_name,
+        coordination_mode=world.task_board.mode,
         scenario_name=options["scenario_name"],
         disabled_actions=control["disabled_actions"],
         routines=control["routines"],
@@ -322,6 +343,17 @@ def run_scenario(
             "control": control_name,
             "scenario_name": options["scenario_name"],
             "blocked_actions": dict(world.blocked_actions),
+            "coordination_mode": world.task_board.mode,
+            "coordination": world.task_board.summary(),
+            "uncovered_threat_gate_seconds": round(
+                metrics.uncovered_threat_gate_seconds, 6
+            ),
+            "threat_gate_seconds": round(metrics.threat_gate_seconds, 6),
+            "uncovered_threat_fraction": (
+                metrics.uncovered_threat_gate_seconds / metrics.threat_gate_seconds
+                if metrics.threat_gate_seconds
+                else None
+            ),
             "stop_reason": reason,
             "failed": world.failed,
             "completed_horizon": completed,
@@ -387,18 +419,35 @@ def run_scenario(
 
 def aggregate(results):
     rows = []
-    for mode, control in dict.fromkeys(
-        (r["mode"], r.get("control", "cooperative")) for r in results
+    for mode, control, coordination in dict.fromkeys(
+        (
+            r["mode"],
+            r.get("control", "cooperative"),
+            r.get("coordination_mode", "independent"),
+        )
+        for r in results
     ):
         group = [
             r
             for r in results
-            if r["mode"] == mode and r.get("control", "cooperative") == control
+            if r["mode"] == mode
+            and r.get("control", "cooperative") == control
+            and r.get("coordination_mode", "independent") == coordination
         ]
         rows.append(
             {
                 "mode": mode,
                 "control": control,
+                "coordination_mode": coordination,
+                "mean_final_village_health": round(
+                    statistics.mean(r["village_health"] for r in group), 3
+                ),
+                "mean_uncovered_threat_gate_seconds": round(
+                    statistics.mean(
+                        r.get("uncovered_threat_gate_seconds", 0) for r in group
+                    ),
+                    3,
+                ),
                 "runs": len(group),
                 "horizons_completed": sum(r["completed_horizon"] for r in group),
                 "village_losses": sum(r["failed"] for r in group),
@@ -451,9 +500,87 @@ def aggregate(results):
     return rows
 
 
+def paired_coordination(results):
+    """Within-seed differences, excluding interrupted/deadline-limited pairs."""
+    key = lambda r: (
+        r.get("scenario_name", "standard"),
+        r["seed"],
+        r["mode"],
+        r.get("control", "cooperative"),
+    )
+    baselines = {
+        key(r): r
+        for r in results
+        if r.get("coordination_mode", "independent") == "independent"
+    }
+    rows = []
+    for mode, strategy in dict.fromkeys(
+        (r["mode"], r.get("coordination_mode", "independent"))
+        for r in results
+        if r.get("coordination_mode", "independent") != "independent"
+    ):
+        candidates = [
+            r
+            for r in results
+            if r["mode"] == mode
+            and r.get("coordination_mode") == strategy
+            and r.get("control", "cooperative") == "cooperative"
+        ]
+        pairs = [
+            (baselines[key(r)], r)
+            for r in candidates
+            if key(r) in baselines
+            and not any(
+                "wall_time_limit" in x["stop_reason"] for x in (baselines[key(r)], r)
+            )
+        ]
+        health = [r["village_health"] - b["village_health"] for b, r in pairs]
+        coverage = [
+            r["uncovered_threat_fraction"] - b["uncovered_threat_fraction"]
+            for b, r in pairs
+            if r.get("uncovered_threat_fraction") is not None
+            and b.get("uncovered_threat_fraction") is not None
+        ]
+        rows.append(
+            dict(
+                mode=mode,
+                strategy=strategy,
+                matched_seeds=len(pairs),
+                excluded_or_missing_pairs=len(
+                    {
+                        key(r)
+                        for r in results
+                        if r["mode"] == mode
+                        and r.get("control", "cooperative") == "cooperative"
+                    }
+                )
+                - len(pairs),
+                survival_gains=sum(
+                    r["completed_horizon"] and b["failed"] for b, r in pairs
+                ),
+                survival_regressions=sum(
+                    b["completed_horizon"] and r["failed"] for b, r in pairs
+                ),
+                mean_final_health_delta=(
+                    round(statistics.mean(health), 3) if health else None
+                ),
+                mean_uncovered_fraction_delta=(
+                    round(statistics.mean(coverage), 6) if coverage else None
+                ),
+            )
+        )
+    return rows
+
+
 def write_report(output, results, manifest):
     comparison = aggregate(results)
-    summary = {"manifest": manifest, "comparison": comparison, "runs": results}
+    paired = paired_coordination(results)
+    summary = {
+        "manifest": manifest,
+        "comparison": comparison,
+        "paired_coordination": paired,
+        "runs": results,
+    }
     (output / "summary.json").write_text(
         json.dumps(summary, indent=2, allow_nan=False) + "\n", encoding="utf-8"
     )
@@ -462,6 +589,13 @@ def write_report(output, results, manifest):
         "mode",
         "control",
         "scenario_name",
+        "coordination_mode",
+        "uncovered_threat_gate_seconds",
+        "uncovered_threat_fraction",
+        "task_requests",
+        "tasks_completed",
+        "tasks_expired",
+        "mean_productive_response_seconds",
         "stop_reason",
         "simulated_seconds",
         "wall_seconds",
@@ -490,6 +624,18 @@ def write_report(output, results, manifest):
         writer.writerows(
             {
                 **r,
+                "task_requests": r.get("coordination", {})
+                .get("counts", {})
+                .get("requested", 0),
+                "tasks_completed": r.get("coordination", {})
+                .get("counts", {})
+                .get("completed", 0),
+                "tasks_expired": r.get("coordination", {})
+                .get("counts", {})
+                .get("expired", 0),
+                "mean_productive_response_seconds": r.get("coordination", {}).get(
+                    "mean_productive_response_seconds"
+                ),
                 "roles_requested": "/".join(
                     r.get("model_coverage", {}).get("roles_requested", [])
                 ),
@@ -512,8 +658,8 @@ def write_report(output, results, manifest):
         "Fixed substeps without rendering; simulation pauses at bounded model checkpoints.",
         "Observed durations include censored runs: they are not mean time-to-failure estimates.",
         "",
-        "| Mode | Control | Runs | Horizon completed | Village lost | Wall limited | Model requests | Accepted AI | Timeouts | Errors |",
-        "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+        "| Mode | Control | Coordination | Runs | Horizon completed | Village lost | Wall limited | Model requests | Accepted AI | Timeouts | Errors |",
+        "| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
     for row in comparison:
         lines.append(
@@ -523,6 +669,7 @@ def write_report(output, results, manifest):
                 for k in (
                     "mode",
                     "control",
+                    "coordination_mode",
                     "runs",
                     "horizons_completed",
                     "village_losses",
@@ -537,8 +684,8 @@ def write_report(output, results, manifest):
         )
     lines += [
         "",
-        "| Mode | Control | Roles requested | Requested coverage | Threat calls | Quiet calls | Unused budget |",
-        "| --- | --- | --- | --- | ---: | ---: | ---: |",
+        "| Mode | Control | Coordination | Roles requested | Requested coverage | Threat calls | Quiet calls | Unused budget |",
+        "| --- | --- | --- | --- | --- | ---: | ---: | ---: |",
     ]
     for row in comparison:
         coverage = (
@@ -547,19 +694,19 @@ def write_report(output, results, manifest):
             else "n/a"
         )
         lines.append(
-            f"| {row['mode']} | {row['control']} | {', '.join(row['roles_requested']) or '-'} | {coverage} | {row['active_threat_requests']} | {row['quiet_requests']} | {row['unused_model_calls']} |"
+            f"| {row['mode']} | {row['control']} | {row['coordination_mode']} | {', '.join(row['roles_requested']) or '-'} | {coverage} | {row['active_threat_requests']} | {row['quiet_requests']} | {row['unused_model_calls']} |"
         )
     lines += [
         "",
-        "| Seed | Mode | Control | Village health | Food shared | Wood shared | Repairs | Kills | Rallies |",
-        "| ---: | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |",
+        "| Seed | Mode | Control | Coordination | Village health | Food shared | Wood shared | Repairs | Kills | Rallies |",
+        "| ---: | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
     for result in results:
         totals = Counter()
         for contribution in result["contributions"].values():
             totals.update(contribution)
         lines.append(
-            f"| {result['seed']} | {result['mode']} | {result.get('control', 'cooperative')} | {result['village_health']:.1f} | "
+            f"| {result['seed']} | {result['mode']} | {result.get('control', 'cooperative')} | {result.get('coordination_mode', 'independent')} | {result['village_health']:.1f} | "
             + " | ".join(
                 str(totals[key])
                 for key in (
@@ -572,6 +719,56 @@ def write_report(output, results, manifest):
             )
             + " |"
         )
+    lines += [
+        "",
+        "| Seed | Mode | Coordination | Completed horizon | Village health | Uncovered threat gate seconds | Help requests | Accepted tasks | Completed / resolved / expired | Mean acknowledgement seconds | Mean productive response seconds |",
+        "| ---: | --- | --- | --- | ---: | ---: | ---: | ---: | --- | ---: | ---: |",
+    ]
+    for result in results:
+        board = result.get("coordination", {})
+        counts = board.get("counts", {})
+        statuses = "/".join(
+            str(counts.get(key, 0)) for key in ("completed", "resolved", "expired")
+        )
+        latency = board.get("mean_response_seconds")
+        latency_text = f"{latency:.2f}" if latency is not None else "-"
+        productive = board.get("mean_productive_response_seconds")
+        productive_text = f"{productive:.2f}" if productive is not None else "-"
+        lines.append(
+            f"| {result['seed']} | {result['mode']} | {result.get('coordination_mode', 'independent')} | {result['completed_horizon']} | {result['village_health']:.1f} | {result.get('uncovered_threat_gate_seconds', 0):.1f} | {counts.get('requested', 0)} | {counts.get('accepted', 0)} | {statuses} | {latency_text} | {productive_text} |"
+        )
+    if paired:
+        lines += [
+            "",
+            "Paired differences against independent routines (same seed, mode and action set).",
+            "Positive health deltas favor coordination; negative uncovered-fraction deltas mean better coverage.",
+            "",
+            "| Mode | Strategy | Matched seeds | Excluded/missing | Survival gains | Survival regressions | Mean health delta | Mean uncovered fraction delta |",
+            "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |",
+        ]
+        for row in paired:
+            lines.append(
+                "| "
+                + " | ".join(
+                    str(row[k])
+                    for k in (
+                        "mode",
+                        "strategy",
+                        "matched_seeds",
+                        "excluded_or_missing_pairs",
+                        "survival_gains",
+                        "survival_regressions",
+                        "mean_final_health_delta",
+                        "mean_uncovered_fraction_delta",
+                    )
+                )
+                + " |"
+            )
+    lines += [
+        "",
+        "A task completed only when its assignee performed relevant work and the need was resolved; resolutions by others are separate.",
+        "Acknowledgement is not productive response time. Latency means use the most recent configured history_capacity samples.",
+    ]
     lines += [
         "",
         "Role coverage counts requested roles, not successful decisions or proven benefits.",
@@ -610,6 +807,17 @@ def main():
         choices=tuple(defaults["controls"]),
         default=defaults["control"],
         help="Scripted intervention control; cooperative allows AI modes",
+    )
+    parser.add_argument(
+        "--coordination",
+        choices=("independent", "requests", "assigned"),
+        default=settings["coordination"]["mode"],
+        help="Shared task strategy; all survival actions stay enabled",
+    )
+    parser.add_argument(
+        "--compare-coordination",
+        action="store_true",
+        help="Compare all three task strategies on identical seeds",
     )
     parser.add_argument("--seeds", nargs="+", type=int, default=defaults["seeds"])
     parser.add_argument(
@@ -664,6 +872,7 @@ def main():
         "full_observations": args.full_observations,
         "checkpoint_strategy": args.checkpoint_strategy,
         "control": args.control,
+        "coordination_mode": args.coordination,
     }
     modes = list(dict.fromkeys(MODES if "all" in args.modes else args.modes))
     if any(mode != "scripted" for mode in modes) and (
@@ -672,6 +881,14 @@ def main():
         or defaults["controls"][args.control]["disabled_actions"]
     ):
         parser.error("Intervention controls require --modes scripted")
+    if args.compare_coordination and (
+        args.control != "cooperative"
+        or defaults["controls"][args.control]["disabled_actions"]
+        or not defaults["controls"][args.control]["routines"]
+    ):
+        parser.error(
+            "Coordination comparisons require all survival actions and routines enabled"
+        )
     seeds = list(dict.fromkeys(args.seeds))
     options.update(seeds=seeds, modes=modes)
     output = Path(args.output).expanduser().resolve() / (
@@ -705,6 +922,13 @@ def main():
         "skipped_scenarios": 0,
         "interrupted": False,
     }
+    strategies = (
+        ["independent", "requests", "assigned"]
+        if args.compare_coordination
+        else [args.coordination]
+    )
+    manifest["coordination_strategies"] = strategies
+    scenario_count = len(seeds) * len(modes) * len(strategies)
     results = []
     deadline = time.monotonic() + args.suite_seconds
     try:
@@ -717,15 +941,22 @@ def main():
                 (output / f"lessons-{seed}.json").write_text(
                     json.dumps(fixture, indent=2) + "\n", encoding="utf-8"
                 )
-            for mode in modes:
+            for mode, strategy in (
+                (mode, strategy) for mode in modes for strategy in strategies
+            ):
                 if time.monotonic() >= deadline:
                     break
-                scenario = output / f"{seed}-{mode}"
+                options_for_run = {**options, "coordination_mode": strategy}
+                scenario = output / (
+                    f"{seed}-{mode}-{strategy}"
+                    if args.compare_coordination
+                    else f"{seed}-{mode}"
+                )
                 scenario.mkdir()
                 result = run_scenario(
                     seed,
                     mode,
-                    options,
+                    options_for_run,
                     args.model_profile,
                     scenario,
                     config_path,
@@ -734,17 +965,17 @@ def main():
                 )
                 results.append(result)
                 print(
-                    f"seed={seed} {mode}: {result['simulated_seconds']:g}s simulated, {result['wall_seconds']:.2f}s wall, {result['accepted_model_actions']}/{result['model_requests']} AI accepted; roles={','.join(result['model_coverage']['roles_requested']) or '-'}; threat calls={result['model_coverage']['active_threat_requests']}; {result['stop_reason']}",
+                    f"seed={seed} {mode}/{strategy}: {result['simulated_seconds']:g}s simulated, {result['wall_seconds']:.2f}s wall, {result['accepted_model_actions']}/{result['model_requests']} AI accepted; roles={','.join(result['model_coverage']['roles_requested']) or '-'}; threat calls={result['model_coverage']['active_threat_requests']}; {result['stop_reason']}",
                     flush=True,
                 )
-                manifest["skipped_scenarios"] = len(seeds) * len(modes) - len(results)
+                manifest["skipped_scenarios"] = scenario_count - len(results)
                 write_report(output, results, manifest)
             if time.monotonic() >= deadline:
                 break
     except KeyboardInterrupt:
         manifest["interrupted"] = True
     finally:
-        manifest["skipped_scenarios"] = len(seeds) * len(modes) - len(results)
+        manifest["skipped_scenarios"] = scenario_count - len(results)
         manifest["finished_at"] = datetime.now(timezone.utc).isoformat()
         manifest["suite_wall_seconds"] = round(
             time.monotonic() - (deadline - args.suite_seconds), 6

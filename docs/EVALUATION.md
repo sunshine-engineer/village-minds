@@ -199,4 +199,4 @@ for deterministic metrics and real spawned processes for timeout/cleanup checks.
 
 ## Harder cooperation scenario
 
-Use `--config configs/cooperation-siege.json` for earlier, stronger waves and limited starting supplies. The [cooperation siege guide](COOPERATION_SCENARIO.md) includes Windows/Linux commands, evaluation-only controls (`--control no-sharing`, `no-defense`, `no-repairs`, `idle`), and limits on interpreting results. Ordinary runs default to `--control cooperative`.
+Use `--config configs/cooperation-siege.json --compare-coordination --modes scripted` to compare independent routines, shared requests and elder assignments on the same seeds with all survival actions enabled. The [siege guide](COOPERATION_SCENARIO.md) explains commands, metrics, paired comparisons and limitations. `--coordination` selects a single strategy. Disabled-action controls remain mechanics diagnostics, not the main cooperation benchmark.

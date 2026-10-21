@@ -17,5 +17,8 @@
   },
   "runtime": {
     "save_path": "../saves/cooperation-siege.json"
+  },
+  "coordination": {
+    "mode": "requests"
   }
 }

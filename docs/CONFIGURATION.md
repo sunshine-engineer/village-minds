@@ -126,3 +126,7 @@ fingerprints are unchanged by these code-only policy improvements.
 ### Cooperation siege preset
 
 `configs/cooperation-siege.json` overrides survival balance and uses a separate campaign slot. See [the scenario guide](COOPERATION_SCENARIO.md). `evaluation.scenario_name` labels the report; `evaluation.control` selects an entry in `evaluation.controls`. Each control configures a `routines` boolean and a list of `disabled_actions`. Interventions affect only headless evaluations; noncooperative controls require scripted mode. Model timeout and wall budgets still apply.
+
+### Shared tasks
+
+`coordination` configures automatic strategy, public task capacity, expiry, request/update intervals, resource goals, assigner roles, task priority and role/distance preferences. `--coordination independent|requests|assigned` overrides the automatic strategy at startup. Tasks and counters persist independently of that choice. Details: [coordination](COORDINATION.md). No core survival action is disabled by a coordination strategy.

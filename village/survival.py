@@ -113,6 +113,7 @@ class SurvivalRules:
             )
         ):
             actions["rally"] = [""]
+        actions.update(self.task_board.actions(bot))
         for name, hook in self.extensions.actions.items():
             targets = hook.available(self, bot)
             if targets:
@@ -221,6 +222,9 @@ class SurvivalRules:
         )
         bot.energy -= R["attack_energy"]
         bot.attack_at = self.time + R["attack_cooldown"]
+        self.task_board.note_progress(
+            bot, {"action": "attack"}, target_gate=monster.gate
+        )
         if monster.health <= 0:
             bot.contributions["kills"] += 1
             bot.memory.append(

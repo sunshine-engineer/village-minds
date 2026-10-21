@@ -64,6 +64,10 @@ class ConfigurationTests(unittest.TestCase):
             {"rules": {"wave_growth_every": 1.5}},
             {"evaluation": {"checkpoint_strategy": "unknown"}},
             {"evaluation": {"control": "missing"}},
+            {"coordination": {"mode": "missing"}},
+            {"coordination": {"priority": ["food"]}},
+            {"coordination": {"max_active_tasks": 0}},
+            {"coordination": {"role_preferences": {"defend": ["missing"]}}},
             {"evaluation": {"scenario_name": " "}},
             {
                 "evaluation": {
