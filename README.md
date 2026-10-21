@@ -192,7 +192,7 @@ Successful model decisions have a 15-simulation-second minimum interval per vill
 
 The HUD separately counts **local actions** and **accepted AI decisions**. An active village is not proof that a model is responding; local routines are explicit game AI. Nearby routine chatter is globally limited to one line every 12 simulation seconds and each speaker has a longer cooldown.
 
-No extra flag or new game is needed. Restart with the usual command to resume your save under the new controller. The save format has not changed.
+Restart with the usual command to resume your campaign under the default rules. Version 1 saves are upgraded to format 2 when saved; customized world/rules settings require a separate save slot.
 
 
 Configuration:
@@ -250,14 +250,29 @@ This remains a flat-grid prototype with radius combat, simplified monster steeri
 
 ## Source layout and references
 
-- `village/simulation.py`: authoritative survival rules, perception, actions, waves, crops, roles, and failure records.
-- `village/persistence.py`: validated versioned JSON, atomic writes, backup recovery, and retained campaign lessons.
-- `village/brains.py`: independent local routines, patrols, contextual chatter, model-order handling, and bounded background Ollama requests.
-- `village/game.py`: procedural scene, HUD, controls, saving, and pause.
-- `tests/`: simulation, API contract, survival, and persistence tests.
-- `scripts/check_window.py`: targeted X11 keyboard integration checks; optional `--save-path artifacts/window-test-save.json` also checks F5 save/reload in an isolated slot.
-- `scripts/check_restart.py`: two actual CLI processes checking normal exit saving and automatic resume.
-- `scripts/check_autonomy.py`: temporary five-second game check that all six villagers move while model inference is pending; works on native Windows and Linux.
+The code separates simulation, local policies, model transports, rendering, assets,
+controls and persistence. Existing `village.simulation` imports remain supported.
+See [architecture](docs/ARCHITECTURE.md) for the module ownership map.
+
+### Customizing and contributing
+
+Use a startup JSON override to change settings without editing Python:
+
+```powershell
+.\.venv-win\Scripts\python.exe -m village --config examples/custom.json --demo --no-save
+```
+
+```bash
+.venv/bin/python -m village --config examples/custom.json --demo --no-save
+```
+
+- [Configuration reference](docs/CONFIGURATION.md): defaults, overrides, paths and save compatibility.
+- [Extension recipes](docs/EXTENDING.md): visual prefabs, custom actions, roles, systems and model backends.
+- [Default settings](village/data/default.json), [asset catalog](village/data/assets/catalog.json), and [model profiles example](examples/models.json).
+
+New saves use format 2. Existing format 1 campaigns load with default gameplay rules.
+Changing gameplay/map settings requires a separate save slot; it never silently resets
+a campaign. Camera, visuals, controls and model settings can change without resetting.
 
 References: [Panda3D tasks](https://docs.panda3d.org/1.10/python/programming/tasks-and-events/tasks), [Panda3D configuration](https://docs.panda3d.org/1.10/python/programming/configuration/list-of-all-config-variables), [Ollama chat API](https://docs.ollama.com/api/chat), [Ollama Docker](https://docs.ollama.com/docker), [Qwen2.5 1.5B model/license](https://ollama.com/library/qwen2.5:1.5b).
 
