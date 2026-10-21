@@ -1,0 +1,506 @@
+{
+  "runtime": {
+    "pace": 0.5,
+    "seed": 7,
+    "save_path": "saves/village.json",
+    "autosave_seconds": 10,
+    "max_step_seconds": 0.1
+  },
+  "world": {
+    "limit": 32,
+    "sight": 12.0,
+    "hearing": 8.0,
+    "wall_coordinate": 24,
+    "wall_half_thickness": 0.6,
+    "gate_half_opening": 2.5,
+    "navigation_clearance": 0.6,
+    "locations": {
+      "square": [
+        0,
+        0
+      ],
+      "farm": [
+        -14,
+        9
+      ],
+      "orchard": [
+        14,
+        10
+      ],
+      "tavern": [
+        -10,
+        -9
+      ],
+      "well": [
+        8,
+        -5
+      ],
+      "rest": [
+        0,
+        17
+      ],
+      "storehouse": [
+        -8,
+        -7
+      ],
+      "north_gate": [
+        0,
+        21
+      ],
+      "south_gate": [
+        0,
+        -21
+      ],
+      "east_gate": [
+        21,
+        0
+      ],
+      "west_gate": [
+        -21,
+        0
+      ]
+    },
+    "buildings": [
+      [
+        -11,
+        -15,
+        3,
+        2.5
+      ],
+      [
+        11,
+        -15,
+        3,
+        2.5
+      ],
+      [
+        -18,
+        -5,
+        2.5,
+        3
+      ],
+      [
+        18,
+        -5,
+        2.5,
+        3
+      ],
+      [
+        -9,
+        18,
+        3,
+        2
+      ],
+      [
+        -8,
+        -10,
+        2,
+        1.5
+      ]
+    ],
+    "crops": [
+      [
+        -16,
+        8
+      ],
+      [
+        -12,
+        8
+      ],
+      [
+        -16,
+        12
+      ],
+      [
+        -12,
+        12
+      ]
+    ],
+    "work_offsets": [
+      [
+        -1,
+        0
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        0,
+        -1
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        -1,
+        1
+      ],
+      [
+        1,
+        1
+      ]
+    ],
+    "cast": [
+      {
+        "name": "Mira",
+        "role": "farmer",
+        "personality": "Patient and generous; values food and cooperation.",
+        "color": [
+          0.92,
+          0.65,
+          0.26
+        ],
+        "position": [
+          -3,
+          0
+        ]
+      },
+      {
+        "name": "Bram",
+        "role": "worker",
+        "personality": "Practical and ambitious; hauls food, gathers wood, and repairs threatened gates.",
+        "color": [
+          0.37,
+          0.66,
+          0.95
+        ],
+        "position": [
+          3,
+          0
+        ]
+      },
+      {
+        "name": "Iris",
+        "role": "farmer",
+        "personality": "Curious and warm; grows crops and shares food with hungry neighbors.",
+        "color": [
+          0.65,
+          0.46,
+          0.86
+        ],
+        "position": [
+          0,
+          4
+        ]
+      },
+      {
+        "name": "Otto",
+        "role": "soldier",
+        "personality": "Blunt and brave; guards threatened gates and protects the farmers.",
+        "color": [
+          0.88,
+          0.4,
+          0.3
+        ],
+        "position": [
+          -5,
+          4
+        ]
+      },
+      {
+        "name": "Nell",
+        "role": "soldier",
+        "personality": "Alert and cooperative; coordinates defense with Otto and guards exposed gates.",
+        "color": [
+          0.3,
+          0.8,
+          0.68
+        ],
+        "position": [
+          5,
+          4
+        ]
+      },
+      {
+        "name": "Edda",
+        "role": "elder",
+        "personality": "Calm and thoughtful; coordinates survival, shares food, and remembers earlier failures.",
+        "color": [
+          0.88,
+          0.76,
+          0.52
+        ],
+        "position": [
+          0,
+          -4
+        ]
+      }
+    ]
+  },
+  "rules": {
+    "gate_health": 150.0,
+    "crop_grow_seconds": 45.0,
+    "villager_max": 100.0,
+    "village_health": 200.0,
+    "monster_health": 40.0,
+    "orchard_capacity": 24,
+    "orchard_regen_seconds": 20,
+    "orchard_regen_amount": 3,
+    "initial_food": 18,
+    "initial_wood": 12,
+    "first_wave_seconds": 180.0,
+    "wave_interval_seconds": 90.0,
+    "wave_max_spawn": 4,
+    "wave_growth_every": 3,
+    "max_monsters": 10,
+    "monster_spawn_coordinate": 31,
+    "monster_gate_coordinate": 25,
+    "monster_speed": 1.4,
+    "monster_gate_damage": 1.5,
+    "monster_villager_damage": 3.0,
+    "monster_core_damage": 2.0,
+    "monster_victim_radius": 1.5,
+    "monster_core_radius": 2.0,
+    "monster_gate_radius": 0.5,
+    "player_speed": 4.5,
+    "villager_speed": 2.5,
+    "walking_energy_per_second": 0.2,
+    "rest_energy_per_second": 4.0,
+    "hunger_per_second": 0.12,
+    "starvation_threshold": 80,
+    "starvation_damage_per_second": 0.4,
+    "attack_range": 8.0,
+    "attack_energy": 2,
+    "attack_cooldown": 1.2,
+    "base_attack_damage": 8,
+    "base_harvest_yield": 4,
+    "base_wood_yield": 2,
+    "base_repair_amount": 10,
+    "gather_energy": 4,
+    "gather_radius": 2.5,
+    "crop_radius": 5.0,
+    "store_radius": 3.0,
+    "repair_radius": 3.5,
+    "plant_energy": 3,
+    "harvest_energy": 6,
+    "repair_energy": 6,
+    "work_cooldown": 1.0,
+    "eat_hunger_restore": 35,
+    "eat_energy_restore": 10,
+    "eat_health_restore": 3,
+    "eat_min_hunger": 5,
+    "eat_energy_threshold": 90,
+    "eat_health_threshold": 95,
+    "rest_available_below": 75,
+    "rally_energy": 4,
+    "rally_radius": 12,
+    "rally_energy_restore": 8,
+    "rally_health_restore": 4,
+    "rally_cooldown": 25,
+    "rally_energy_threshold": 85,
+    "rally_health_threshold": 90,
+    "speech_seconds": 8,
+    "speech_wake_seconds": 1,
+    "eat_food_cost": 1,
+    "repair_wood_cost": 1,
+    "rally_food_cost": 1
+  },
+  "roles": {
+    "farmer": {
+      "harvest_yield": 6
+    },
+    "worker": {
+      "wood_yield": 3,
+      "repair_amount": 18
+    },
+    "soldier": {
+      "attack_damage": 20
+    },
+    "elder": {
+      "can_rally": true
+    }
+  },
+  "policy": {
+    "eat_above_hunger": 40,
+    "rest_below_energy": 25,
+    "rest_until_energy": 85,
+    "idle_rest_below_energy": 70,
+    "deposit_at_inventory": 6,
+    "repair_missing_health": 10,
+    "wood_target": 20,
+    "arrival_radius": 2.8,
+    "urgent_hunger": 70,
+    "urgent_energy": 12,
+    "urgent_gate_health": 30,
+    "patrol_min_energy": 20,
+    "idle_min_energy": 40,
+    "soldier_gates": [
+      "north_gate",
+      "south_gate"
+    ]
+  },
+  "ai": {
+    "default_profile": "local_qwen",
+    "profiles": {
+      "local_qwen": {
+        "backend": "ollama",
+        "url": "http://localhost:11434",
+        "model": "qwen2.5:1.5b",
+        "timeout": 25.0,
+        "temperature": 0.8,
+        "max_tokens": 160,
+        "context_size": 4096,
+        "keep_alive": "10m",
+        "api_key_env": ""
+      }
+    },
+    "system_prompt": "prompts/villager.txt",
+    "strategic_actions": [
+      "move",
+      "guard",
+      "talk"
+    ],
+    "routine_seconds": 0.8,
+    "routine_stagger_seconds": 0.06,
+    "routine_index_seconds": 0.03,
+    "initial_social_seconds": 5,
+    "social_stagger_seconds": 3,
+    "social_interval_seconds": 12,
+    "speaker_cooldown_seconds": 35,
+    "retry_seconds": 20,
+    "max_decision_age_seconds": 35,
+    "plan_seconds": 20,
+    "short_plan_seconds": 1.5,
+    "think_seconds": 15,
+    "patrol_seconds": 3.5,
+    "patrol_index_seconds": 0.15,
+    "patrol_distance": 2,
+    "patrol_coordinate": 20,
+    "activity_seconds": 4,
+    "activity_index_seconds": 0.2,
+    "activity_offsets": [
+      [
+        -1,
+        0
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        0,
+        -1
+      ]
+    ],
+    "social_low_food": 8,
+    "social_low_wood": 5,
+    "model_history_limit": 12,
+    "villager_profiles": {},
+    "objective": "Cooperate to keep the village alive: grow and deposit food, eat, gather and deposit wood, repair gates, and guard against monsters. Ignoring these jobs can destroy the village. Use past failure lessons.",
+    "social_messages": {
+      "threat": "{other}, enemies are at the {gate}. Keep food and repairs coming!",
+      "low_food": "{other}, food is running low. We need harvests in the storehouse.",
+      "low_wood": "{other}, we need more shared wood before the next attack.",
+      "carrying_food": "{other}, I'm carrying {supplies} food. I'll share it at the storehouse.",
+      "elder_lessons": "{other}, share the work and remember why earlier villages fell.",
+      "generic": "{other}, let us keep the village supplied and safe.",
+      "roles": {
+        "farmer": "{other}, I'll keep the crops going. Please keep the village supplied.",
+        "worker": "{other}, I'm checking our wood and repairs. Let's stay prepared.",
+        "soldier": "{other}, I'm watching the gates. Call if you see trouble.",
+        "elder": "{other}, everyone's work matters. Keep food and defenses ready."
+      }
+    }
+  },
+  "display": {
+    "title": "Village Minds | Willowbrook",
+    "window_size": [
+      1440,
+      900
+    ],
+    "sync_video": true,
+    "audio_library": "null",
+    "fov": 58,
+    "near": 0.1,
+    "far": 250,
+    "background": [
+      0.53,
+      0.72,
+      0.82
+    ],
+    "zoom": 42,
+    "zoom_min": 12,
+    "zoom_max": 65,
+    "zoom_step": 3,
+    "camera_height_ratio": 0.95,
+    "orbit_speed": 1,
+    "ambient": [
+      0.56,
+      0.6,
+      0.64,
+      1
+    ],
+    "sun": [
+      1,
+      0.91,
+      0.74,
+      1
+    ],
+    "sun_hpr": [
+      -35,
+      -55,
+      0
+    ],
+    "focus_delay_seconds": 0.08,
+    "chat_close_delay_seconds": 0.15,
+    "animation_speed": 10,
+    "leg_swing_degrees": 22,
+    "body_bob": 0.045,
+    "feed_lines": 6,
+    "roster_action_chars": 18
+  },
+  "controls": {
+    "forward": "w",
+    "backward": "s",
+    "left": "a",
+    "right": "d",
+    "orbit_left": "arrow_left",
+    "orbit_right": "arrow_right",
+    "takeover_keys": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "cycle": "tab",
+    "observer": "0",
+    "speak": "enter",
+    "escape": "escape",
+    "save": "f5",
+    "pause": "p",
+    "zoom_in": "wheel_up",
+    "zoom_out": "wheel_down",
+    "actions": {
+      "gather": "e",
+      "rest": "r",
+      "farm": "f",
+      "harvest": "h",
+      "deposit": "t",
+      "eat": "c",
+      "guard": "g",
+      "repair": "j",
+      "attack": "k",
+      "rally": "l"
+    }
+  },
+  "assets": {
+    "manifest": "assets/catalog.json"
+  },
+  "plugins": [],
+  "memory": {
+    "recent_capacity": 8,
+    "lesson_capacity": 8,
+    "event_capacity": 7,
+    "failure_capacity": 20,
+    "dialogue_chars": 180
+  },
+  "extension_settings": {}
+}

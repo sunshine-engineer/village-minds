@@ -1,4 +1,22 @@
-# Survival prototype validation — 22 October 2026
+# Validation evidence
+
+## Modularity/configuration refactor — 21 October 2026
+
+- **56 tests passed on Linux and native Windows**, including the original 37 regression checks. New coverage includes startup overrides/type/range/path validation, duplicate/nonfinite JSON rejection, configurable balance and rosters, config fingerprints and legacy saves, plugin action validation/state persistence, policy/system registration, model routing, API keys, response limits and the second transport's mocked contract.
+- Native Windows default and customized offscreen rendering passed. The extension integration check loaded an external `.egg` model through a manifest-relative path, dispatched a configured action key through Panda3D's messenger, verified energy costs/effects and HUD remapping, and restored plugin cooldowns from a temporary save. Evidence: `artifacts/extension-check.json` and screenshot. Messenger dispatch is not an OS keyboard test.
+- Two actual native Windows CLI processes passed normal-exit save and resume checks with an isolated temporary slot. Default campaign saves were not changed.
+- The real Docker-hosted Ollama API probe returned an accepted move decision. A native Windows background-inference run accepted one real model decision while all six villagers continued moving/working (16 local actions over 12.73 seconds). Evidence: `artifacts/autonomy-windows-model.json` and screenshot.
+- A wheel build succeeded and contained packaged defaults, prefab data, prompt text and the example plugin. Compilation and Python 3.11 grammar checks passed. Actual local execution used Python 3.14; the GitHub workflow also targets Python 3.11, but remote CI status is not asserted here.
+- The OpenAI-compatible transport was checked with mocked HTTP responses only. No claim is made about a live compatible server. No new full X11 keyboard run or human manual playtest is claimed for this refactor. Historical evidence follows and does not imply every older check was repeated.
+- New snapshots use format 2 with configuration fingerprints and plugin state; format 1 snapshots remain readable under default gameplay settings. Customized campaigns use separate save slots.
+
+Repeat the new integration check with `python scripts/check_extensions.py` using native Windows Python or a Linux graphics backend. Unit commands and broader integration commands remain in README.md.
+
+---
+
+## Historical survival/autonomy validation
+
+### Survival prototype validation — 22 October 2026
 
 ## Continuous autonomy update
 

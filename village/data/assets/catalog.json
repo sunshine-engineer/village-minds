@@ -1,0 +1,1197 @@
+{
+  "prefabs": {
+    "ground": {
+      "parts": [
+        {
+          "name": "grass",
+          "position": [
+            0,
+            0,
+            -0.4
+          ],
+          "scale": [
+            33,
+            33,
+            0.4
+          ],
+          "color": [
+            0.3,
+            0.48,
+            0.27
+          ]
+        },
+        {
+          "name": "north_road",
+          "position": [
+            0,
+            0,
+            0.015
+          ],
+          "scale": [
+            3,
+            24,
+            0.02
+          ],
+          "color": [
+            0.69,
+            0.61,
+            0.43
+          ]
+        },
+        {
+          "name": "east_road",
+          "position": [
+            0,
+            -4,
+            0.02
+          ],
+          "scale": [
+            24,
+            2,
+            0.025
+          ],
+          "color": [
+            0.69,
+            0.61,
+            0.43
+          ]
+        },
+        {
+          "name": "square",
+          "position": [
+            0,
+            0,
+            0.03
+          ],
+          "scale": [
+            6,
+            6,
+            0.03
+          ],
+          "color": [
+            0.73,
+            0.67,
+            0.51
+          ]
+        }
+      ]
+    },
+    "building": {
+      "parts": [
+        {
+          "name": "walls",
+          "position": [
+            0,
+            0,
+            2
+          ],
+          "scale": [
+            1,
+            1,
+            2
+          ],
+          "color": [
+            0.79,
+            0.68,
+            0.49
+          ],
+          "size_mode": "building"
+        },
+        {
+          "name": "roof",
+          "position": [
+            0,
+            0,
+            4.15
+          ],
+          "scale": [
+            0.5,
+            0.4,
+            0.45
+          ],
+          "color": [
+            0.46,
+            0.23,
+            0.19
+          ],
+          "size_mode": "roof"
+        },
+        {
+          "name": "door",
+          "position": [
+            0,
+            -0.03,
+            1
+          ],
+          "scale": [
+            0.55,
+            0.05,
+            1
+          ],
+          "color": [
+            0.27,
+            0.19,
+            0.13
+          ],
+          "position_mode": "front"
+        },
+        {
+          "name": "window_left",
+          "position": [
+            -1.5,
+            -0.04,
+            2.3
+          ],
+          "scale": [
+            0.4,
+            0.06,
+            0.45
+          ],
+          "color": [
+            0.45,
+            0.72,
+            0.8
+          ],
+          "position_mode": "front"
+        },
+        {
+          "name": "window_right",
+          "position": [
+            1.5,
+            -0.04,
+            2.3
+          ],
+          "scale": [
+            0.4,
+            0.06,
+            0.45
+          ],
+          "color": [
+            0.45,
+            0.72,
+            0.8
+          ],
+          "position_mode": "front"
+        }
+      ]
+    },
+    "tree": {
+      "parts": [
+        {
+          "name": "trunk",
+          "position": [
+            0,
+            0,
+            1.3
+          ],
+          "scale": [
+            0.3,
+            0.3,
+            1.3
+          ],
+          "color": [
+            0.37,
+            0.24,
+            0.14
+          ]
+        },
+        {
+          "name": "crown",
+          "position": [
+            0,
+            0,
+            3
+          ],
+          "scale": [
+            1.5,
+            1.5,
+            1.3
+          ],
+          "color": [
+            0.21,
+            0.4,
+            0.24
+          ],
+          "hpr": [
+            35,
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    "fruit": {
+      "parts": [
+        {
+          "name": "fruit",
+          "position": [
+            -0.7,
+            -0.9,
+            3
+          ],
+          "scale": [
+            0.22,
+            0.22,
+            0.22
+          ],
+          "color": [
+            0.86,
+            0.31,
+            0.22
+          ]
+        }
+      ]
+    },
+    "well": {
+      "parts": [
+        {
+          "name": "stone",
+          "position": [
+            0,
+            0,
+            0.6
+          ],
+          "scale": [
+            1.1,
+            1.1,
+            0.6
+          ],
+          "color": [
+            0.45,
+            0.5,
+            0.5
+          ]
+        },
+        {
+          "name": "water",
+          "position": [
+            0,
+            0,
+            1.22
+          ],
+          "scale": [
+            0.8,
+            0.8,
+            0.03
+          ],
+          "color": [
+            0.23,
+            0.55,
+            0.67
+          ]
+        }
+      ]
+    },
+    "bench": {
+      "parts": [
+        {
+          "name": "bench",
+          "position": [
+            0,
+            0,
+            0.5
+          ],
+          "scale": [
+            2,
+            0.6,
+            0.22
+          ],
+          "color": [
+            0.43,
+            0.29,
+            0.16
+          ]
+        }
+      ]
+    },
+    "crop": {
+      "parts": [
+        {
+          "name": "soil",
+          "position": [
+            0,
+            0,
+            0.08
+          ],
+          "scale": [
+            1.5,
+            1.5,
+            0.08
+          ],
+          "color": [
+            0.32,
+            0.24,
+            0.13
+          ]
+        },
+        {
+          "name": "stalk_0",
+          "position": [
+            -0.6,
+            -0.6,
+            0.4
+          ],
+          "scale": [
+            0.3,
+            0.3,
+            0.4
+          ],
+          "color": [
+            0.74,
+            0.72,
+            0.24
+          ]
+        },
+        {
+          "name": "stalk_1",
+          "position": [
+            0.6,
+            -0.6,
+            0.4
+          ],
+          "scale": [
+            0.3,
+            0.3,
+            0.4
+          ],
+          "color": [
+            0.74,
+            0.72,
+            0.24
+          ]
+        },
+        {
+          "name": "stalk_2",
+          "position": [
+            0,
+            0.6,
+            0.4
+          ],
+          "scale": [
+            0.3,
+            0.3,
+            0.4
+          ],
+          "color": [
+            0.74,
+            0.72,
+            0.24
+          ]
+        }
+      ]
+    },
+    "wall_horizontal": {
+      "parts": [
+        {
+          "name": "wall",
+          "position": [
+            0,
+            0,
+            1.1
+          ],
+          "scale": [
+            10.5,
+            0.35,
+            1.1
+          ],
+          "color": [
+            0.45,
+            0.43,
+            0.37
+          ]
+        }
+      ]
+    },
+    "wall_vertical": {
+      "parts": [
+        {
+          "name": "wall",
+          "position": [
+            0,
+            0,
+            1.1
+          ],
+          "scale": [
+            0.35,
+            10.5,
+            1.1
+          ],
+          "color": [
+            0.45,
+            0.43,
+            0.37
+          ]
+        }
+      ]
+    },
+    "tower": {
+      "parts": [
+        {
+          "name": "tower",
+          "position": [
+            0,
+            0,
+            1.8
+          ],
+          "scale": [
+            0.9,
+            0.9,
+            1.8
+          ],
+          "color": [
+            0.37,
+            0.38,
+            0.34
+          ]
+        }
+      ]
+    },
+    "gate_horizontal": {
+      "parts": [
+        {
+          "name": "gate",
+          "position": [
+            0,
+            0,
+            1.2
+          ],
+          "scale": [
+            2.5,
+            0.3,
+            1.2
+          ],
+          "color": [
+            0.35,
+            0.5,
+            0.3
+          ]
+        }
+      ]
+    },
+    "gate_vertical": {
+      "parts": [
+        {
+          "name": "gate",
+          "position": [
+            0,
+            0,
+            1.2
+          ],
+          "scale": [
+            0.3,
+            2.5,
+            1.2
+          ],
+          "color": [
+            0.35,
+            0.5,
+            0.3
+          ]
+        }
+      ]
+    },
+    "core": {
+      "parts": [
+        {
+          "name": "core",
+          "position": [
+            0,
+            0,
+            0.35
+          ],
+          "scale": [
+            1,
+            1,
+            0.35
+          ],
+          "color": [
+            0.7,
+            0.65,
+            0.4
+          ]
+        }
+      ]
+    },
+    "villager": {
+      "parts": [
+        {
+          "name": "body",
+          "position": [
+            0,
+            0,
+            1
+          ],
+          "scale": [
+            0.35,
+            0.25,
+            0.5
+          ],
+          "color": "villager"
+        },
+        {
+          "name": "head",
+          "position": [
+            0,
+            0,
+            1.8
+          ],
+          "scale": [
+            0.28,
+            0.27,
+            0.3
+          ],
+          "color": [
+            0.88,
+            0.69,
+            0.51
+          ]
+        },
+        {
+          "name": "nose",
+          "position": [
+            0,
+            0.28,
+            1.85
+          ],
+          "scale": [
+            0.1,
+            0.06,
+            0.05
+          ],
+          "color": [
+            0.18,
+            0.16,
+            0.14
+          ]
+        },
+        {
+          "name": "leg_0",
+          "position": [
+            -0.18,
+            0,
+            0.35
+          ],
+          "scale": [
+            0.12,
+            0.17,
+            0.35
+          ],
+          "color": [
+            0.22,
+            0.26,
+            0.29
+          ]
+        },
+        {
+          "name": "leg_1",
+          "position": [
+            0.18,
+            0,
+            0.35
+          ],
+          "scale": [
+            0.12,
+            0.17,
+            0.35
+          ],
+          "color": [
+            0.22,
+            0.26,
+            0.29
+          ]
+        }
+      ]
+    },
+    "role_soldier": {
+      "parts": [
+        {
+          "name": "helmet",
+          "position": [
+            0,
+            0,
+            2.1
+          ],
+          "scale": [
+            0.34,
+            0.32,
+            0.12
+          ],
+          "color": [
+            0.46,
+            0.5,
+            0.54
+          ]
+        },
+        {
+          "name": "sword",
+          "position": [
+            0.5,
+            0,
+            1.2
+          ],
+          "scale": [
+            0.055,
+            0.055,
+            0.6
+          ],
+          "color": [
+            0.8,
+            0.83,
+            0.85
+          ]
+        }
+      ]
+    },
+    "role_farmer": {
+      "parts": [
+        {
+          "name": "hat",
+          "position": [
+            0,
+            0,
+            2.15
+          ],
+          "scale": [
+            0.43,
+            0.4,
+            0.08
+          ],
+          "color": [
+            0.81,
+            0.67,
+            0.36
+          ]
+        }
+      ]
+    },
+    "role_elder": {
+      "parts": [
+        {
+          "name": "staff",
+          "position": [
+            0.5,
+            0,
+            1
+          ],
+          "scale": [
+            0.06,
+            0.06,
+            0.95
+          ],
+          "color": [
+            0.42,
+            0.28,
+            0.18
+          ]
+        }
+      ]
+    },
+    "role_worker": {
+      "parts": [
+        {
+          "name": "pack",
+          "position": [
+            0,
+            -0.35,
+            1.2
+          ],
+          "scale": [
+            0.32,
+            0.18,
+            0.35
+          ],
+          "color": [
+            0.4,
+            0.26,
+            0.16
+          ]
+        }
+      ]
+    },
+    "monster": {
+      "parts": [
+        {
+          "name": "body",
+          "position": [
+            0,
+            0,
+            0.7
+          ],
+          "scale": [
+            0.5,
+            0.4,
+            0.7
+          ],
+          "color": [
+            0.5,
+            0.16,
+            0.18
+          ]
+        },
+        {
+          "name": "head",
+          "position": [
+            0,
+            0,
+            1.6
+          ],
+          "scale": [
+            0.4,
+            0.35,
+            0.4
+          ],
+          "color": [
+            0.65,
+            0.23,
+            0.2
+          ]
+        },
+        {
+          "name": "horn_0",
+          "position": [
+            -0.3,
+            0,
+            2.15
+          ],
+          "scale": [
+            0.1,
+            0.1,
+            0.25
+          ],
+          "color": [
+            0.82,
+            0.77,
+            0.57
+          ]
+        },
+        {
+          "name": "horn_1",
+          "position": [
+            0.3,
+            0,
+            2.15
+          ],
+          "scale": [
+            0.1,
+            0.1,
+            0.25
+          ],
+          "color": [
+            0.82,
+            0.77,
+            0.57
+          ]
+        }
+      ]
+    }
+  },
+  "instances": [
+    {
+      "prefab": "ground",
+      "position": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "prefab": "tree",
+      "position": [
+        12,
+        12,
+        0
+      ]
+    },
+    {
+      "prefab": "tree",
+      "position": [
+        16,
+        12,
+        0
+      ]
+    },
+    {
+      "prefab": "tree",
+      "position": [
+        18,
+        9,
+        0
+      ]
+    },
+    {
+      "prefab": "tree",
+      "position": [
+        14,
+        16,
+        0
+      ]
+    },
+    {
+      "prefab": "tree",
+      "position": [
+        -21,
+        17,
+        0
+      ]
+    },
+    {
+      "prefab": "tree",
+      "position": [
+        -20,
+        -19,
+        0
+      ]
+    },
+    {
+      "prefab": "tree",
+      "position": [
+        21,
+        -19,
+        0
+      ]
+    },
+    {
+      "prefab": "tree",
+      "position": [
+        -18,
+        21,
+        0
+      ]
+    },
+    {
+      "prefab": "fruit",
+      "position": [
+        12,
+        12,
+        0
+      ]
+    },
+    {
+      "prefab": "fruit",
+      "position": [
+        16,
+        12,
+        0
+      ]
+    },
+    {
+      "prefab": "fruit",
+      "position": [
+        18,
+        9,
+        0
+      ]
+    },
+    {
+      "prefab": "fruit",
+      "position": [
+        14,
+        16,
+        0
+      ]
+    },
+    {
+      "prefab": "well",
+      "location": "well"
+    },
+    {
+      "prefab": "bench",
+      "location": "rest"
+    }
+  ],
+  "style": {
+    "label_size": 0.65,
+    "label_color": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "location_label_height": 1.8,
+    "location_label_size": 0.5,
+    "location_label_color": [
+      0.98,
+      0.95,
+      0.8,
+      1
+    ],
+    "crop_label_height": 1.8,
+    "crop_label_size": 0.32,
+    "gate_label_height": 3,
+    "gate_label_size": 0.4,
+    "actor_name_height": 2.65,
+    "actor_name_size": 0.5,
+    "speech_height": 3.7,
+    "speech_size": 0.35,
+    "speech_wordwrap": 22,
+    "speech_card_color": [
+      0.08,
+      0.12,
+      0.15,
+      0.9
+    ],
+    "speech_margin": [
+      0.5,
+      0.5,
+      0.3,
+      0.3
+    ],
+    "monster_label_height": 2.7,
+    "monster_label_size": 0.3,
+    "ripe_color": [
+      0.86,
+      0.77,
+      0.23,
+      1
+    ],
+    "growing_color": [
+      0.25,
+      0.65,
+      0.28,
+      1
+    ],
+    "crop_min_height": 0.2,
+    "crop_growth_height": 0.7,
+    "gate_healthy_color": [
+      0.35,
+      0.5,
+      0.3
+    ],
+    "core_label": "VILLAGE HEART",
+    "core_label_height": 2,
+    "core_label_size": 0.35,
+    "wall_gate_margin": 0.5,
+    "gate_broken_color": [
+      1,
+      0.25,
+      0.18,
+      1
+    ],
+    "gate_full_color": [
+      0,
+      0.65,
+      0.18,
+      1
+    ],
+    "core_broken_color": [
+      1,
+      0.4,
+      0.2,
+      1
+    ],
+    "core_full_color": [
+      0,
+      0.4,
+      0.2,
+      1
+    ]
+  },
+  "role_prefabs": {
+    "farmer": "role_farmer",
+    "worker": "role_worker",
+    "soldier": "role_soldier",
+    "elder": "role_elder"
+  },
+  "building_roof_roll": 8,
+  "ui": [
+    {
+      "name": null,
+      "kind": "DirectFrame",
+      "options": {
+        "frameColor": [
+          0.035,
+          0.065,
+          0.08,
+          0.92
+        ],
+        "frameSize": [
+          0,
+          0.84,
+          -1.46,
+          0
+        ]
+      },
+      "parent": "a2dTopLeft"
+    },
+    {
+      "name": "title",
+      "kind": "OnscreenText",
+      "options": {
+        "text": "VILLAGE MINDS",
+        "pos": [
+          0.04,
+          -0.07
+        ],
+        "scale": 0.054,
+        "fg": [
+          0.95,
+          0.81,
+          0.48,
+          1
+        ]
+      },
+      "parent": "a2dTopLeft",
+      "align": "ALeft"
+    },
+    {
+      "name": "subtitle",
+      "kind": "OnscreenText",
+      "options": {
+        "text": "W I L L O W B R O O K",
+        "pos": [
+          0.04,
+          -0.12
+        ],
+        "scale": 0.026,
+        "fg": [
+          0.7,
+          0.8,
+          0.79,
+          1
+        ]
+      },
+      "parent": "a2dTopLeft",
+      "align": "ALeft"
+    },
+    {
+      "name": "roster",
+      "kind": "OnscreenText",
+      "options": {
+        "text": "",
+        "pos": [
+          0.04,
+          -0.2
+        ],
+        "scale": 0.025,
+        "fg": [
+          0.9,
+          0.94,
+          0.91,
+          1
+        ],
+        "mayChange": true
+      },
+      "parent": "a2dTopLeft",
+      "align": "ALeft"
+    },
+    {
+      "name": "controls",
+      "kind": "OnscreenText",
+      "options": {
+        "text": "1-6 / Tab  Take over   |   0 Observe\nWASD Walk | Arrows Orbit | Wheel Zoom\nF Plant | H Harvest | E Gather wood\nT Deposit | C Eat | R Rest\nG Guard gate | J Repair | K Attack\nL Elder rally | Enter Speak\nP Pause | F5 Save | Esc Quit/cancel",
+        "pos": [
+          0.04,
+          -1.16
+        ],
+        "scale": 0.026,
+        "fg": [
+          0.64,
+          0.75,
+          0.75,
+          1
+        ]
+      },
+      "parent": "a2dTopLeft",
+      "align": "ALeft"
+    },
+    {
+      "name": "status",
+      "kind": "OnscreenText",
+      "options": {
+        "text": "",
+        "pos": [
+          -0.04,
+          -0.06
+        ],
+        "scale": 0.029,
+        "fg": [
+          1,
+          0.9,
+          0.65,
+          1
+        ],
+        "mayChange": true
+      },
+      "parent": "a2dTopRight",
+      "align": "ARight"
+    },
+    {
+      "name": null,
+      "kind": "DirectFrame",
+      "options": {
+        "frameColor": [
+          0.035,
+          0.065,
+          0.08,
+          0.88
+        ],
+        "frameSize": [
+          0,
+          1.95,
+          0,
+          0.42
+        ]
+      },
+      "parent": "a2dBottomLeft"
+    },
+    {
+      "name": "feed",
+      "kind": "OnscreenText",
+      "options": {
+        "text": "",
+        "pos": [
+          0.04,
+          0.35
+        ],
+        "scale": 0.028,
+        "fg": [
+          0.85,
+          0.91,
+          0.88,
+          1
+        ],
+        "mayChange": true,
+        "wordwrap": 100
+      },
+      "parent": "a2dBottomLeft",
+      "align": "ALeft"
+    },
+    {
+      "name": "entry",
+      "kind": "DirectEntry",
+      "options": {
+        "pos": [
+          0.04,
+          0,
+          0.46
+        ],
+        "scale": 0.042,
+        "width": 39,
+        "numLines": 1,
+        "initialText": "",
+        "focus": 0
+      },
+      "parent": "a2dBottomLeft",
+      "command": "submit_chat"
+    },
+    {
+      "name": "hint",
+      "kind": "OnscreenText",
+      "options": {
+        "text": "OBSERVER MODE  |  Pick a villager with 1-6",
+        "pos": [
+          0,
+          0.88
+        ],
+        "scale": 0.038,
+        "fg": [
+          1,
+          0.98,
+          0.86,
+          1
+        ],
+        "mayChange": true
+      }
+    }
+  ]
+}
