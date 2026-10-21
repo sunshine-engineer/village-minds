@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "village-minds"
+version = "0.1.0"
+description = "A Panda3D village with local AI villagers and player possession"
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.11"
+dependencies = ["panda3d==1.10.16"]
+
+[project.urls]
+Repository = "https://github.com/sunshine-engineer/village-minds"
+Issues = "https://github.com/sunshine-engineer/village-minds/issues"
+
+[project.scripts]
+village-minds = "village.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["village*"]

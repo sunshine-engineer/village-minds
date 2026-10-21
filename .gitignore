@@ -1,0 +1,10 @@
+.venv*/
+__pycache__/
+*.pyc
+*.egg-info/
+artifacts/
+saves/
+.env
+.env.*
+!.env.example
+.git-storage/
