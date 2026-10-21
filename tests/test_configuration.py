@@ -62,6 +62,11 @@ class ConfigurationTests(unittest.TestCase):
             {"ai": {"profiles": {"broken": {"backend": "ollama"}}}},
             {"ai": {"villager_profiles": {"missing": "local_qwen"}}},
             {"rules": {"wave_growth_every": 1.5}},
+            {"evaluation": {"checkpoint_strategy": "unknown"}},
+            {"evaluation": {"role_order": []}},
+            {"evaluation": {"role_order": ["soldier", "soldier"]}},
+            {"evaluation": {"role_order": ["missing"]}},
+            {"evaluation": {"checkpoint_start_seconds": -1}},
             {"ai": {"social_messages": {"generic": "{unknown}"}}},
         ]
         with tempfile.TemporaryDirectory() as directory:

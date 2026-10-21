@@ -161,6 +161,17 @@ def validate(config, reference):
         v not in ("scripted", "hybrid", "hybrid-memory") for v in evaluation["modes"]
     ):
         raise ValueError("Unknown evaluation mode")
+    if evaluation["checkpoint_strategy"] not in ("threats", "interval"):
+        raise ValueError("evaluation.checkpoint_strategy must be threats or interval")
+    roles = evaluation["role_order"]
+    if (
+        not roles
+        or any(not isinstance(r, str) or r not in config["roles"] for r in roles)
+        or len(set(roles)) != len(roles)
+    ):
+        raise ValueError(
+            "evaluation.role_order must contain unique configured role names"
+        )
     if evaluation["step_seconds"] > runtime["max_step_seconds"]:
         raise ValueError(
             "evaluation.step_seconds cannot exceed runtime.max_step_seconds"

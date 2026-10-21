@@ -16,6 +16,7 @@ import statistics
 import time
 import uuid
 from .config import configure, get_settings, fingerprint
+from .evaluation_schedule import CheckpointSchedule
 
 MODES = ("scripted", "hybrid", "hybrid-memory")
 
@@ -188,8 +189,7 @@ def run_scenario(
         world, profile["url"], profile["model"], demo=True, profile=profile
     )
     metrics = Metrics(world)
-    checkpoint = 0.0
-    cursor = 0
+    schedule = CheckpointSchedule(world, seed, options)
     requests = 0
     latencies = []
     outcomes = Counter()
@@ -205,6 +205,9 @@ def run_scenario(
         mode=mode,
         timing_policy="paused_checkpoints",
         memory_available=bool(memory),
+        checkpoint_strategy=schedule.strategy,
+        planned_times=schedule.planned_times,
+        role_order=schedule.roles,
     )
     try:
         while world.time < options["duration_seconds"] - 1e-9 and not world.failed:
@@ -217,14 +220,13 @@ def run_scenario(
                 break
             if (
                 mode != "scripted"
-                and world.time + 1e-9 >= checkpoint
+                and schedule.ready(world)
                 and requests < options["max_model_calls"]
                 and not circuit_open
             ):
-                live = [i for i, v in enumerate(world.villagers) if v.alive]
-                if live:
-                    index = live[cursor % len(live)]
-                    cursor += 1
+                selection = schedule.take(world)
+                if selection is not None:
+                    index, checkpoint_context = selection
                     bot = world.villagers[index]
                     observation = world.observe(bot)
                     observation["decision_layer"] = "strategic"
@@ -242,6 +244,7 @@ def run_scenario(
                         observation=observation,
                         model=selected["model"],
                         backend=selected["backend"],
+                        checkpoint=checkpoint_context,
                     )
                     timeout = min(
                         options["model_timeout_seconds"],
@@ -286,7 +289,6 @@ def run_scenario(
                         circuit_open = True
                     if expired:
                         continue
-                checkpoint = world.time + options["checkpoint_seconds"]
             dt = min(options["step_seconds"], options["duration_seconds"] - world.time)
             metrics.step(world, dt)
             world.tick(dt)
@@ -319,6 +321,11 @@ def run_scenario(
             "contributions": contributions,
             "local_actions": brains.local_decisions,
             "model_requests": requests,
+            "checkpoint_strategy": schedule.strategy,
+            "model_coverage": schedule.coverage(),
+            "unused_model_calls": (
+                options["max_model_calls"] - requests if mode != "scripted" else 0
+            ),
             "model_outcomes": dict(outcomes),
             "model_circuit_open": circuit_open,
             "model_acceptance_rate": (
@@ -384,6 +391,35 @@ def aggregate(results):
                 ),
                 "timeouts": sum(r["model_outcomes"].get("timeout", 0) for r in group),
                 "errors": sum(r["model_outcomes"].get("error", 0) for r in group),
+                "roles_requested": sorted(
+                    {
+                        role
+                        for r in group
+                        for role in r.get("model_coverage", {}).get(
+                            "roles_requested", []
+                        )
+                    }
+                ),
+                "roles_expected": sorted(
+                    {
+                        role
+                        for r in group
+                        if mode != "scripted"
+                        for role in r.get("model_coverage", {}).get(
+                            "roles_expected", []
+                        )
+                    }
+                ),
+                "active_threat_requests": sum(
+                    r.get("model_coverage", {}).get("active_threat_requests", 0)
+                    for r in group
+                ),
+                "quiet_requests": sum(
+                    r.get("model_coverage", {}).get("quiet_requests", 0) for r in group
+                ),
+                "unused_model_calls": sum(
+                    r.get("unused_model_calls", 0) for r in group
+                ),
             }
         )
     return rows
@@ -414,11 +450,28 @@ def write_report(output, results, manifest):
         "mean_model_latency_ms",
         "memory_available",
         "log_dropped_records",
+        "checkpoint_strategy",
+        "roles_requested",
+        "active_threat_requests",
+        "quiet_requests",
+        "unused_model_calls",
     ]
     with (output / "results.csv").open("w", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fields, extrasaction="ignore")
         writer.writeheader()
-        writer.writerows(results)
+        writer.writerows(
+            {
+                **r,
+                "roles_requested": "/".join(
+                    r.get("model_coverage", {}).get("roles_requested", [])
+                ),
+                "active_threat_requests": r.get("model_coverage", {}).get(
+                    "active_threat_requests", 0
+                ),
+                "quiet_requests": r.get("model_coverage", {}).get("quiet_requests", 0),
+            }
+            for r in results
+        )
     lines = [
         "# Village AI evaluation",
         "",
@@ -449,6 +502,23 @@ def write_report(output, results, manifest):
         )
     lines += [
         "",
+        "| Mode | Roles requested | Requested coverage | Threat calls | Quiet calls | Unused budget |",
+        "| --- | --- | --- | ---: | ---: | ---: |",
+    ]
+    for row in comparison:
+        coverage = (
+            f"{len(row['roles_requested'])}/{len(row['roles_expected'])}"
+            if row["roles_expected"]
+            else "n/a"
+        )
+        lines.append(
+            f"| {row['mode']} | {', '.join(row['roles_requested']) or '-'} | {coverage} | {row['active_threat_requests']} | {row['quiet_requests']} | {row['unused_model_calls']} |"
+        )
+    lines += [
+        "",
+        "Role coverage counts requested roles, not successful decisions or proven benefits.",
+        "Threat checkpoints require live monsters at a gate; a short/quiet scenario may have no requests.",
+        "",
         f"Skipped scenarios: {manifest['skipped_scenarios']}. Interrupted: {manifest['interrupted']}.",
         "",
         "A short/call-limited run is a smoke check, not evidence of improved cooperation.",
@@ -468,6 +538,12 @@ def main():
     defaults = settings["evaluation"]
     parser.add_argument(
         "--modes", nargs="+", choices=(*MODES, "all"), default=defaults["modes"]
+    )
+    parser.add_argument(
+        "--checkpoint-strategy",
+        choices=("threats", "interval"),
+        default=defaults["checkpoint_strategy"],
+        help="Threat-aware horizon slots or fixed intervals",
     )
     parser.add_argument("--seeds", nargs="+", type=int, default=defaults["seeds"])
     parser.add_argument(
@@ -520,6 +596,7 @@ def main():
         "run_wall_seconds": args.wall_seconds,
         "suite_wall_seconds": args.suite_seconds,
         "full_observations": args.full_observations,
+        "checkpoint_strategy": args.checkpoint_strategy,
     }
     modes = list(dict.fromkeys(MODES if "all" in args.modes else args.modes))
     seeds = list(dict.fromkeys(args.seeds))
@@ -584,7 +661,7 @@ def main():
                 )
                 results.append(result)
                 print(
-                    f"seed={seed} {mode}: {result['simulated_seconds']:g}s simulated, {result['wall_seconds']:.2f}s wall, {result['accepted_model_actions']}/{result['model_requests']} AI accepted; {result['stop_reason']}",
+                    f"seed={seed} {mode}: {result['simulated_seconds']:g}s simulated, {result['wall_seconds']:.2f}s wall, {result['accepted_model_actions']}/{result['model_requests']} AI accepted; roles={','.join(result['model_coverage']['roles_requested']) or '-'}; threat calls={result['model_coverage']['active_threat_requests']}; {result['stop_reason']}",
                     flush=True,
                 )
                 manifest["skipped_scenarios"] = len(seeds) * len(modes) - len(results)

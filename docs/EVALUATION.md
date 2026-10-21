@@ -69,10 +69,51 @@ model access to that information. This evaluates supplied memory, not model trai
 or self-directed long-term learning. The idle fixture is deliberately limited;
 future experiments should use representative failures from real play.
 
-Checkpoints rotate across surviving villagers. Defaults request at most two model
-decisions per AI run, with a 30-simulation-second interval. This is a bounded smoke
-experiment, not continuous AI control or a sufficient sample to establish benefit.
-Increase the call budget and seeds for a stronger experiment, within your wall budget.
+## Threat-aware checkpoints and role coverage
+
+The default `evaluation.checkpoint_strategy` is `threats`. Planned model calls start
+at the first scheduled monster wave and are spread across the remaining simulated
+horizon. With the default first wave at 180 seconds and a 900-second horizon:
+
+| Call budget | Planned simulation times |
+| --- | --- |
+| 2 | 180, 540 |
+| 4 | 180, 360, 540, 720 |
+
+At or after each planned time, the runner waits for **live monsters threatening a
+gate**. It does not spawn extra monsters to satisfy a checkpoint. If the previous
+wave is already defeated, the checkpoint waits for the next active threat. The
+existing `checkpoint_seconds` setting is the minimum gap between actual requests.
+A short/quiet scenario may issue no calls; unused budget and absent coverage are
+reported, not treated as successful AI evaluation. Threats are village-wide: the
+selected actor need not have a monster inside its personal sight radius.
+
+The configured `role_order` rotates by a stable SHA-256 hash of the world seed.
+Requests cycle through roles before reusing a role, and choose the least-requested
+living actor within each role. Dead, missing and possessed actors are skipped.
+Selection uses no model output, so matched conditions share the same planned times
+and role order. Actual times can differ when their world states diverge.
+
+Four calls can cover farmer, worker, soldier and elder in one run. A two-call budget
+cannot cover four roles in one run; seeds 7, 19 and 31 together exercise all four
+roles under the default roster/order. Arbitrary seed subsets are not guaranteed
+full coverage. Check `model_coverage` and the report's coverage table.
+
+To cover four roles in one bounded AI run (allow enough time for your hardware):
+
+```powershell
+.\.venv-win\Scripts\python.exe -m village.evaluation --modes hybrid --seeds 7 --duration 900 --max-model-calls 4 --model-timeout 20 --wall-seconds 90 --suite-seconds 100
+```
+
+Use `--checkpoint-strategy interval` for the previous fixed-interval behavior.
+`evaluation.checkpoint_start_seconds` selects the earliest start (default zero);
+interval mode requests every `checkpoint_seconds`, even when no threats exist.
+Threat mode also respects that earliest start but waits until the first wave.
+Set `evaluation.role_order` to include any custom roles you want to evaluate.
+
+The default two-call budget is still a bounded diagnostic, not continuous AI
+control or evidence of improved cooperation. Old early-only reports and new
+threat-aware reports use different experiments and should not be pooled blindly.
 
 ## Limits that prevent indefinite waits
 
@@ -110,6 +151,9 @@ Each invocation creates a unique folder under `artifacts/evaluations/`:
 Metrics include observed simulation duration, village health, villagers lost, food
 shortage time, starvation villager-seconds, gate breach events, individual contributions,
 model request/acceptance counts, errors/timeouts and end-to-end checkpoint latency.
+Coverage records planned/actual times, requested roles/actors, active-threat versus
+quiet requests and unused call budgets. Coverage counts requests, not successful
+decisions or proven benefit.
 Food/starvation intervals use state at the beginning of each substep. Breaches count
 crossings from positive gate health to zero, including repeat breaches after repairs.
 

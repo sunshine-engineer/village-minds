@@ -540,6 +540,14 @@
     "lesson_seconds": 900.0,
     "output_dir": "artifacts/evaluations",
     "full_observations": false,
-    "stop_requests_on_error": true
+    "stop_requests_on_error": true,
+    "checkpoint_strategy": "threats",
+    "checkpoint_start_seconds": 0.0,
+    "role_order": [
+      "soldier",
+      "worker",
+      "farmer",
+      "elder"
+    ]
   }
 }

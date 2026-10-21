@@ -40,7 +40,11 @@ class EvaluationTests(unittest.TestCase):
         self.root = Path(self.temporary.name)
         self.options = deepcopy(get_settings()["evaluation"])
         self.options.update(
-            duration_seconds=40.0, run_wall_seconds=10.0, max_model_calls=1
+            duration_seconds=40.0,
+            run_wall_seconds=10.0,
+            max_model_calls=1,
+            checkpoint_strategy="interval",
+            role_order=["farmer"],
         )
         self.profile = resolve_profile()
 
@@ -190,6 +194,58 @@ class EvaluationTests(unittest.TestCase):
         )
         seen[1]["lessons_from_previous_failures"] = []
         self.assertEqual(seen[0], seen[1])
+
+    def test_threat_checkpoint_integration_covers_roles_and_late_waves(self):
+        seen = []
+        options = deepcopy(get_settings()["evaluation"])
+        options.update(
+            duration_seconds=900.0,
+            max_model_calls=4,
+            run_wall_seconds=20.0,
+            checkpoint_strategy="threats",
+        )
+
+        def decide(profile, observation, *args):
+            seen.append(deepcopy(observation))
+            decision = (
+                {
+                    "action": "guard",
+                    "target": next(iter(observation["village"]["gate_threats"])),
+                }
+                if observation["role"] == "soldier"
+                else {"action": "move", "target": "farm"}
+            )
+            return {"status": "ok", "decision": decision, "latency_ms": 1.0}
+
+        result = self.run_mode("hybrid", request=decide, options=options)
+        self.assertTrue(result["completed_horizon"])
+        self.assertEqual(
+            {o["role"] for o in seen}, {"worker", "farmer", "elder", "soldier"}
+        )
+        self.assertTrue(all(o["village"]["gate_threats"] for o in seen))
+        coverage = result["model_coverage"]
+        self.assertEqual(coverage["active_threat_requests"], 4)
+        self.assertEqual(coverage["quiet_requests"], 0)
+        self.assertGreater(coverage["history"][-1]["sim_time"], 700)
+        self.assertEqual(result["unused_model_calls"], 0)
+
+    def test_threat_mode_short_horizon_reports_unexercised_budget(self):
+        options = deepcopy(get_settings()["evaluation"])
+        options.update(
+            duration_seconds=60.0,
+            max_model_calls=2,
+            run_wall_seconds=10.0,
+            checkpoint_strategy="threats",
+        )
+
+        def forbidden(*args):
+            raise AssertionError("No monster wave before this horizon")
+
+        result = self.run_mode("hybrid", request=forbidden, options=options)
+        self.assertTrue(result["completed_horizon"])
+        self.assertEqual(result["model_requests"], 0)
+        self.assertEqual(result["model_coverage"]["roles_requested"], [])
+        self.assertEqual(result["unused_model_calls"], 2)
 
     def test_rejected_model_action_is_not_counted_as_accepted(self):
         result = self.run_mode(

@@ -77,7 +77,9 @@ To test fifteen simulated minutes without waiting for a game window:
 
 This runs scripted villagers without Docker and generates a report under
 `artifacts/evaluations/`. Add `--modes all` for scripted / AI / AI-with-memory
-comparisons. Model calls, individual requests and whole suites have time/call limits.
+comparisons. Model calls now wait for active monster threats, spread across the
+scenario horizon and rotate among roles. Reports show actual role/threat coverage.
+Individual requests and whole suites have time/call limits.
 AI inference still takes real time; evaluation pauses at bounded decision checkpoints.
 
 See the [evaluation guide](docs/EVALUATION.md) for short AI commands, metrics, limits

@@ -13,21 +13,22 @@ def default_policy(self, bot):
     if not bot.alive or self.failed:
         return None
 
+    available = self.available_actions(bot)
+
     def go(place, action, **fields):
-        if distance(bot.position, LOCATIONS[place]) < (
-            R["crop_radius"] if place == "farm" else P["arrival_radius"]
-        ):
+        if fields.get("target", "") in available.get(action, []):
             return {"action": action, **fields}
+        if self.time < bot.work_at:
+            return None
         if bot.path and bot.action == f"walking to {place}":
             return None
         return {"action": "move", "target": place}
 
     if bot.hunger > P["eat_above_hunger"]:
-        if bot.supplies >= R["eat_food_cost"] or (
-            distance(bot.position, LOCATIONS["storehouse"]) < R["store_radius"]
-            and self.store["food"] >= R["eat_food_cost"]
-        ):
+        if "eat" in available:
             return {"action": "eat"}
+        if self.time < bot.work_at:
+            return None
         if self.store["food"] >= R["eat_food_cost"]:
             return go("storehouse", "eat")
     if bot.energy < P["rest_below_energy"]:
@@ -63,10 +64,17 @@ def default_policy(self, bot):
         "can_rally", False
     ) and "rally" in self.available_actions(bot):
         return {"action": "rally"}
-    if any(c.stage == "ripe" for c in self.crops):
-        return go("farm", "harvest")
-    if any(c.stage == "empty" for c in self.crops):
-        return go("farm", "farm")
+    if self.time < bot.work_at:
+        return None
+    if "harvest" in available:
+        return {"action": "harvest"}
+    if "farm" in available:
+        return {"action": "farm"}
+    if any(c.stage in ("ripe", "empty") for c in self.crops):
+        if bot.path and bot.action == "walking to farm":
+            return None
+        if self.crop_destination(bot) is not None:
+            return {"action": "move", "target": "farm"}
     if bot.supplies or bot.wood:
         return go("storehouse", "deposit")
     if bot.energy < P["idle_rest_below_energy"]:

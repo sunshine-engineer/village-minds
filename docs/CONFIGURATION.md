@@ -37,7 +37,7 @@ to use the example's separate save slot. It does not overwrite the default slot.
 | `display` | Window, camera, lighting, animation, chat focus timing, feed and roster limits |
 | `controls` | Movement, takeover, camera, action, chat, pause, save and quit bindings |
 | `assets` | Path to the prefab/style/UI catalog |
-| `evaluation` | Seeds/modes, simulated horizon, fixed step, checkpoint/call/time budgets, output directory and circuit breaker |
+| `evaluation` | Seeds/modes, simulated horizon, fixed step, checkpoint strategy/start, role order, call/time budgets, output directory and circuit breaker |
 | `telemetry` | Optional JSONL path, full observations, byte cap and movement sampling interval |
 | `plugins` | Explicit trusted Python modules to import |
 | `extension_settings` | Plugin-owned JSON settings; each plugin validates its own schema |
@@ -109,3 +109,16 @@ decision logs. Explicit relative `telemetry.decision_log` and `evaluation.output
 overrides resolve relative to the override file. Their defaults resolve relative to
 the editable checkout. `--decision-log` and evaluation `--output` paths resolve from
 the terminal directory. Evaluation and telemetry settings do not invalidate saves.
+
+## Crop work and action ranges
+
+Local policies choose currently legal harvest/plant actions before travelling.
+Moving to `farm` selects a reachable grid work point beside an actual ripe or empty
+plot, within `rules.crop_radius`; it does not stop merely because the farm sign is
+nearby. Personal work offsets remain configurable. Work cooldowns preserve the
+current order instead of generating retries or idle wandering.
+
+`policy.arrival_radius` remains accepted for compatibility with older overrides;
+service arrival now uses the action's actual legality/range, so that legacy value
+does not control task completion. Save format and gameplay configuration
+fingerprints are unchanged by these code-only policy improvements.

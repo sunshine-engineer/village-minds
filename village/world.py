@@ -14,7 +14,7 @@ from .map_data import (
     CROP_GROW_SECONDS,
 )
 from .entities import Villager, Crop, Monster
-from .navigation import distance, pathfind, walkable
+from .navigation import distance, pathfind, walkable, work_point
 from .survival import SurvivalRules
 from .policies import default_policy
 from .extensions import load_extensions
@@ -373,6 +373,10 @@ class World(SurvivalRules):
 
     def destination(self, bot, place):
         """Personal work slots reduce crowding at shared destinations."""
+        if place == "farm":
+            point = self.crop_destination(bot)
+            if point is not None:
+                return point
         index = next(i for i, v in enumerate(self.villagers) if v is bot)
         offsets = W["work_offsets"]
         dx, dy = offsets[index % len(offsets)]
@@ -390,3 +394,21 @@ class World(SurvivalRules):
             for i, v in enumerate(v for v in self.villagers if v.role == bot.role)
             if v is bot
         )
+
+    def crop_destination(self, bot):
+        """Choose reachable work beside a ripe/empty plot, not just the farm sign."""
+        index = next(i for i, v in enumerate(self.villagers) if v is bot)
+        offsets = W["work_offsets"]
+        offset = offsets[index % len(offsets)]
+        for stage in ("ripe", "empty"):
+            crops = [c for c in self.crops if c.stage == stage]
+            if crops:
+                rotation = index % len(crops)
+                crops = crops[rotation:] + crops[:rotation]
+            for crop in crops:
+                point = work_point(
+                    bot.position, crop.position, R["crop_radius"], offset
+                )
+                if point is not None:
+                    return point
+        return None

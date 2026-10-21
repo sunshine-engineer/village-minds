@@ -24,6 +24,7 @@ mutate state. Local routines keep every unpossessed actor active during inferenc
 | `ui.py`, `controls.py` | Configured HUD widgets and input bindings |
 | `game.py` | Panda3D lifecycle, frame orchestration, camera, possession and saving |
 | `telemetry.py` | Bounded JSONL traces and aggregate event counters |
+| `evaluation_schedule.py` | Seed-deterministic role rotation, horizon-spread threat checkpoints and coverage |
 | `evaluation.py` | Headless experiments, factual failure fixtures, bounded model processes and reports |
 | `timing.py` | Fast-forward substeps and retained frame backlog |
 | `persistence.py` | Validated versioned JSON, atomic writes and backup recovery |

@@ -207,7 +207,7 @@ class BrainScheduler:
             decision = world.fallback(bot)
             if decision and world.apply(bot, decision, source="local"):
                 self.local_decisions += 1
-            if decision is None:
+            if decision is None and world.time >= bot.work_at:
                 self._idle_activity(index, bot)
             self._patrol(index, bot)
         self._social()

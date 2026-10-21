@@ -1,5 +1,15 @@
 # Validation evidence
 
+## Crop policy and threat-aware role coverage — 21 October 2026
+
+- **89 tests passed on Linux and native Windows.** New regression cases were first run against the old implementation and reproduced the out-of-range harvest stall. They now cover local planting alternatives, reaching ripe/distant plots, blocked plot centers, work cooldowns and finishing movement inside one rounded grid cell.
+- The original isolated Edda reproduction now plants four crops and harvests four food within ten simulated seconds, instead of remaining motionless with zero contributions. Local artifact: `artifacts/farming-fix-repro.json`.
+- Scripted seed-7 and seed-19 runs again completed 900 simulated seconds with village health 200/200 and no deaths/breaches. Logged local decision rejections decreased from 232 and 260 in the previous recorded runs to **zero in both new runs**. Gameplay config fingerprints matched. This is a before/after policy diagnostic, not an AI benchmark claim.
+- New schedule tests verify horizon-spread times, real threat gating, role coverage, seed-deterministic rotation, living actor selection, actor fairness, interval compatibility and zero budgets. A full fake-response integration covers all four roles across later waves; short quiet scenarios retain unused budgets explicitly.
+- Live native Windows comparisons used seeds 7 and 19, all three modes, 900 simulated seconds, and two model requests per AI condition. All six scenarios completed. Requests occurred around **180.1 and 540.2 seconds**, during waves 1 and 5 with actual gate threats. Worker, farmer, elder and soldier roles were exercised across these checks. **Six of seven model requests were accepted; one timed out at the 20-second bound**, opening that scenario's circuit and leaving its second call unused. No timeout is counted as a successful model action.
+- Local live evidence: `artifacts/evaluations/run-20261021T225830-9b6add2a/` and `artifacts/evaluations/run-20261021T230020-afb3125b/`. Coverage tables report requested roles separately from accepted action counts. No new claim of improved AI cooperation or memory effectiveness is made.
+- The native Windows offscreen game smoke check passed. Save schema/fingerprints remain compatible; this change adds no entity fields and evaluation still uses separate temporary worlds.
+
 ## AI evaluation, logs and fast-forward — 21 October 2026
 
 - **73 tests passed on both Linux and native Windows** after this update. New checks cover reproducible scripted runs, model/local provenance and correlation, lesson-field isolation, request budgets, timeout circuit breaking, process termination, censored outcomes, metrics, report files, JSONL caps, takeover staleness, substep timing/backlog and an actual CLI run that leaves a sentinel campaign file untouched.
