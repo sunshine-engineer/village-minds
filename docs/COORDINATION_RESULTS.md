@@ -54,3 +54,7 @@ Local evidence: `artifacts/evaluations/run-20261021T232432-a5056d67/` contains c
 ## Model smoke checks
 
 Two live Windows `hybrid` runs used the volunteer strategy, seeds 7 and 19, four planned calls per run, a 15-second model timeout, 75-second run limit and 150-second suite limit. Both reached 900 simulated seconds, but each first request timed out and opened the circuit. There were **zero accepted model actions** and six unused calls across the two runs. These checks validate bounded fallback, not successful model coordination. Local evidence: `artifacts/evaluations/run-20261021T232957-44ef7e5d/`.
+
+## Prospective validation
+
+A separate [held-out protocol](HELD_OUT_VALIDATION.md) tests the unchanged policies on fresh seeds and resource/travel variants. Keep those results separate from this development comparison.

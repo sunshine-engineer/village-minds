@@ -130,3 +130,7 @@ fingerprints are unchanged by these code-only policy improvements.
 ### Shared tasks
 
 `coordination` configures automatic strategy, public task capacity, expiry, request/update intervals, resource goals, assigner roles, task priority and role/distance preferences. `--coordination independent|requests|assigned` overrides the automatic strategy at startup. Tasks and counters persist independently of that choice. Details: [coordination](COORDINATION.md). No core survival action is disabled by a coordination strategy.
+
+### Holdout matrix
+
+`configs/validation/holdout-v1.json` is a batch plan, passed to `python -m village.validation --plan`, not the game’s `--config`. It contains fresh/excluded seeds, named scenario-config paths, duration/substep and wall budgets. Scenario/output paths resolve relative to this plan. Individual presets in that folder are ordinary game/evaluator configs. See [held-out validation](HELD_OUT_VALIDATION.md).

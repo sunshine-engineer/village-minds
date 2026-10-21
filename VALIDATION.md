@@ -1,5 +1,15 @@
 # Validation evidence
 
+## Prospective seed/scenario validation — 21 October 2026
+
+- **113 tests passed on Linux and native Windows.** Six new harness checks cover disjoint/duplicate seeds and budgets, scenario preflight with unchanged controller settings, disabled-action rejection, explicit missing/censored outcomes, inference mismatch rejection, fresh child processes, frozen inputs and campaign-save preservation.
+- A frozen 96-run matrix used eight fresh seeds (211, 223, 227, 229, 233, 239, 241, 251), four scenarios and three strategies at a 900-second horizon / 0.1-second steps. All runs completed or reached destruction, with **no skipped, missing or wall-limited runs**, and zero model calls. Simulator/controller/evaluator/data hashes matched published `1ff6c75`; no policies were tuned between scenarios.
+- Survival (independent / volunteers / elder assignments): fresh siege **3/8, 7/8, 5/8**; tighter food **3/8, 6/8, 4/8**; scarce wood **0/8 across all three**; long haul **0/8 across all three**. Volunteers had one paired survival regression in each of the first two scenarios. These are context-dependent controller results, not universal robustness or AI reasoning.
+- Under scarce wood, mean observed destruction times were 658.9s / 502.1s / 539.5s. All those runs failed, so these particular failure times are uncensored. A secondary accepted-repair trace audit measured 17.91 / 10.30 / 10.28 actual gate HP restored per wood; coordination delegated most repairs to non-worker roles. No audited logs dropped records. This identifies an efficiency concern, not an isolated causal explanation for every loss. Native Windows and Linux audit outputs matched exactly.
+- Every resource/travel failure run still shared food, repaired gates and killed monsters. A long-haul navigation audit confirmed reachable, legal storehouse/orchard work points for all six initial villagers. The food variant reduced buffers but produced zero measured starvation time; it is not a severe starvation benchmark. Both zero-survival scenarios expose boundaries but cannot rank survival rates.
+- Full matrix evidence: `artifacts/validation/coordination-holdout-v1-20261021T234106-f40823d3/`. The [held-out report](docs/HELD_OUT_VALIDATION.md) publishes all 96 CSV rows, input/source hashes, adverse outcomes and reproduction commands. The full matrix ran on Linux/WSL2 Python 3.14.4; Windows ran the regression suite and tiny harness fixture, not the full 96-run matrix.
+- A wheel build included `validation.py`; an isolated installed-wheel batch ran all three strategies with Panda3D imports blocked in the parent and child interpreters. Compilation, Python 3.11 grammar, result-table/CSV uniqueness and documentation-link checks passed. These checks do not assert a human playtest or successful model inference.
+
 ## Structured coordination and matched evaluations — 21 October 2026
 
 - The built wheel contains the new task module, defaults and model prompt. All three strategies ran from an isolated extracted wheel while Panda3D imports were blocked, confirming the headless boundary.

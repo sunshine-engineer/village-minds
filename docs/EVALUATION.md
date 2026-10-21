@@ -200,3 +200,7 @@ for deterministic metrics and real spawned processes for timeout/cleanup checks.
 ## Harder cooperation scenario
 
 Use `--config configs/cooperation-siege.json --compare-coordination --modes scripted` to compare independent routines, shared requests and elder assignments on the same seeds with all survival actions enabled. The [siege guide](COOPERATION_SCENARIO.md) explains commands, metrics, paired comparisons and limitations. `--coordination` selects a single strategy. Disabled-action controls remain mechanics diagnostics, not the main cooperation benchmark.
+
+## Validate beyond the development scenario
+
+`python -m village.validation` runs [the frozen multi-scenario protocol](HELD_OUT_VALIDATION.md) with fresh seeds, all three strategies and every survival action enabled. Use `--plan` for the matrix; individual scenario configs still use the evaluator’s `--config`. The batch records hashes, per-scenario paired results and incomplete runs. It makes no model requests.

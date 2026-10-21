@@ -1,0 +1,42 @@
+{
+  "scenario": "wood-pressure",
+  "source_summary_sha256": "8c7fab98522992b1dfd96446842a8adfb6bbef5c6341ddd46438fec3a77af7ba",
+  "strategies": {
+    "independent": {
+      "gate_hp_restored": 3169.500000000004,
+      "wood_consumed": 177,
+      "gate_hp_per_wood": 17.906779661016973,
+      "repairs_by_role": {
+        "worker": 177
+      },
+      "dropped_log_records": 0,
+      "complete_logs": true
+    },
+    "requests": {
+      "gate_hp_restored": 1360.0,
+      "wood_consumed": 132,
+      "gate_hp_per_wood": 10.303030303030303,
+      "repairs_by_role": {
+        "elder": 76,
+        "farmer": 45,
+        "worker": 5,
+        "soldier": 6
+      },
+      "dropped_log_records": 0,
+      "complete_logs": true
+    },
+    "assigned": {
+      "gate_hp_restored": 1469.7000000000007,
+      "wood_consumed": 143,
+      "gate_hp_per_wood": 10.277622377622382,
+      "repairs_by_role": {
+        "elder": 86,
+        "farmer": 44,
+        "soldier": 8,
+        "worker": 5
+      },
+      "dropped_log_records": 0,
+      "complete_logs": true
+    }
+  }
+}

@@ -312,3 +312,5 @@ Project code and documentation are available under the [MIT License](LICENSE).
 Panda3D, Ollama and downloaded models retain their own licenses.
 
 For a harder benchmark, try the [cooperation siege scenario](docs/COOPERATION_SCENARIO.md). It combines earlier, stronger waves with scarce reserves. Compare independent routines, volunteers responding to requests, and elder-assigned tasks while keeping all survival actions enabled. See [task coordination](docs/COORDINATION.md) for player/model actions and save behavior.
+
+To test generalization beyond the development seeds, run `python -m village.validation` using your platform’s virtual-environment Python. The [held-out validation guide](docs/HELD_OUT_VALIDATION.md) describes the frozen 96-run matrix, new scenarios, time limits and evidence.
