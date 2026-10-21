@@ -109,6 +109,16 @@ def _validate_types(value, reference, path="config"):
             "near",
             "far",
             "fov",
+            "max_pace",
+            "max_steps_per_frame",
+            "max_bytes",
+            "duration_seconds",
+            "step_seconds",
+            "checkpoint_seconds",
+            "model_timeout_seconds",
+            "run_wall_seconds",
+            "suite_wall_seconds",
+            "lesson_seconds",
         }
         if value < 0 or (path.rsplit(".", 1)[-1] in positive and value == 0):
             raise ValueError(f"{path} is outside its valid range")
@@ -133,8 +143,30 @@ def _vector(value, length, name, low=None, high=None):
 def validate(config, reference):
     _validate_types(config, reference)
     world, display = config["world"], config["display"]
-    if not 0.1 <= config["runtime"]["pace"] <= 2:
-        raise ValueError("runtime.pace must be between 0.1 and 2")
+    runtime, evaluation = config["runtime"], config["evaluation"]
+    if not runtime["speed_steps"] or any(
+        isinstance(v, bool)
+        or not isinstance(v, (int, float))
+        or not math.isfinite(v)
+        or not 0.1 <= v <= runtime["max_pace"]
+        for v in runtime["speed_steps"]
+    ):
+        raise ValueError("runtime.speed_steps must contain supported pace values")
+    if not evaluation["seeds"] or any(
+        isinstance(v, bool) or not isinstance(v, int) or v < 0
+        for v in evaluation["seeds"]
+    ):
+        raise ValueError("evaluation.seeds must contain nonnegative integers")
+    if not evaluation["modes"] or any(
+        v not in ("scripted", "hybrid", "hybrid-memory") for v in evaluation["modes"]
+    ):
+        raise ValueError("Unknown evaluation mode")
+    if evaluation["step_seconds"] > runtime["max_step_seconds"]:
+        raise ValueError(
+            "evaluation.step_seconds cannot exceed runtime.max_step_seconds"
+        )
+    if not 0.1 <= config["runtime"]["pace"] <= config["runtime"]["max_pace"]:
+        raise ValueError("runtime.pace must be between 0.1 and runtime.max_pace")
     if config["runtime"]["max_step_seconds"] > 0.1:
         raise ValueError("runtime.max_step_seconds cannot exceed 0.1")
     if display["zoom_min"] > display["zoom"] or display["zoom"] > display["zoom_max"]:
@@ -315,6 +347,23 @@ def load_config(path=None):
     )
     result["runtime"]["save_path"] = str(
         (save_base / result["runtime"]["save_path"]).resolve()
+    )
+    if result["telemetry"]["decision_log"]:
+        log_base = (
+            path.parent
+            if path and "decision_log" in override.get("telemetry", {})
+            else PROJECT
+        )
+        result["telemetry"]["decision_log"] = str(
+            (log_base / result["telemetry"]["decision_log"]).resolve()
+        )
+    output_base = (
+        path.parent
+        if path and "output_dir" in override.get("evaluation", {})
+        else PROJECT
+    )
+    result["evaluation"]["output_dir"] = str(
+        (output_base / result["evaluation"]["output_dir"]).resolve()
     )
     return result
 

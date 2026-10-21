@@ -34,10 +34,17 @@ def main():
         default=settings["runtime"]["pace"],
         help="Simulation speed relative to real time",
     )
+    parser.add_argument(
+        "--decision-log",
+        default=settings["telemetry"]["decision_log"],
+        help="Append local/model/player decisions to a JSONL trace",
+    )
     args = parser.parse_args()
     attach_profile(parser, args)
-    if not 0.1 <= args.pace <= 2:
-        parser.error("--pace must be between 0.1 and 2")
+    if not 0.1 <= args.pace <= settings["runtime"]["max_pace"]:
+        parser.error(
+            f"--pace must be between 0.1 and {settings['runtime']['max_pace']}"
+        )
     if args.new_game and (args.no_save or args.smoke_test):
         parser.error(
             "--new-game requires saving and cannot be combined with --smoke-test"
@@ -56,6 +63,7 @@ def main():
         game.run()
     finally:
         game.save_world()
+        game.close_decision_log()
 
 
 if __name__ == "__main__":

@@ -27,7 +27,7 @@ to use the example's separate save slot. It does not overwrite the default slot.
 
 | Section | Controls |
 | --- | --- |
-| `runtime` | Simulation pace, seed, save path, autosave interval, step cap |
+| `runtime` | Simulation pace, maximum pace, speed steps, per-frame work cap, seed, save path, autosave interval, step cap |
 | `world` | Bounds, sight/hearing, navigation clearance, walls/openings, locations, buildings, crops, work offsets, villager roster/personality/color |
 | `rules` | Health, yields, energy costs, food/wood costs, ranges, cooldowns, regeneration, crop timing, hunger, monster damage/speed, wave timing and limits |
 | `roles` | Per-role harvest, wood, repair and combat bonuses; rally capability |
@@ -37,6 +37,8 @@ to use the example's separate save slot. It does not overwrite the default slot.
 | `display` | Window, camera, lighting, animation, chat focus timing, feed and roster limits |
 | `controls` | Movement, takeover, camera, action, chat, pause, save and quit bindings |
 | `assets` | Path to the prefab/style/UI catalog |
+| `evaluation` | Seeds/modes, simulated horizon, fixed step, checkpoint/call/time budgets, output directory and circuit breaker |
+| `telemetry` | Optional JSONL path, full observations, byte cap and movement sampling interval |
 | `plugins` | Explicit trusted Python modules to import |
 | `extension_settings` | Plugin-owned JSON settings; each plugin validates its own schema |
 
@@ -99,3 +101,11 @@ The HUD has a finite size: larger rosters may require UI layout changes.
 
 Only load configuration, asset manifests and plugins from trusted contributors.
 Plugin module imports execute Python; model responses cannot select modules or code.
+
+## Evaluation and logging
+
+See [evaluation](EVALUATION.md) for fast-forward, bounded headless comparisons and
+decision logs. Explicit relative `telemetry.decision_log` and `evaluation.output_dir`
+overrides resolve relative to the override file. Their defaults resolve relative to
+the editable checkout. `--decision-log` and evaluation `--output` paths resolve from
+the terminal directory. Evaluation and telemetry settings do not invalidate saves.

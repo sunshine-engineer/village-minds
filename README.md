@@ -60,6 +60,29 @@ docker compose exec ollama ollama pull qwen2.5:1.5b
 
 Python 3.11+ is required. Panda3D 1.10.16 is pinned. The game window runs on the host; only the model runs in Docker. The Linux `.venv` and Windows `.venv-win` are different environments and must not be shared.
 
+## Fast-forward and AI evaluation
+
+Press **V** during play to cycle 0.5x, 1x, 2x, 5x and 10x; the HUD shows speed.
+Use `--pace 10` to start fast. Survival rules advance in small substeps.
+
+To test fifteen simulated minutes without waiting for a game window:
+
+```powershell
+.\.venv-win\Scripts\python.exe -m village.evaluation --seeds 7 --duration 900
+```
+
+```bash
+.venv/bin/python -m village.evaluation --seeds 7 --duration 900
+```
+
+This runs scripted villagers without Docker and generates a report under
+`artifacts/evaluations/`. Add `--modes all` for scripted / AI / AI-with-memory
+comparisons. Model calls, individual requests and whole suites have time/call limits.
+AI inference still takes real time; evaluation pauses at bounded decision checkpoints.
+
+See the [evaluation guide](docs/EVALUATION.md) for short AI commands, metrics, limits
+and `--decision-log artifacts/decisions.jsonl` during normal play.
+
 ## Roles and cooperation
 
 | Villager | Role | Responsibility / bonus |
@@ -199,7 +222,7 @@ Configuration:
 
 - `--model TAG` or `VILLAGE_MODEL`: use a different installed Ollama model.
 - `--url URL` or `OLLAMA_URL`: default `http://localhost:11434`.
-- `--pace NUMBER`: between 0.1 and 2; default 0.5.
+- `--pace NUMBER`: between 0.1 and the configured maximum (10 by default); default 0.5.
 - The Compose API binds to host loopback only. Observations and dialogue go to the configured endpoint.
 - The inspected Ollama 0.32.15 image digest is pinned in `compose.yaml`.
 

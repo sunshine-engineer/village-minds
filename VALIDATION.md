@@ -1,5 +1,18 @@
 # Validation evidence
 
+## AI evaluation, logs and fast-forward — 21 October 2026
+
+- **73 tests passed on both Linux and native Windows** after this update. New checks cover reproducible scripted runs, model/local provenance and correlation, lesson-field isolation, request budgets, timeout circuit breaking, process termination, censored outcomes, metrics, report files, JSONL caps, takeover staleness, substep timing/backlog and an actual CLI run that leaves a sentinel campaign file untouched.
+- A Linux headless scripted run completed **900 simulated seconds in 10.30 wall seconds** with decision logging. Timing is hardware/filesystem dependent, not a guaranteed speedup.
+- A native Windows three-condition smoke check completed **300 simulated seconds per condition**: scripted in 0.61 seconds, hybrid in 5.11 seconds, and hybrid-with-memory in 12.75 seconds. Both AI conditions accepted one real Docker-hosted Ollama decision. One call per condition verifies integration, not improved survival or memory effectiveness. Evidence: `artifacts/evaluations/run-20261021T223406-23d53e25/`.
+- A separate eight-second-timeout comparison recorded zero accepted AI actions in both AI conditions and explicit timeouts. The runner completed using local routines; it did not label those actions as model successes. Evidence: `artifacts/evaluations/run-20261021T223101-e76118cc/`.
+- Normal save/restart passed again with two native Windows CLI processes and an isolated temporary save. No normal campaign save was modified.
+- Native Windows offscreen checks passed for the speed key reaching 10x, ten safe substeps in a frame, accelerated wave timing, the speed HUD, pause, and player action/movement JSONL records. This used Panda3D messenger dispatch and an injected frame delta, not OS keyboard automation. Evidence: `artifacts/speed-check.json`.
+- The built wheel included evaluation, telemetry, timing, the CLI entry point and default settings. An isolated installed-wheel scenario ran with Panda3D imports explicitly blocked, confirming the headless dependency boundary.
+- The real-time scheduler and evaluator share model-response validation, but evaluation pauses simulation at request checkpoints. Their timings are deliberately different; no real-time cooperation benchmark, statistical improvement claim or human playtest is asserted.
+
+Commands, budgets, output schema and limitations are in [the evaluation guide](docs/EVALUATION.md).
+
 ## Modularity/configuration refactor — 21 October 2026
 
 - **56 tests passed on Linux and native Windows**, including the original 37 regression checks. New coverage includes startup overrides/type/range/path validation, duplicate/nonfinite JSON rejection, configurable balance and rosters, config fingerprints and legacy saves, plugin action validation/state persistence, policy/system registration, model routing, API keys, response limits and the second transport's mocked contract.

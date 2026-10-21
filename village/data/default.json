@@ -4,7 +4,16 @@
     "seed": 7,
     "save_path": "saves/village.json",
     "autosave_seconds": 10,
-    "max_step_seconds": 0.1
+    "max_step_seconds": 0.1,
+    "max_pace": 10.0,
+    "speed_steps": [
+      0.5,
+      1.0,
+      2.0,
+      5.0,
+      10.0
+    ],
+    "max_steps_per_frame": 100
   },
   "world": {
     "limit": 32,
@@ -489,7 +498,8 @@
       "repair": "j",
       "attack": "k",
       "rally": "l"
-    }
+    },
+    "speed": "v"
   },
   "assets": {
     "manifest": "assets/catalog.json"
@@ -502,5 +512,34 @@
     "failure_capacity": 20,
     "dialogue_chars": 180
   },
-  "extension_settings": {}
+  "extension_settings": {},
+  "telemetry": {
+    "decision_log": "",
+    "full_observations": false,
+    "max_bytes": 20000000,
+    "movement_interval_seconds": 0.5
+  },
+  "evaluation": {
+    "seeds": [
+      7,
+      19,
+      31,
+      43,
+      59
+    ],
+    "modes": [
+      "scripted"
+    ],
+    "duration_seconds": 900.0,
+    "step_seconds": 0.1,
+    "checkpoint_seconds": 30.0,
+    "max_model_calls": 2,
+    "model_timeout_seconds": 15.0,
+    "run_wall_seconds": 40.0,
+    "suite_wall_seconds": 120.0,
+    "lesson_seconds": 900.0,
+    "output_dir": "artifacts/evaluations",
+    "full_observations": false,
+    "stop_requests_on_error": true
+  }
 }

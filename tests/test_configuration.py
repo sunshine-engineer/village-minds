@@ -53,7 +53,7 @@ class ConfigurationTests(unittest.TestCase):
             {"rulz": {}},
             {"rules": {"gate_health": -1}},
             {"runtime": {"pace": True}},
-            {"runtime": {"pace": 3}},
+            {"runtime": {"pace": 11}},
             {"display": {"window_size": [0, 900]}},
             {"controls": {"forward": "s"}},
             {"ai": {"default_profile": "missing"}},

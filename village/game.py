@@ -56,6 +56,30 @@ class VillageGame(SceneBuilder, ShowBase):
             if self.save_store
             else None
         ) or World()
+        from .telemetry import DecisionLog
+        from .timing import SimulationClock
+
+        trace = getattr(
+            args, "decision_log", get_settings()["telemetry"]["decision_log"]
+        )
+        if (
+            trace
+            and self.save_store
+            and Path(trace).expanduser().resolve() == self.save_store.path
+        ):
+            raise ValueError("Decision log must differ from the campaign save path")
+        self.world.decision_log = (
+            DecisionLog(
+                trace,
+                max_bytes=get_settings()["telemetry"]["max_bytes"],
+                full_observations=get_settings()["telemetry"]["full_observations"],
+            )
+            if trace
+            else None
+        )
+        self.simulation_clock = SimulationClock(
+            RT["max_step_seconds"], RT["max_steps_per_frame"]
+        )
         self.save_status = (
             "Temporary session (no save)"
             if not self.save_store
@@ -132,7 +156,9 @@ class VillageGame(SceneBuilder, ShowBase):
                 (m for m in self.world.monsters if m.id in choices),
                 key=lambda m: distance(bot.position, m.position),
             ).id
-        if not self.world.apply(bot, {"action": action, "target": target}):
+        if not self.world.apply(
+            bot, {"action": action, "target": target}, source="player"
+        ):
             self.world.log(
                 f"Cannot {action} here: check distance, energy, cooldown, and shared supplies."
             )
@@ -161,7 +187,7 @@ class VillageGame(SceneBuilder, ShowBase):
             return
         if self.world.controlled is not None:
             bot = self.world.villagers[self.world.controlled]
-            self.world.say(bot, text)
+            self.world.say(bot, text, source="player")
         self.close_chat()
 
     def close_chat(self):
@@ -199,8 +225,7 @@ class VillageGame(SceneBuilder, ShowBase):
             dy = right * math.sin(self.orbit) + forward * math.cos(self.orbit)
             self.world.move_player(dx, dy, dt)
         if not self.paused:
-            self.world.tick(dt * self.pace)
-            self.brains.tick()
+            self.simulation_clock.advance(self.world, self.brains, dt * self.pace)
         if time.monotonic() >= self.next_save_wall or (
             self.world.failed and not self.failure_saved
         ):
@@ -272,7 +297,7 @@ class VillageGame(SceneBuilder, ShowBase):
         self.feed.setText("\n".join(list(self.world.events)[-D["feed_lines"] :]))
         self.status.setText(
             self.brains.status
-            + f"\nLocal actions {self.brains.local_decisions} | AI decisions {self.brains.model_decisions}"
+            + f"\nSpeed {self.pace:g}x | Local actions {self.brains.local_decisions} | AI decisions {self.brains.model_decisions}"
             + f"\nVillage {int(self.world.village_health)}/{R['village_health']:g} | Attempt {self.world.campaign['attempt']} | Wave {self.world.wave}"
             + f"\nShared food {self.world.store['food']} | Wood {self.world.store['wood']} | Next wave {max(0,int(self.world.next_wave-self.world.time))}s"
             + "\n"
@@ -316,6 +341,23 @@ class VillageGame(SceneBuilder, ShowBase):
                 self.win.saveScreenshot("artifacts/village-smoke.png")
                 self.userExit()
         return task.cont
+
+    def cycle_speed(self):
+        if self.typing:
+            return
+        speeds = RT["speed_steps"]
+        index = next((i for i, v in enumerate(speeds) if abs(v - self.pace) < 1e-9), -1)
+        self.pace = speeds[(index + 1) % len(speeds)]
+
+    def close_decision_log(self):
+        if self.world.decision_log and not self.world.decision_log.handle.closed:
+            self.world.decision_log.record(
+                "session_end",
+                self.world.time,
+                pending_model_request=self.brains.busy,
+                dropped_records=self.world.decision_log.dropped,
+            )
+            self.world.decision_log.close()
 
     def toggle_pause(self):
         if not self.typing:

@@ -23,6 +23,9 @@ mutate state. Local routines keep every unpossessed actor active during inferenc
 | `scene.py` | Procedural geometry and world/actor visual synchronization |
 | `ui.py`, `controls.py` | Configured HUD widgets and input bindings |
 | `game.py` | Panda3D lifecycle, frame orchestration, camera, possession and saving |
+| `telemetry.py` | Bounded JSONL traces and aggregate event counters |
+| `evaluation.py` | Headless experiments, factual failure fixtures, bounded model processes and reports |
+| `timing.py` | Fast-forward substeps and retained frame backlog |
 | `persistence.py` | Validated versioned JSON, atomic writes and backup recovery |
 | `cli.py`, `__main__.py`, `probe.py` | Config/profile startup, game entry and API probe |
 | `simulation.py` | Compatibility imports for existing scripts/tests |
@@ -65,3 +68,8 @@ retains prompt lessons. These memories do not train the model or prove improveme
 
 See [configuration](CONFIGURATION.md), [extension recipes](EXTENDING.md), and
 [validation evidence](../VALIDATION.md).
+
+Evaluation uses the same rules, local routines and model-result validation as gameplay,
+with a different timing policy: the simulation pauses at fixed strategic checkpoints.
+Requests run in spawned processes so a hung adapter cannot stall the suite indefinitely.
+Compare results within that policy; see [evaluation](EVALUATION.md) for limitations.

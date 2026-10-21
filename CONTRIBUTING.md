@@ -48,3 +48,8 @@ new model transports separate from scheduling and simulation. The optional
 When changing configuration defaults, verify save compatibility. New settings need
 validation and a documented default. Do not loosen a save validator just to make a
 new test pass. Tests that load a different startup config must use a fresh process.
+
+For evaluation or timing changes, run the unit suite, a scripted headless scenario and
+`python scripts/check_speed.py` with a graphics backend. The [evaluation guide](docs/EVALUATION.md)
+explains the checkpoint policy, budget semantics, metrics and logs. AI integration
+checks require a real model; mocked response tests alone do not verify server behavior.

@@ -24,7 +24,9 @@ R, P, W = S["rules"], S["policy"], S["world"]
 
 
 class World(SurvivalRules):
-    def __init__(self, seed=None, campaign=None, extensions=None):
+    def __init__(self, seed=None, campaign=None, extensions=None, decision_log=None):
+        self.decision_log = decision_log
+        self._movement_log_at = 0.0
         self.extensions = extensions if extensions is not None else load_extensions()
         self.extension_state = {
             name: create() for name, (create, _) in self.extensions.states.items()
@@ -66,6 +68,10 @@ class World(SurvivalRules):
             previous.action = "idle"
             previous.next_think = self.time
         self.controlled = index
+        if self.decision_log:
+            self.decision_log.record(
+                "possession", self.time, source="player", actor_index=index
+            )
         if index is not None and not self.villagers[index].alive:
             self.controlled = None
             self.log("That villager has fallen. Choose a survivor.")
@@ -145,11 +151,15 @@ class World(SurvivalRules):
             "objective": S["ai"]["objective"],
         }
 
-    def say(self, bot, text, target=None):
+    def say(self, bot, text, target=None, *, source="system"):
         text = " ".join(str(text).split())[: S["memory"]["dialogue_chars"]]
         if not text or not bot.alive:
             return
         bot.speech, bot.speech_until = text, self.time + R["speech_seconds"]
+        if self.decision_log:
+            self.decision_log.record(
+                "dialogue", self.time, source=source, actor=bot.name, text=text
+            )
         line = f"{bot.name}: {text}"
         bot.memory.append(line)
         self.log(line)
@@ -164,7 +174,33 @@ class World(SurvivalRules):
                     other.next_think, self.time + R["speech_wake_seconds"]
                 )
 
-    def apply(self, bot, decision):
+    def apply(
+        self, bot, decision, *, source="external", request_id=None, observation=None
+    ):
+        if self.decision_log is None:
+            return self._apply(bot, decision)
+        from .telemetry import state_summary
+
+        before = state_summary(self, bot)
+        if observation is None and self.decision_log.full_observations:
+            observation = self.observe(bot)
+        accepted = self._apply(bot, decision)
+        self.decision_log.record(
+            "decision",
+            self.time,
+            source=source,
+            actor=bot.name,
+            outcome="accepted" if accepted else "rejected",
+            decision=decision,
+            request_id=request_id,
+            observation=observation,
+            before=before,
+            after=state_summary(self, bot),
+            reason="" if accepted else "unavailable_or_invalid",
+        )
+        return accepted
+
+    def _apply(self, bot, decision):
         """Validate model intents against current state, never execute model code."""
         if self.failed or not bot.alive or not isinstance(decision, dict):
             return False
@@ -275,6 +311,18 @@ class World(SurvivalRules):
         if walkable(x, y + dy * step):
             y += dy * step
         bot.position = (x, y)
+        if self.decision_log and self.time >= self._movement_log_at:
+            self.decision_log.record(
+                "movement",
+                self.time,
+                source="player",
+                actor=bot.name,
+                direction=[dx, dy],
+                position=list(bot.position),
+            )
+            self._movement_log_at = (
+                self.time + S["telemetry"]["movement_interval_seconds"]
+            )
 
     def tick(self, dt):
         if self.failed:

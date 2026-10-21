@@ -81,7 +81,8 @@ Add the role's bonuses in `roles`, a villager profile in `world.cast`, a takeove
 and optionally an accessory prefab. New roles use the default general survival policy
 until a plugin registers `registry.register_policy(role, policy)`.
 
-A policy has signature `policy(world, bot) -> decision | None`. Returning `None`
+A policy has signature `policy(world, bot) -> decision | None`. Keep it free of
+state mutations: observations may also call it for recommended tasks. Returning `None`
 keeps the current work order eligible for the normal idle/patrol behavior. Reuse
 `village.policies.default_policy` when adding one priority instead of duplicating
 all needs logic. Soldiers are assigned by their index within the role, not a name.

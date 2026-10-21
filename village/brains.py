@@ -2,6 +2,7 @@
 
 import queue
 import threading
+import time
 from .config import get_settings
 from .decisions import decision_schema
 from .models import request_decision, resolve_profile, BACKENDS
@@ -52,6 +53,8 @@ class BrainScheduler:
         self.local_decisions = 0
         self.model_decisions = 0
         self.model_history = []
+        self.request_count = 0
+        self.request_context = None
         if not demo:
             threading.Thread(
                 target=self._worker, daemon=True, name="village-model"
@@ -131,6 +134,15 @@ class BrainScheduler:
             else (x * A["patrol_coordinate"] / abs(x), side * A["patrol_distance"])
         )
         bot.path = pathfind(bot.position, point)
+        if world.decision_log and bot.path:
+            world.decision_log.record(
+                "patrol",
+                world.time,
+                source="local",
+                actor=bot.name,
+                outcome="accepted",
+                target=list(point),
+            )
         self.patrol_side[index] = -side
         self.patrol_due[index] = (
             world.time + A["patrol_seconds"] + index * A["patrol_index_seconds"]
@@ -163,6 +175,16 @@ class BrainScheduler:
                 else "checking stores" if bot.role == "worker" else "checking village"
             )
             self.local_decisions += 1
+            if world.decision_log:
+                world.decision_log.record(
+                    "activity",
+                    world.time,
+                    source="local",
+                    actor=bot.name,
+                    outcome="accepted",
+                    action=bot.action,
+                    target=list(bot.path[-1]),
+                )
         self.activity_due[index] = (
             world.time + A["activity_seconds"] + index * A["activity_index_seconds"]
         )
@@ -183,7 +205,7 @@ class BrainScheduler:
                 self._patrol(index, bot)
                 continue
             decision = world.fallback(bot)
-            if decision and world.apply(bot, decision):
+            if decision and world.apply(bot, decision, source="local"):
                 self.local_decisions += 1
             if decision is None:
                 self._idle_activity(index, bot)
@@ -232,7 +254,7 @@ class BrainScheduler:
             else:
                 template = templates["roles"].get(bot.role, templates["generic"])
             text = template.format(other=other.name, gate=gate, supplies=bot.supplies)
-            world.say(bot, text)
+            world.say(bot, text, source="local")
             self.social_due[index] = world.time + A["speaker_cooldown_seconds"]
             break
 
@@ -247,42 +269,22 @@ class BrainScheduler:
             pass
         else:
             self.busy = False
-            bot = world.villagers[index]
-            if error:
-                self.status = "MODEL FALLBACK | local routines active | " + error
-                self.retry_at = world.time + A["retry_seconds"]
-            else:
-                self.status = (
-                    "MODEL: "
-                    + self.active_profile["model"]
-                    + " | local routines active"
-                )
-                if (
-                    bot.alive
-                    and revision == bot.revision
-                    and index != world.controlled
-                    and world.time - sent_at < A["max_decision_age_seconds"]
-                ):
-                    if world.apply(bot, result):
-                        self.model_decisions += 1
-                        self.model_history.append(
-                            {
-                                "name": bot.name,
-                                "decision": result,
-                                "model": self.active_profile["model"],
-                                "backend": self.active_profile["backend"],
-                            }
-                        )
-                        del self.model_history[: -A["model_history_limit"]]
-                        self.model_tasks[index] = result.get("action")
-                        self.override_until[index] = world.time + (
-                            A["plan_seconds"]
-                            if result.get("action") in ("move", "guard", "rest")
-                            else A["short_plan_seconds"]
-                        )
-                    else:
-                        self.status += " | outdated/unavailable choice skipped"
-                    bot.next_think = world.time + A["think_seconds"]
+            context = self.request_context or {}
+            self.consume_decision(
+                index,
+                revision,
+                sent_at,
+                result,
+                error,
+                request_id=context.get("id"),
+                observation=context.get("observation"),
+                latency_ms=(
+                    (time.monotonic() - context["started"]) * 1000
+                    if "started" in context
+                    else None
+                ),
+            )
+            self.request_context = None
         # This runs regardless of model latency, errors, or request cooldowns.
         self._routines()
         if self.demo or world.time < self.retry_at or self.busy:
@@ -294,6 +296,23 @@ class BrainScheduler:
                 observation = world.observe(bot)
                 observation["decision_layer"] = "strategic"
                 self.active_profile = self.profile_for(bot.name)
+                self.request_count += 1
+                self.request_context = {
+                    "id": f"model-{self.request_count}",
+                    "started": time.monotonic(),
+                    "observation": observation,
+                }
+                if world.decision_log:
+                    world.decision_log.record(
+                        "model_request",
+                        world.time,
+                        source="model",
+                        actor=bot.name,
+                        request_id=self.request_context["id"],
+                        observation=observation,
+                        model=self.active_profile["model"],
+                        backend=self.active_profile["backend"],
+                    )
                 self.jobs.put_nowait((index, bot.revision, world.time, observation))
                 self.busy = True
                 self.cursor = (index + 1) % len(world.villagers)
@@ -302,3 +321,82 @@ class BrainScheduler:
     def profile_for(self, name):
         assigned = A["villager_profiles"].get(name)
         return resolve_profile(assigned) if assigned else self.profile
+
+    def consume_decision(
+        self,
+        index,
+        revision,
+        sent_at,
+        result,
+        error=None,
+        *,
+        request_id=None,
+        observation=None,
+        latency_ms=None,
+        profile=None,
+    ):
+        """Common validation/arbitration for live async and evaluation checkpoints."""
+        world = self.world
+        bot = world.villagers[index]
+        profile = profile or self.active_profile
+        reason = ""
+        if error:
+            self.status = "MODEL FALLBACK | local routines active | " + error
+            self.retry_at = world.time + A["retry_seconds"]
+            outcome = "error"
+            reason = error
+        elif (
+            world.failed
+            or not bot.alive
+            or revision != bot.revision
+            or index == world.controlled
+            or world.time - sent_at >= A["max_decision_age_seconds"]
+        ):
+            outcome = "stale"
+            reason = "world_failed_dead_possessed_or_expired"
+        else:
+            self.status = "MODEL: " + profile["model"] + " | local routines active"
+            accepted = world.apply(
+                bot,
+                result,
+                source="model",
+                request_id=request_id,
+                observation=observation,
+            )
+            outcome = "accepted" if accepted else "rejected"
+            if accepted:
+                self.model_decisions += 1
+                self.model_history.append(
+                    {
+                        "name": bot.name,
+                        "decision": result,
+                        "model": profile["model"],
+                        "backend": profile["backend"],
+                    }
+                )
+                del self.model_history[: -A["model_history_limit"]]
+                self.model_tasks[index] = result.get("action")
+                self.override_until[index] = world.time + (
+                    A["plan_seconds"]
+                    if result.get("action") in ("move", "guard", "rest")
+                    else A["short_plan_seconds"]
+                )
+            else:
+                reason = "unavailable_or_invalid"
+                self.status += " | outdated/unavailable choice skipped"
+            bot.next_think = world.time + A["think_seconds"]
+        if world.decision_log:
+            world.decision_log.record(
+                "model_response",
+                world.time,
+                source="model",
+                actor=bot.name,
+                outcome=outcome,
+                reason=reason,
+                request_id=request_id,
+                decision=result,
+                latency_ms=latency_ms,
+                model=profile["model"],
+                backend=profile["backend"],
+            )
+        return outcome

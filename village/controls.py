@@ -19,6 +19,7 @@ def bind_controls(game):
         ("escape", game.escape, []),
         ("save", game.save_world, []),
         ("pause", game.toggle_pause, []),
+        ("speed", game.cycle_speed, []),
         ("zoom_in", game.change_zoom, [-display["zoom_step"]]),
         ("zoom_out", game.change_zoom, [display["zoom_step"]]),
     ):

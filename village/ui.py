@@ -20,7 +20,7 @@ def control_help():
         for i in range(0, len(actions), 3)
     ]
     lines += [
-        f"{keys['speak']} Speak | {keys['pause']} Pause",
+        f"{keys['speak']} Speak | {keys['pause']} Pause | {keys['speed']} Speed",
         f"{keys['save']} Save | {keys['escape']} Quit/cancel",
     ]
     return "\n".join(lines)
