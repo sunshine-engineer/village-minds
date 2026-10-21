@@ -266,7 +266,7 @@ class VillageGame(SceneBuilder, ShowBase):
         for i, bot in enumerate(self.world.villagers):
             marker = ">" if i == self.world.controlled else " "
             rows.append(
-                f"{marker} {C['takeover_keys'][i]} {bot.name} / {bot.role}\n     HP {int(bot.health)}  Energy {int(bot.energy)}  Hunger {int(bot.hunger)}\n     Food {bot.supplies} Wood {bot.wood} | {bot.action[:D["roster_action_chars"]]}\n"
+                f"{marker} {C['takeover_keys'][i]} {bot.name} / {bot.role}\n     HP {int(bot.health)}  Energy {int(bot.energy)}  Hunger {int(bot.hunger)}\n     Food {bot.supplies} Wood {bot.wood} | {bot.action[:D['roster_action_chars']]}\n"
             )
         self.roster.setText("\n".join(rows))
         self.feed.setText("\n".join(list(self.world.events)[-D["feed_lines"] :]))
