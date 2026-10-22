@@ -77,8 +77,9 @@ IDs, reconnect/server/possession changes, stale frames, long gaps, bounded memor
 disabling smoothing, frame rates 30/60/144, and unchanged gameplay fingerprints.
 Configuration checks reject invalid smoothing settings.
 
-A native Windows Panda3D fixture rendered **121 updates at 60 FPS with five
-snapshots/second**. After startup buffering, maximum per-frame actor displacement
+A native Windows Panda3D fixture rendered **121 updates on a simulated 60 FPS
+timeline with five snapshots/second**. This tests scene transforms at fixed time
+steps; it does not measure achieved GPU frame rate. After startup buffering, maximum per-frame actor displacement
 was **0.083334 units**, versus **1.0 unit** for direct snapshot positions. Assertions
 also checked monster interpolation, camera/actor alignment, animation changes
 between packets, and unchanged authoritative position/time. This is a controlled

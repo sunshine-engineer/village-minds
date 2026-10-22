@@ -1,6 +1,7 @@
 {
   "frames": 121,
-  "fps": 60,
+  "timeline_fps": 60,
+  "measured_frame_rate": false,
   "snapshot_hz": 5,
   "max_rendered_step": 0.08333396911621094,
   "max_snapshot_step": 1.0000000000000009,

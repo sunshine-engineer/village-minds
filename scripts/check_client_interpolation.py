@@ -68,6 +68,7 @@ def main():
                     session.pending = packet(next_packet * 0.2, next_packet)
                     next_packet += 1
                 game.update(argparse.Namespace(cont="cont"))
+                game.graphicsEngine.renderFrame()
                 actor = game.actors[0][0].getX()
                 monster = game.monster_nodes["m1"].getX()
                 target = game.camera.getX() - math.sin(game.orbit) * game.zoom
@@ -102,7 +103,8 @@ def main():
             game.win.saveScreenshot("artifacts/client-interpolation.png")
             report = dict(
                 frames=len(frames),
-                fps=60,
+                timeline_fps=60,
+                measured_frame_rate=False,
                 snapshot_hz=5,
                 max_rendered_step=max(steps),
                 max_snapshot_step=max(raw),
