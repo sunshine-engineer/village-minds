@@ -154,6 +154,7 @@ def run_scenario(
     circuit_open = False
     inference_records = []
     allocations = []
+    plans = []
     memory = (
         (lesson_fixture or {}).get("lessons", {}) if mode == "hybrid-memory" else {}
     )
@@ -176,11 +177,20 @@ def run_scenario(
     )
 
     def advance_step(dt):
+        previous_repairs = {v.name: v.contributions["repairs"] for v in world.villagers}
         metrics.step(world, dt)
         world.tick(dt)
         if control["routines"]:
             brains.tick()
         metrics.after_step(world)
+        if plans:
+            plan = plans[-1]
+            if world.time <= plan["expires_at"]:
+                plan["repair_actions_during_plan"] += sum(
+                    max(0, v.contributions["repairs"] - previous_repairs[v.name])
+                    for v in world.villagers
+                    if v.action == f"repairing {plan['gate']}"
+                )
         for allocation in allocations:
             person = next(
                 v for v in world.villagers if v.name == allocation["recipient"]
@@ -319,6 +329,9 @@ def run_scenario(
                         sent_at=sent_at,
                         response_at=world.time,
                         simulated_delay_seconds=elapsed,
+                        controller=get_settings()["ai"]["repair_strategy"][
+                            "controller"
+                        ],
                         role=bot.role,
                         actor=bot.name,
                         request_id=request_id,
@@ -327,6 +340,21 @@ def run_scenario(
                         latency_ms=response["latency_ms"],
                         inference=response.get("inference", {}),
                     )
+                    if (
+                        outcome == "accepted"
+                        and response["decision"].get("action") == "plan_repairs"
+                    ):
+                        if plans:
+                            plans[-1]["expires_at"] = min(
+                                plans[-1]["expires_at"], world.time
+                            )
+                        plans.append(
+                            dict(
+                                world.task_board.repair_plan,
+                                request_id=request_id,
+                                repair_actions_during_plan=0,
+                            )
+                        )
                     inference_records.append(record)
                     logger.record(
                         "model_inference", world.time, source="model", **record
@@ -417,9 +445,14 @@ def run_scenario(
                 for a in allocations
             ],
             "productive_model_allocations": sum(a["repairs"] > 0 for a in allocations),
+            "repair_priority_plans": plans,
+            "productive_priority_plans": sum(
+                p["repair_actions_during_plan"] > 0 for p in plans
+            ),
             "model_deferrals": (
                 sum(r["outcome"] == "accepted" for r in inference_records)
                 - len(allocations)
+                - len(plans)
                 if get_settings()["ai"]["repair_strategy"]["enabled"]
                 else 0
             ),

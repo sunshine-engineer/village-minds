@@ -149,6 +149,13 @@ def validate(config, reference):
     _validate_types(config, reference)
     if not 1 <= config["ai"]["repair_strategy"]["max_choices"] <= 12:
         raise ValueError("repair_strategy.max_choices must be between 1 and 12")
+    strategy = config["ai"]["repair_strategy"]
+    if strategy["mode"] not in ("assignment", "priority_plan") or strategy[
+        "controller"
+    ] not in ("model", "scripted"):
+        raise ValueError("Invalid repair strategy mode or controller")
+    if strategy["plan_seconds"] <= 0:
+        raise ValueError("Repair plan duration must be positive")
     probe = config["inference_probe"]
     if (
         probe["rounds"] < 1
@@ -451,7 +458,11 @@ def load_config(path=None):
         _merge(result, override)
     validate(result, reference)
     for section, key in (("ai", "system_prompt"), ("assets", "manifest")):
-        base = path.parent if path and key in override.get(section, {}) else DATA
+        base = (
+            path.parent
+            if path and key in override.get(section, {})
+            else DEFAULT_PATH.parent
+        )
         result[section][key] = str((base / result[section][key]).resolve())
         if not Path(result[section][key]).is_file():
             raise ValueError(f"Missing {section}.{key}: {result[section][key]}")
@@ -459,13 +470,26 @@ def load_config(path=None):
     strategy_base = (
         path.parent
         if path and "prompt" in override.get("ai", {}).get("repair_strategy", {})
-        else DATA
+        else DEFAULT_PATH.parent
     )
     result["ai"]["repair_strategy"]["prompt"] = str(
         (strategy_base / strategy_prompt).resolve()
     )
     if not Path(result["ai"]["repair_strategy"]["prompt"]).is_file():
         raise ValueError("Missing repair strategy prompt")
+    priority_prompt = result["ai"]["repair_strategy"]["priority_prompt"]
+    priority_base = (
+        path.parent
+        if path
+        and "priority_prompt" in override.get("ai", {}).get("repair_strategy", {})
+        else DEFAULT_PATH.parent
+    )
+    result["ai"]["repair_strategy"]["priority_prompt"] = str(
+        (priority_base / priority_prompt).resolve()
+    )
+    if not Path(result["ai"]["repair_strategy"]["priority_prompt"]).is_file():
+        raise ValueError("Missing priority prompt")
+
     network_base = (
         path.parent if path and "save_path" in override.get("network", {}) else PROJECT
     )

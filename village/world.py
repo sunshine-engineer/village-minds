@@ -251,6 +251,8 @@ class World(SurvivalRules):
             return False
         if action == "defer_strategy":
             return get_settings()["ai"]["repair_strategy"]["enabled"]
+        if action == "plan_repairs":
+            return self.task_board.install_repair_plan(bot, decision.get("target"))
         if action == "dispatch_repair":
             from .allocation import repair_candidates
 

@@ -425,7 +425,11 @@
       "max_choices": 4,
       "max_lessons": 1,
       "prompt": "prompts/repair_coordinator.txt",
-      "lease_seconds": 30.0
+      "lease_seconds": 30.0,
+      "mode": "assignment",
+      "plan_seconds": 60.0,
+      "controller": "model",
+      "priority_prompt": "prompts/repair_priority.txt"
     }
   },
   "display": {

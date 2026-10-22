@@ -5,7 +5,7 @@ from .config import get_settings
 
 def decision_schema(observation):
     """Constrain choices at request time; Python rechecks them on arrival."""
-    if observation.get("decision_layer") == "repair_allocation":
+    if observation.get("decision_layer") in ("repair_allocation", "repair_priority"):
         return {
             "type": "object",
             "properties": {

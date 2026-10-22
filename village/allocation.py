@@ -88,6 +88,8 @@ def can_handoff(board, bot, gate):
 def repair_candidates(board, proposer=None):
     w = board.world
     s = get_settings()["ai"]["repair_strategy"]
+    if s["enabled"] and s["mode"] == "priority_plan":
+        return priority_candidates(board)
     candidates = []
     if (
         not s["enabled"]
@@ -164,8 +166,59 @@ def strategy_observation(world, bot, lessons=()):
         name=bot.name,
         role=bot.role,
         personality=bot.personality,
-        decision_layer="repair_allocation",
+        decision_layer=(
+            "repair_priority"
+            if get_settings()["ai"]["repair_strategy"]["mode"] == "priority_plan"
+            else "repair_allocation"
+        ),
         wood=world.store["wood"],
         choices=choices,
         lessons=list(lessons)[: get_settings()["ai"]["repair_strategy"]["max_lessons"]],
     )
+
+
+def priority_candidates(board):
+    """Gate-level plans remain useful when helpers are busy or wood is absent."""
+    w = board.world
+    settings = get_settings()
+    if (
+        not settings["ai"]["repair_strategy"]["enabled"]
+        or not board.settings["enabled"]
+        or board.mode == "independent"
+    ):
+        return []
+    choices = []
+    for gate, hp in w.gates.items():
+        if (
+            hp
+            >= settings["rules"]["gate_health"]
+            - settings["policy"]["repair_missing_health"]
+        ):
+            continue
+        features = [
+            repair_features(w, dict(kind="repair", target=gate), bot)
+            for bot in board.living()
+        ]
+        features = [f for f in features if f is not None]
+        if not features:
+            continue
+        best = min(features, key=lambda f: f["cost"])
+        choices.append(
+            dict(
+                target=gate,
+                gate=gate,
+                health=hp,
+                threats=w.gate_threats().get(gate, 0),
+                **best,
+            )
+        )
+    choices.sort(
+        key=lambda c: (
+            c["breach_in_seconds"] is None,
+            c["breach_in_seconds"] or 0,
+            c["health"],
+            c["cost"],
+            c["gate"],
+        )
+    )
+    return choices[: settings["ai"]["repair_strategy"]["max_choices"]]

@@ -29,6 +29,12 @@ ABLATIONS = (
 
 
 def validate_plan(plan):
+    strategy_mode = plan.get("strategy_mode", "assignment")
+    if strategy_mode not in ("assignment", "priority_plan") or (
+        "scripted-priority" in plan.get("conditions", ())
+        and strategy_mode != "priority_plan"
+    ):
+        raise ValueError("Scripted priority comparison requires priority_plan strategy")
     if not plan["seeds"] or any(type(s) is not int or s < 0 for s in plan["seeds"]):
         raise ValueError("Invalid seeds")
     if len(set(plan["seeds"])) != len(plan["seeds"]) or set(plan["seeds"]) & set(
@@ -80,7 +86,7 @@ def repair_audit(path):
     )
 
 
-def paired_results(rows):
+def paired_results(rows, baseline_condition="scripted"):
     pairs = []
     for row in rows:
         if row["condition"] != "model":
@@ -89,7 +95,7 @@ def paired_results(rows):
             (
                 r
                 for r in rows
-                if r["condition"] == "scripted"
+                if r["condition"] == baseline_condition
                 and (r["seed"], r["case"]) == (row["seed"], row["case"])
             ),
             None,
@@ -102,6 +108,7 @@ def paired_results(rows):
             dict(
                 case=row["case"],
                 seed=row["seed"],
+                baseline=baseline_condition,
                 eligible=valid,
                 health_delta=(
                     row["village_health"] - baseline["village_health"]
@@ -131,7 +138,7 @@ def main():
     if (
         not conditions
         or len(set(conditions)) != len(conditions)
-        or any(c not in (*ABLATIONS, "model") for c in conditions)
+        or any(c not in (*ABLATIONS, "model", "scripted-priority") for c in conditions)
     ):
         parser.error("Invalid experiment conditions")
     root = Path(args.output).resolve() / (
@@ -165,6 +172,7 @@ def main():
                 "scoring-handoffs",
                 "scoring-deliveries",
                 "scripted",
+                "scripted-priority",
                 "model",
             )
             config["coordination"]["repair_handoffs"] = condition in (
@@ -172,6 +180,7 @@ def main():
                 "scoring-handoffs",
                 "handoffs-deliveries",
                 "scripted",
+                "scripted-priority",
                 "model",
             )
             config["logistics"]["enabled"] = condition in (
@@ -179,9 +188,16 @@ def main():
                 "scoring-deliveries",
                 "handoffs-deliveries",
                 "scripted",
+                "scripted-priority",
                 "model",
             )
             config["ai"]["repair_strategy"]["enabled"] = True
+            config["ai"]["repair_strategy"]["mode"] = plan.get(
+                "strategy_mode", "assignment"
+            )
+            config["ai"]["repair_strategy"]["controller"] = (
+                "scripted" if condition == "scripted-priority" else "model"
+            )
             config["ai"]["profiles"]["local_qwen"].update(
                 context_size=2048,
                 max_tokens=24,
@@ -230,7 +246,11 @@ def main():
                     "--config",
                     str(configs[case["name"], condition]),
                     "--modes",
-                    "hybrid" if condition == "model" else "scripted",
+                    (
+                        "hybrid"
+                        if condition in ("model", "scripted-priority")
+                        else "scripted"
+                    ),
                     "--seeds",
                     str(seed),
                     "--duration",
@@ -289,6 +309,9 @@ def main():
                             runs=rows,
                             failures=failures,
                             paired_model_vs_scripted=paired_results(rows),
+                            paired_model_vs_scripted_priority=paired_results(
+                                rows, "scripted-priority"
+                            ),
                         ),
                         indent=2,
                     )
@@ -306,6 +329,9 @@ def main():
                 runs=rows,
                 failures=failures,
                 paired_model_vs_scripted=paired_results(rows),
+                paired_model_vs_scripted_priority=paired_results(
+                    rows, "scripted-priority"
+                ),
             ),
             indent=2,
         )
@@ -330,6 +356,7 @@ def main():
         "urgent_partial_deliveries",
         "model_requests",
         "productive_model_allocations",
+        "productive_priority_plans",
         "model_deferrals",
         "wall_seconds",
         "log_dropped_records",
