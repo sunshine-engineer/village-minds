@@ -46,6 +46,10 @@ def main():
     (root / "config.json").write_text(json.dumps(settings, indent=2))
     options = settings["inference_probe"]
     deadline = time.monotonic() + options["suite_seconds"]
+    from .validation import source_hashes
+    import platform, os, sys
+
+    frozen_sources = source_hashes()
     rows = []
     for repeat in range(options["rounds"]):
         for role in options["roles"]:
@@ -53,19 +57,29 @@ def main():
             if remaining <= 0:
                 break
             world, bot, observation = fixture(role)
+            request_limit = min(options["request_seconds"], remaining)
             response = bounded_decision(
                 args.model_profile,
                 observation,
                 root / "config.json",
-                min(options["request_seconds"], remaining),
+                request_limit,
             )
-            row = dict(role=role, round=repeat, **response)
+            row = dict(
+                role=role,
+                round=repeat,
+                request_seconds=request_limit,
+                within_deadline=response["latency_ms"] <= request_limit * 1000,
+                **response,
+            )
             row["observation"] = observation
             row["applied"] = response["status"] == "ok" and world.apply(
                 bot, response["decision"], source="model"
             )
             row["allocation"] = bool(
                 row["applied"] and response["decision"]["action"] == "dispatch_repair"
+            )
+            row["plan"] = bool(
+                row["applied"] and response["decision"]["action"] == "plan_repairs"
             )
             rows.append(row)
             print(
@@ -84,6 +98,10 @@ def main():
                 expected=options["rounds"],
                 valid_applied=sum(r["applied"] for r in group),
                 allocations=sum(r["allocation"] for r in group),
+                priority_plans=sum(r["plan"] for r in group),
+                valid_in_deadline=sum(
+                    r["status"] == "ok" and r["within_deadline"] for r in group
+                ),
                 timeouts=sum(r["status"] == "timeout" for r in group),
                 mean_ms=statistics.mean(latencies) if latencies else None,
                 max_ms=max(latencies) if latencies else None,
@@ -95,10 +113,28 @@ def main():
                 ),
             )
         )
+    expected = options["rounds"] * len(options["roles"])
+    valid = sum(r["status"] == "ok" and r["within_deadline"] for r in rows)
+    passed = len(rows) == expected and valid / expected >= options["minimum_valid_rate"]
+    if source_hashes() != frozen_sources:
+        raise RuntimeError("Frozen probe source changed")
     (root / "summary.json").write_text(
         json.dumps(
             {
                 "fixture": "controlled damaged gates, limited wood, no survival benchmark",
+                "expected_requests": expected,
+                "attempted_requests": len(rows),
+                "valid_in_deadline": valid,
+                "minimum_valid_rate": options["minimum_valid_rate"],
+                "passed": passed,
+                "sources": frozen_sources,
+                "profile": args.model_profile,
+                "host": dict(
+                    platform=platform.platform(),
+                    processor=platform.processor(),
+                    logical_cpus=os.cpu_count(),
+                    python=sys.version,
+                ),
                 "by_role": summary,
                 "results": rows,
             },
@@ -107,6 +143,8 @@ def main():
         + "\n"
     )
     print(f'Report: {root / "summary.json"}', flush=True)
+    if not passed:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

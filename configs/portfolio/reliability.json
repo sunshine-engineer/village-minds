@@ -1,0 +1,39 @@
+{
+  "ai": {
+    "repair_strategy": {
+      "enabled": true,
+      "mode": "priority_plan",
+      "plan_seconds": 30.0
+    },
+    "profiles": {
+      "local_qwen": {
+        "context_size": 2048,
+        "max_tokens": 24,
+        "temperature": 0.0,
+        "timeout": 15.0
+      }
+    }
+  },
+  "coordination": {
+    "mode": "requests",
+    "priority": [
+      "repair",
+      "defend",
+      "wood",
+      "food"
+    ],
+    "resource_aware": {
+      "enabled": true
+    },
+    "repair_handoffs": false
+  },
+  "logistics": {
+    "enabled": false
+  },
+  "inference_probe": {
+    "rounds": 10,
+    "request_seconds": 15.0,
+    "suite_seconds": 600.0,
+    "minimum_valid_rate": 0.95
+  }
+}

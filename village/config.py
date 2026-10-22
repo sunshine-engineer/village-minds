@@ -171,6 +171,8 @@ def validate(config, reference):
     ):
         if value <= 0:
             raise ValueError("Inference deadlines and leases must be positive")
+    if not 0 <= probe["minimum_valid_rate"] <= 1:
+        raise ValueError("Probe valid-rate threshold must be between zero and one")
     if probe["gate_health"] > config["rules"]["gate_health"]:
         raise ValueError("Probe gate health exceeds maximum")
     network = config["network"]

@@ -1,0 +1,32 @@
+{
+  "plugins": [
+    "village.plugins.encourage",
+    "village.plugins.offline_backend"
+  ],
+  "extension_settings": {
+    "encourage": {
+      "energy_cost": 2,
+      "energy_restore": 3,
+      "cooldown_seconds": 10
+    },
+    "offline_backend": {
+      "action": "rest"
+    }
+  },
+  "ai": {
+    "default_profile": "contributor",
+    "profiles": {
+      "contributor": {
+        "backend": "offline_example",
+        "url": "http://127.0.0.1:0",
+        "model": "deterministic-contract-example",
+        "timeout": 25.0,
+        "temperature": 0.8,
+        "max_tokens": 160,
+        "context_size": 4096,
+        "keep_alive": "10m",
+        "api_key_env": ""
+      }
+    }
+  }
+}

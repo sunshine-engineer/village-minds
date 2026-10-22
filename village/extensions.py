@@ -33,6 +33,7 @@ BUILTIN_ACTIONS = frozenset(
         "claim_task",
         "release_task",
         "dispatch_repair",
+        "plan_repairs",
         "defer_strategy",
     }
 )

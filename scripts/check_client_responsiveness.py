@@ -22,6 +22,11 @@ def main():
     parser.add_argument(
         "--output", default="artifacts/server-client/responsiveness.json"
     )
+    parser.add_argument(
+        "--transport",
+        choices=("legacy", "exchange", "responsive"),
+        default="responsive",
+    )
     args = parser.parse_args()
     if args.samples < 2:
         parser.error("At least two samples required")
@@ -34,6 +39,8 @@ def main():
     from village.game import C
 
     settings = get_settings()
+    settings["network"]["exchange_motion"] = args.transport != "legacy"
+    settings["network"]["wake_on_input"] = args.transport == "responsive"
     stop = threading.Event()
     world = World(seed=301)
     world.villagers[0].position = (0, 0)
@@ -177,6 +184,7 @@ def main():
         report = dict(
             method="real loopback HTTP, offscreen Panda3D renderFrame, monotonic wall time",
             human_playtest=False,
+            transport=args.transport,
             network=settings["network"],
             samples=rows,
             summary=[],
@@ -190,6 +198,9 @@ def main():
                     **{
                         key: dict(
                             median=round(statistics.median(r[key] for r in group), 3),
+                            p95=sorted(r[key] for r in group)[
+                                math.ceil(0.95 * len(group)) - 1
+                            ],
                             max=max(r[key] for r in group),
                         )
                         for key in (
