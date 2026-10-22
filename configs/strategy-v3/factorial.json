@@ -1,0 +1,61 @@
+{
+  "name": "repair-factorial-v3",
+  "seeds": [
+    431,
+    433
+  ],
+  "excluded_seeds": [
+    7,
+    19,
+    31,
+    43,
+    59,
+    71,
+    83,
+    97,
+    109,
+    127,
+    211,
+    223,
+    227,
+    229,
+    233,
+    239,
+    241,
+    251,
+    301,
+    307,
+    401,
+    409,
+    419
+  ],
+  "duration_seconds": 900,
+  "request_seconds": 15,
+  "run_wall_seconds": 45,
+  "suite_seconds": 600,
+  "model_calls": 4,
+  "conditions": [
+    "legacy",
+    "scoring",
+    "handoffs",
+    "deliveries",
+    "scoring-handoffs",
+    "scoring-deliveries",
+    "handoffs-deliveries",
+    "scripted"
+  ],
+  "cases": [
+    {
+      "name": "siege",
+      "config": "../cooperation-siege.json"
+    },
+    {
+      "name": "wood-pressure",
+      "config": "../validation/wood-pressure.json"
+    },
+    {
+      "name": "long-haul",
+      "config": "../validation/long-haul.json"
+    }
+  ]
+}

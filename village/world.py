@@ -256,7 +256,7 @@ class World(SurvivalRules):
 
             target = decision.get("target", "")
             if not isinstance(target, str) or target not in [
-                c["target"] for c in repair_candidates(self.task_board)
+                c["target"] for c in repair_candidates(self.task_board, bot)
             ]:
                 return False
             gate, _, recipient = target.partition(":")

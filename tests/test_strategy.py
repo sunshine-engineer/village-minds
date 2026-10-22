@@ -21,6 +21,7 @@ class StrategyTests(unittest.TestCase):
         self.settings["ai"]["repair_strategy"]["enabled"] = True
         self.settings["coordination"]["resource_aware"]["enabled"] = True
         self.settings["logistics"]["enabled"] = True
+        self.settings["coordination"]["repair_handoffs"] = True
         self.w = World(seed=301)
         self.w.task_board.mode = "requests"
         self.worker = next(v for v in self.w.villagers if v.role == "worker")
@@ -30,8 +31,17 @@ class StrategyTests(unittest.TestCase):
         self.w.store["wood"] = 2
 
     def tearDown(self):
-        self.settings.clear()
-        self.settings.update(self.saved)
+        def restore(target, saved):
+            for key in list(target):
+                if key not in saved:
+                    del target[key]
+            for key, value in saved.items():
+                if isinstance(value, dict) and isinstance(target.get(key), dict):
+                    restore(target[key], value)
+                else:
+                    target[key] = deepcopy(value)
+
+        restore(self.settings, self.saved)
 
     def test_worker_efficiency_accounts_for_travel_and_clipped_repairs(self):
         task = dict(kind="repair", target="north_gate")
@@ -306,3 +316,94 @@ class StrategyTests(unittest.TestCase):
             self.assertTrue(
                 all(r["error"] == "suite_deadline" for r in report["failures"])
             )
+
+    def test_requester_cooldown_is_filtered_before_inference(self):
+        self.w.task_board.next_request[self.elder.name] = 100
+        self.assertEqual(strategy_observation(self.w, self.elder)["choices"], [])
+        self.assertTrue(strategy_observation(self.w, self.farmer)["choices"])
+
+    def test_existing_open_repair_remains_assignable_during_cooldown(self):
+        self.assertTrue(
+            self.w.apply(
+                self.elder, dict(action="request_help", target="repair:north_gate")
+            )
+        )
+        obs = strategy_observation(self.w, self.elder)
+        self.assertTrue(obs["choices"])
+        self.assertTrue(
+            self.w.apply(
+                self.elder,
+                dict(action="dispatch_repair", target=obs["choices"][0]["target"]),
+            )
+        )
+
+    def test_full_board_filters_new_requests(self):
+        board = self.w.task_board
+        board.settings = deepcopy(board.settings)
+        board.settings["max_active_tasks"] = 1
+        self.w.store["wood"] = 0
+        self.assertTrue(
+            self.w.apply(
+                self.elder, dict(action="request_help", target="wood:storehouse")
+            )
+        )
+        self.w.store["wood"] = 2
+        board.next_request.clear()
+        self.assertEqual(strategy_observation(self.w, self.elder)["choices"], [])
+
+    def test_handoff_switch_does_not_change_repair_scoring(self):
+        self.settings["coordination"]["repair_handoffs"] = False
+        board = self.w.task_board
+        self.w.store["wood"] = 0
+        self.assertTrue(
+            self.w.apply(
+                self.elder, dict(action="request_help", target="wood:storehouse")
+            )
+        )
+        self.assertTrue(
+            self.w.apply(
+                self.worker, dict(action="claim_task", target=board.tasks[-1]["id"])
+            )
+        )
+        self.w.store["wood"] = 2
+        from village.allocation import can_handoff
+
+        self.assertFalse(can_handoff(board, self.worker, "north_gate"))
+
+    def test_delayed_evaluation_advances_world_and_rejects_expired_intent(self):
+        from village.evaluation import run_scenario
+        from village.models import resolve_profile
+
+        # Generic strategic action avoids dependence on threat/repair fixture timing.
+        self.settings["ai"]["repair_strategy"]["enabled"] = False
+        options = deepcopy(self.settings["evaluation"])
+        options.update(
+            duration_seconds=50.0,
+            run_wall_seconds=10.0,
+            checkpoint_strategy="interval",
+            checkpoint_start_seconds=1.0,
+            max_model_calls=1,
+            timing_policy="fixed_delay",
+            inference_delay_seconds=35.0,
+        )
+
+        def request(*args):
+            return dict(
+                status="ok", latency_ms=2.0, decision=dict(action="move", target="farm")
+            )
+
+        with tempfile.TemporaryDirectory() as d:
+            result = run_scenario(
+                301,
+                "hybrid",
+                options,
+                resolve_profile(),
+                Path(d),
+                Path("unused"),
+                request=request,
+            )
+        self.assertEqual(result["model_outcomes"], {"stale": 1})
+        record = result["inference_records"][0]
+        self.assertAlmostEqual(record["response_at"] - record["sent_at"], 35.0)
+        self.assertEqual(result["timing_policy"], "fixed_delay")
+        self.assertEqual(result["simulated_seconds"], 50.0)

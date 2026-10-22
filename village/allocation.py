@@ -76,7 +76,7 @@ def can_handoff(board, bot, gate):
     )
     if current is None:
         return True
-    if current["kind"] not in ("wood", "food"):
+    if not board.settings["repair_handoffs"] or current["kind"] not in ("wood", "food"):
         return False
     s = board.settings["resource_aware"]
     return (
@@ -85,7 +85,7 @@ def can_handoff(board, bot, gate):
     )
 
 
-def repair_candidates(board):
+def repair_candidates(board, proposer=None):
     w = board.world
     s = get_settings()["ai"]["repair_strategy"]
     candidates = []
@@ -108,10 +108,16 @@ def repair_candidates(board):
                 for t in board.tasks
                 if t["kind"] == "repair"
                 and t["target"] == gate
-                and t["status"] in ("offered", "accepted")
+                and t["status"] in ("open", "offered", "accepted")
             ),
             None,
         )
+        if (
+            proposer is not None
+            and active is None
+            and f"repair:{gate}" not in board.actions(proposer).get("request_help", [])
+        ):
+            continue
         for bot in board.living():
             if active and active["assigned_to"] == bot.name:
                 continue
@@ -149,7 +155,7 @@ def repair_candidates(board):
 
 
 def strategy_observation(world, bot, lessons=()):
-    candidates = repair_candidates(world.task_board)
+    candidates = repair_candidates(world.task_board, bot)
     choices = [
         dict(id=f"r{i}", **{k: v for k, v in c.items() if k != "cost"})
         for i, c in enumerate(candidates)

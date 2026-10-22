@@ -325,7 +325,7 @@ class TaskBoard:
                         source="coordination",
                     )
                     break
-        if self.settings["resource_aware"]["enabled"]:
+        if self.settings["repair_handoffs"]:
             self.rebalance_repairs()
         elders = [
             v

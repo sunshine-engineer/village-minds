@@ -40,7 +40,7 @@ class CheckpointSchedule:
             self.strategy != "threats" or bool(world.gate_threats())
         )
 
-    def take(self, world):
+    def take(self, world, eligible=None):
         """Issue at most once per slot; missing/dead roles are skipped explicitly."""
         if not self.ready(world):
             return None
@@ -50,7 +50,10 @@ class CheckpointSchedule:
             candidates = [
                 i
                 for i, v in enumerate(world.villagers)
-                if v.alive and i != world.controlled and v.role == role
+                if v.alive
+                and i != world.controlled
+                and v.role == role
+                and (eligible is None or eligible(v))
             ]
             if not candidates:
                 continue

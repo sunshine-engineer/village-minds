@@ -1,0 +1,51 @@
+{
+  "name": "repair-paused-checkpoints-v3",
+  "seeds": [
+    439,
+    443
+  ],
+  "excluded_seeds": [
+    7,
+    19,
+    31,
+    43,
+    59,
+    71,
+    83,
+    97,
+    109,
+    127,
+    211,
+    223,
+    227,
+    229,
+    233,
+    239,
+    241,
+    251,
+    301,
+    307,
+    401,
+    409,
+    419,
+    431,
+    433
+  ],
+  "duration_seconds": 900,
+  "request_seconds": 15,
+  "run_wall_seconds": 90,
+  "suite_seconds": 360,
+  "model_calls": 4,
+  "conditions": [
+    "scripted",
+    "model"
+  ],
+  "cases": [
+    {
+      "name": "siege",
+      "config": "../cooperation-siege.json"
+    }
+  ],
+  "timing_policy": "paused_checkpoints",
+  "inference_delay_seconds": 5.0
+}

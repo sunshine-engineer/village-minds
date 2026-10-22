@@ -184,6 +184,12 @@ def validate(config, reference):
             or len(set(roles)) != len(roles)
         ):
             raise ValueError("Invalid coordination role preferences")
+    if config["evaluation"]["timing_policy"] not in (
+        "paused_checkpoints",
+        "fixed_delay",
+        "measured_delay",
+    ):
+        raise ValueError("Unknown evaluation timing policy")
     world, display = config["world"], config["display"]
     runtime, evaluation = config["runtime"], config["evaluation"]
     if not runtime["speed_steps"] or any(
