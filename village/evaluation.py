@@ -282,6 +282,10 @@ def run_scenario(
                             else 0.0
                         )
                     )
+                    # Keep the same integration grid as the no-inference baseline.
+                    # Splitting a tick by arbitrary HTTP latency changes physics,
+                    # cooldowns and random-event order even for a no-op response.
+                    # Apply at the next normal tick (at most one step later).
                     elapsed = 0.0
                     while (
                         elapsed < delay - 1e-9
@@ -291,7 +295,6 @@ def run_scenario(
                     ):
                         dt = min(
                             options["step_seconds"],
-                            delay - elapsed,
                             options["duration_seconds"] - world.time,
                         )
                         advance_step(dt)
@@ -329,6 +332,8 @@ def run_scenario(
                         sent_at=sent_at,
                         response_at=world.time,
                         simulated_delay_seconds=elapsed,
+                        requested_delay_seconds=delay,
+                        delay_quantization_seconds=max(0.0, elapsed - delay),
                         controller=get_settings()["ai"]["repair_strategy"][
                             "controller"
                         ],
