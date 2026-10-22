@@ -2,6 +2,15 @@
 
 A Python/Panda3D village with six villagers using fast local role routines and background plans from a Docker-hosted model. Take over any villager, grow and share food, supply repairs, and defend the village from respawning monster waves. The village and its memories resume when you restart.
 
+[Portfolio readiness and evidence](docs/PORTFOLIO_READINESS.md) ·
+[Consequential allocation benchmark](docs/CONTENTION_BENCHMARK.md) ·
+[Three-minute walkthrough and human checks](docs/PORTFOLIO_DEMO.md)
+
+The model proposes bounded repair priorities; local policies execute and validate
+work. In the controlled benchmark it matched a scripted planner and did not
+outperform it. Stored memories persist across restarts; model weights are not
+trained by game failures. The server/client prototype is loopback and single-client.
+
 ## Start on Windows — PowerShell
 
 Use **native Windows Python**, separate from a Linux/WSL virtual environment. From PowerShell:

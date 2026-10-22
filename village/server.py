@@ -235,6 +235,8 @@ def make_http_server(runtime, host, port):
     settings = runtime.settings
 
     class Handler(BaseHTTPRequestHandler):
+        disable_nagle_algorithm = settings["tcp_no_delay"]
+
         def setup(self):
             super().setup()
             self.connection.settimeout(settings["request_seconds"])

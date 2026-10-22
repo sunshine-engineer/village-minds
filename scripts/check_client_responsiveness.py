@@ -11,6 +11,10 @@ from pathlib import Path
 import statistics
 import sys
 import threading
+import subprocess
+import tempfile
+import queue
+from copy import deepcopy
 import time
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -27,13 +31,13 @@ def main():
         choices=("legacy", "exchange", "responsive"),
         default="responsive",
     )
+    parser.add_argument("--suite-seconds", type=float, default=600.0)
     args = parser.parse_args()
     if args.samples < 2:
         parser.error("At least two samples required")
     from village.config import get_settings
     from village.world import World
-    from village.brains import BrainScheduler
-    from village.server import VillageServer, make_http_server
+    from village.persistence import SaveStore
     from village.network import RemoteSession
     from village.client import game_class
     from village.game import C
@@ -41,36 +45,52 @@ def main():
     settings = get_settings()
     settings["network"]["exchange_motion"] = args.transport != "legacy"
     settings["network"]["wake_on_input"] = args.transport == "responsive"
-    stop = threading.Event()
+    settings["network"]["tcp_no_delay"] = args.transport != "legacy"
+    temporary = tempfile.TemporaryDirectory()
+    work = Path(temporary.name)
+    config = deepcopy(settings)
+    save = work / "world.json"
+    config["network"]["save_path"] = str(save)
+    config["telemetry"]["decision_log"] = ""
+    config_path = work / "config.json"
+    config_path.write_text(json.dumps(config, indent=2))
     world = World(seed=301)
     world.villagers[0].position = (0, 0)
     world.next_wave = (
         (2 * args.samples + 1) * settings["network"]["request_seconds"] * 10
     )
-    runtime = VillageServer(world, BrainScheduler(world, "", "", demo=True))
-    http = make_http_server(runtime, "127.0.0.1", 0)
+    SaveStore(save).save(world)
+    stderr = (work / "server-errors.log").open("w")
+    process = subprocess.Popen(
+        [
+            sys.executable,
+            "-m",
+            "village.server",
+            "--demo",
+            "--config",
+            str(config_path),
+            "--save-path",
+            str(save),
+            "--port",
+            "0",
+            "--run-seconds",
+            str(args.suite_seconds),
+        ],
+        cwd=Path(__file__).resolve().parents[1],
+        stdout=subprocess.PIPE,
+        stderr=stderr,
+        text=True,
+    )
+    ready = queue.Queue(maxsize=1)
+
+    def read_ready():
+        ready.put(process.stdout.readline())
+
+    reader = threading.Thread(target=read_ready, daemon=True)
+    reader.start()
     failures = []
-
-    def simulate():
-        try:
-            while not stop.is_set():
-                started = time.monotonic()
-                runtime.step(settings["network"]["tick_seconds"])
-                stop.wait(
-                    max(
-                        0,
-                        settings["network"]["tick_seconds"]
-                        - (time.monotonic() - started),
-                    )
-                )
-        except Exception as exc:
-            failures.append(repr(exc))
-            stop.set()
-
-    simulation = threading.Thread(target=simulate, daemon=True)
-    serving = threading.Thread(target=http.serve_forever, daemon=True)
-    simulation.start()
-    serving.start()
+    port = None
+    overall_deadline = time.monotonic() + args.suite_seconds
 
     class TracedSession(RemoteSession):
         trial = None
@@ -106,7 +126,12 @@ def main():
     session = game = None
     rows = []
     try:
-        session = TracedSession(f"http://127.0.0.1:{http.server_port}")
+        line = ready.get(timeout=6 * settings["network"]["request_seconds"])
+        metadata = json.loads(line)
+        if not metadata.get("ready"):
+            raise RuntimeError("Temporary server did not become ready")
+        port = metadata["port"]
+        session = TracedSession(f"http://127.0.0.1:{port}")
         game = game_class()(
             argparse.Namespace(
                 smoke_test=True, no_save=True, demo=True, pace=1.0, url="", model=""
@@ -118,8 +143,12 @@ def main():
         game.clock_dt = lambda: 1 / 60
 
         def frame():
-            if failures:
-                raise RuntimeError(failures)
+            if time.monotonic() >= overall_deadline:
+                raise RuntimeError("Responsiveness suite wall budget exceeded")
+            if process.poll() is not None:
+                raise RuntimeError(
+                    "Temporary server exited before measurement completed"
+                )
             game.update(argparse.Namespace(cont="cont"))
             game.graphicsEngine.renderFrame()
             time.sleep(1 / 120)
@@ -208,9 +237,10 @@ def main():
                 session.trial = None
                 game.keys.clear()
         report = dict(
-            method="real loopback HTTP, offscreen Panda3D renderFrame, monotonic wall time",
+            method="separate authoritative server process, real loopback HTTP, offscreen Panda3D renderFrame, monotonic wall time",
             human_playtest=False,
-            fixture_revision=2,
+            fixture_revision=3,
+            separate_server_process=True,
             waves_deferred=True,
             stationary_before_input=True,
             transport=args.transport,
@@ -252,10 +282,18 @@ def main():
             completed_samples=rows,
             trial=session.trial if session else None,
             client_status=session.status if session else None,
-            world_failed=runtime.world.failed,
-            server_frame=runtime.frame,
-            controlled=runtime.world.controlled,
-            actor_health=runtime.world.villagers[0].health,
+            last_known_state=(
+                dict(
+                    frame=session.latest.get("frame"),
+                    controlled=session.latest.get("controlled"),
+                    world_failed=session.latest["world"]["world"]["failed"],
+                    actor_health=session.latest["world"]["world"]["villagers"][0][
+                        "health"
+                    ],
+                )
+                if session
+                else None
+            ),
             simulation_failures=failures,
         )
         output = Path(args.output).with_suffix(".failed.json")
@@ -267,11 +305,17 @@ def main():
             session.close()
         if game:
             game.destroy()
-        stop.set()
-        simulation.join(timeout=3)
-        http.shutdown()
-        http.server_close()
-        serving.join(timeout=3)
+        if process.poll() is None:
+            process.terminate()
+            try:
+                process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait(timeout=5)
+        reader.join(timeout=1)
+        process.stdout.close()
+        stderr.close()
+        temporary.cleanup()
 
 
 if __name__ == "__main__":

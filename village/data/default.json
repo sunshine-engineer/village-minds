@@ -704,6 +704,7 @@
       "catch_up_threshold_seconds": 0.05
     },
     "exchange_motion": true,
-    "wake_on_input": true
+    "wake_on_input": true,
+    "tcp_no_delay": true
   }
 }

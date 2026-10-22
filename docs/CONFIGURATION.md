@@ -174,3 +174,11 @@ or save compatibility. See [defaults, tradeoffs and checks](CLIENT_SMOOTHING.md)
 
 Gate-level strategy, expiry and the scripted comparator are described in
 [temporary repair priorities](REPAIR_PRIORITY_PLANS.md).
+
+
+`network.exchange_motion=true` returns a post-tick snapshot with movement requests;
+`network.wake_on_input=true` wakes the bounded client worker on input changes.
+`network.tcp_no_delay=true` disables server-side Nagle buffering. Disable all three for the legacy comparison. The loopback protocol is version 2.
+`inference_probe.minimum_valid_rate` defaults to 0.95 and is an operational sample
+acceptance threshold; the report retains each response, deadline and missing call.
+The portfolio reliability preset requests ten rounds across all four roles.

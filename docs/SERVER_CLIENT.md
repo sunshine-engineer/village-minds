@@ -146,3 +146,25 @@ prevent accidental cross-client control; they are not an internet security desig
 Only one server process should write a save. There is no simulation catch-up for
 time when the server itself is stopped. Abrupt termination can lose progress since
 the last autosave; ordinary client disconnect does not stop the server.
+
+
+## Responsive movement exchange (protocol 2)
+
+By default the client wakes its worker on changed movement input or a queued
+command. A movement POST to `/exchange` replaces the separate movement POST plus
+snapshot GET. HTTP handlers still enqueue requests; the simulation thread validates
+sequence/session and input, advances the normal tick, then returns authoritative
+state with the acknowledgement. The acknowledgement therefore includes a completed
+physics tick; accepting the intent alone is not treated as rendered movement.
+
+If another queued command disconnects/replaces the session in the same tick, the
+pending exchange returns 401 and cannot expose the replacement session's snapshot.
+Duplicate sequences retain command idempotence; an exchange snapshot may reflect
+a newer tick. Movement expiry, leases and maximum commands/tick remain enforced.
+The renderer still interpolates confirmed states and does not predict movement.
+
+`network.exchange_motion` and `network.wake_on_input` both default to `true`.
+Set both to `false` to reproduce the legacy transport for measurement. These are
+transport settings and do not invalidate world saves. Client and server must use
+the same wire-protocol version; older clients/servers are rejected during handshake.
+See [responsiveness measurement](CLIENT_SMOOTHING.md) and the readiness checklist.
