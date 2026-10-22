@@ -44,6 +44,9 @@ def main():
     stop = threading.Event()
     world = World(seed=301)
     world.villagers[0].position = (0, 0)
+    world.next_wave = (
+        (2 * args.samples + 1) * settings["network"]["request_seconds"] * 10
+    )
     runtime = VillageServer(world, BrainScheduler(world, "", "", demo=True))
     http = make_http_server(runtime, "127.0.0.1", 0)
     failures = []
@@ -122,9 +125,31 @@ def main():
             time.sleep(1 / 120)
 
         def settle(seconds):
-            until = time.monotonic() + seconds
-            while time.monotonic() < until:
+            started = changed_at = time.monotonic()
+            previous = None
+            while (
+                time.monotonic() - started < 3 * settings["network"]["request_seconds"]
+            ):
                 frame()
+                now = time.monotonic()
+                position = (
+                    game.world.villagers[0].position[0],
+                    game.actors[0][0].getX(),
+                )
+                if previous is None or any(
+                    abs(a - b) > 1e-5 for a, b in zip(previous, position)
+                ):
+                    changed_at = now
+                previous = position
+                if game.world.failed:
+                    raise RuntimeError("Responsiveness fixture village failed")
+                if (
+                    now - started >= seconds
+                    and now - changed_at >= 2 * settings["network"]["poll_seconds"]
+                    and game.world.controlled == 0
+                ):
+                    return
+            raise RuntimeError("Motion did not settle before measurement")
 
         game.takeover(0)
         settle(1.0)
@@ -151,6 +176,7 @@ def main():
                     frame()
                     if (
                         "render_at" not in trial
+                        and "snapshot_at" in trial
                         and (game.actors[0][0].getX() - trial["display_baseline_x"])
                         * direction
                         > 0.01
@@ -184,6 +210,9 @@ def main():
         report = dict(
             method="real loopback HTTP, offscreen Panda3D renderFrame, monotonic wall time",
             human_playtest=False,
+            fixture_revision=2,
+            waves_deferred=True,
+            stationary_before_input=True,
             transport=args.transport,
             network=settings["network"],
             samples=rows,
@@ -216,6 +245,23 @@ def main():
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(json.dumps(report, indent=2) + "\n")
         print(json.dumps(report["summary"], indent=2))
+    except BaseException as exc:
+        failure = dict(
+            error=f"{type(exc).__name__}: {exc}",
+            transport=args.transport,
+            completed_samples=rows,
+            trial=session.trial if session else None,
+            client_status=session.status if session else None,
+            world_failed=runtime.world.failed,
+            server_frame=runtime.frame,
+            controlled=runtime.world.controlled,
+            actor_health=runtime.world.villagers[0].health,
+            simulation_failures=failures,
+        )
+        output = Path(args.output).with_suffix(".failed.json")
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(json.dumps(failure, indent=2) + "\n")
+        raise
     finally:
         if session:
             session.close()
