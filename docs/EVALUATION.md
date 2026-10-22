@@ -42,8 +42,10 @@ mode is the easiest way to watch accelerated villagers.
 
 Headless evaluation removes rendering and real-time sleeps. It advances fixed
 substeps as fast as the CPU permits. **It cannot make model inference faster.**
-Instead, AI modes pause the simulation at selected checkpoints, wait for a bounded
-response, then resume. This prevents accelerated time making every response stale.
+By default, AI modes pause the simulation at selected checkpoints, wait for a bounded
+response, then resume. `evaluation.timing_policy` also supports `fixed_delay` and
+`measured_delay`: these replay normal grid-aligned simulation ticks before applying
+the response. See [timing semantics and the corrected replay](EVALUATION_GAPS.md). This prevents accelerated time making every response stale.
 That timing policy differs from the live game's asynchronous inference. Compare
 conditions within this runner; do not interpret its results as a latency benchmark
 for normal real-time gameplay. At high speeds in the normal game, model replies

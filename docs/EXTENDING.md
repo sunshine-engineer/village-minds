@@ -140,3 +140,22 @@ and timeouts, return only a decision object, and let the world validate it. The 
 
 Test unavailable targets, insufficient resources, takeover during a pending response,
 save/reload and model failure. Record what was actually exercised in validation docs.
+
+
+## Executable contributor contract
+
+[`examples/contributor.json`](../examples/contributor.json) enables the packaged
+`encourage` action and a minimal custom backend. The backend is a deterministic
+adapter example, **not a model or AI-quality result**. It returns a validated rest
+intent or defers a planning request and never calls a provider.
+
+```bash
+python scripts/check_contributor_contracts.py
+```
+
+The check exercises action cost/effect, cooldown rejection, backend registration,
+world validation and cooldown persistence after save/reload. It uses temporary
+saves. No core simulation or renderer change is needed to enable the examples.
+The clean-wheel release check executes this same contract from outside the source
+checkout and asserts that the imported package lives in the new virtual environment.
+The built-in `plan_repairs` name is reserved against plugin replacement.

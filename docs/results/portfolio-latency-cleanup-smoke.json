@@ -1,0 +1,120 @@
+{
+  "method": "separate authoritative server process, real loopback HTTP, offscreen Panda3D renderFrame, monotonic wall time",
+  "human_playtest": false,
+  "fixture_revision": 3,
+  "separate_server_process": true,
+  "waves_deferred": true,
+  "stationary_before_input": true,
+  "transport": "responsive",
+  "network": {
+    "host": "127.0.0.1",
+    "port": 8765,
+    "save_path": "D:\\projects\\3d_game\\saves\\server-village.json",
+    "tick_seconds": 0.05,
+    "poll_seconds": 0.1,
+    "request_seconds": 2.0,
+    "lease_seconds": 5.0,
+    "input_seconds": 0.4,
+    "reconnect_seconds": 1.0,
+    "queue_capacity": 64,
+    "max_commands_per_tick": 8,
+    "max_body_bytes": 65536,
+    "max_state_bytes": 5000000,
+    "interpolation": {
+      "enabled": true,
+      "delay_seconds": 0.2,
+      "max_gap_seconds": 0.75,
+      "snap_distance": 4.0,
+      "buffer_size": 32,
+      "catch_up_rate": 1.1,
+      "catch_up_threshold_seconds": 0.05
+    },
+    "exchange_motion": true,
+    "wake_on_input": true,
+    "tcp_no_delay": true
+  },
+  "samples": [
+    {
+      "interpolation": false,
+      "sample": 0,
+      "request_sent_ms": 0.31,
+      "ack_received_ms": 72.577,
+      "snapshot_ms": 75.419,
+      "render_ms": 88.325
+    },
+    {
+      "interpolation": true,
+      "sample": 0,
+      "request_sent_ms": 10.277,
+      "ack_received_ms": 60.665,
+      "snapshot_ms": 69.827,
+      "render_ms": 249.559
+    },
+    {
+      "interpolation": true,
+      "sample": 1,
+      "request_sent_ms": 4.748,
+      "ack_received_ms": 54.923,
+      "snapshot_ms": 66.054,
+      "render_ms": 230.367
+    },
+    {
+      "interpolation": false,
+      "sample": 1,
+      "request_sent_ms": 0.55,
+      "ack_received_ms": 59.589,
+      "snapshot_ms": 64.518,
+      "render_ms": 81.934
+    }
+  ],
+  "summary": [
+    {
+      "interpolation": false,
+      "samples": 2,
+      "request_sent_ms": {
+        "median": 0.43,
+        "p95": 0.55,
+        "max": 0.55
+      },
+      "ack_received_ms": {
+        "median": 66.083,
+        "p95": 72.577,
+        "max": 72.577
+      },
+      "snapshot_ms": {
+        "median": 69.969,
+        "p95": 75.419,
+        "max": 75.419
+      },
+      "render_ms": {
+        "median": 85.13,
+        "p95": 88.325,
+        "max": 88.325
+      }
+    },
+    {
+      "interpolation": true,
+      "samples": 2,
+      "request_sent_ms": {
+        "median": 7.512,
+        "p95": 10.277,
+        "max": 10.277
+      },
+      "ack_received_ms": {
+        "median": 57.794,
+        "p95": 60.665,
+        "max": 60.665
+      },
+      "snapshot_ms": {
+        "median": 67.941,
+        "p95": 69.827,
+        "max": 69.827
+      },
+      "render_ms": {
+        "median": 239.963,
+        "p95": 249.559,
+        "max": 249.559
+      }
+    }
+  ]
+}

@@ -38,6 +38,7 @@ class RemoteSession:
         self.frames = queue.Queue(maxsize=1)
         self.commands = queue.Queue(maxsize=self.settings["queue_capacity"])
         self.stop = threading.Event()
+        self.wake = threading.Event()
         self.motion = (0.0, 0.0)
         self.status = "CONNECTING"
         self.connected = False
@@ -48,6 +49,17 @@ class RemoteSession:
                 target=self._worker, daemon=True, name="village-client"
             )
             self.thread.start()
+
+    @property
+    def motion(self):
+        return self._motion
+
+    @motion.setter
+    def motion(self, value):
+        changed = getattr(self, "_motion", None) != value
+        self._motion = value
+        if changed and self.settings["wake_on_input"]:
+            self.wake.set()
 
     def request(self, route, body=None):
         headers = {"Content-Type": "application/json"}
@@ -109,6 +121,8 @@ class RemoteSession:
             return False
         try:
             self.commands.put_nowait(command)
+            if self.settings["wake_on_input"]:
+                self.wake.set()
             return True
         except queue.Full:
             self.status = "Command queue full"
@@ -116,7 +130,12 @@ class RemoteSession:
 
     def command(self, command):
         self.sequence += 1
-        return self.request("/command", dict(sequence=self.sequence, command=command))
+        route = (
+            "/exchange"
+            if command.get("kind") == "move" and self.settings["exchange_motion"]
+            else "/command"
+        )
+        return self.request(route, dict(sequence=self.sequence, command=command))
 
     def poll(self):
         try:
@@ -137,10 +156,12 @@ class RemoteSession:
     def _worker(self):
         reconnect = False
         while not self.stop.is_set():
+            self.wake.clear()
             try:
                 if reconnect:
                     self.publish(self.connect())
                     reconnect = False
+                controlled = self.latest.get("controlled")
                 for _ in range(self.settings["max_commands_per_tick"]):
                     if self.stop.is_set():
                         break
@@ -149,7 +170,9 @@ class RemoteSession:
                     except queue.Empty:
                         break
                     try:
-                        self.command(command)
+                        acknowledgement = self.command(command)
+                        if command.get("kind") == "takeover":
+                            controlled = acknowledgement["controlled"]
                     except RemoteError as exc:
                         if exc.status in (400, 409):
                             self.status = str(exc)
@@ -157,15 +180,20 @@ class RemoteSession:
                             raise
                 if self.stop.is_set():
                     break
-                if self.latest.get("controlled") is not None:
-                    self.command(
+                reply = None
+                if controlled is not None:
+                    reply = self.command(
                         dict(kind="move", dx=self.motion[0], dy=self.motion[1])
                     )
-                state = self.request("/state")
+                state = (
+                    reply["state"]
+                    if reply is not None and "state" in reply
+                    else self.request("/state")
+                )
                 self.publish(state)
                 if self.status.startswith(("DISCONNECTED", "CONNECTING")):
                     self.status = "CONNECTED"
-                self.stop.wait(self.settings["poll_seconds"])
+                self.wake.wait(self.settings["poll_seconds"])
             except (OSError, ValueError, RemoteError, KeyError) as exc:
                 self.connected = False
                 self.status = "DISCONNECTED: " + str(exc)[:100]
@@ -189,6 +217,7 @@ class RemoteSession:
     def close(self):
         self.motion = (0.0, 0.0)
         self.stop.set()
+        self.wake.set()
         if self.thread:
             self.thread.join(
                 timeout=2 * self.settings["request_seconds"]

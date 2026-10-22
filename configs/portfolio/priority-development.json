@@ -1,0 +1,63 @@
+{
+  "name": "priority-contention-development",
+  "config": "priority.json",
+  "seeds": [
+    301,
+    307,
+    308,
+    310
+  ],
+  "excluded_seeds": [],
+  "conditions": [
+    "baseline",
+    "scripted",
+    "adverse"
+  ],
+  "duration_seconds": 20.5,
+  "step_seconds": 0.1,
+  "decision_delay_seconds": 5.0,
+  "request_seconds": 15.0,
+  "run_wall_seconds": 30.0,
+  "suite_seconds": 120.0,
+  "wood": 1,
+  "food": 10,
+  "worker_release_seconds": 7.0,
+  "resting_energy": 0.0,
+  "position_jitter": 0.3,
+  "cases": [
+    {
+      "name": "near-urgent",
+      "worker_position": [
+        4,
+        17
+      ],
+      "gates": {
+        "north_gate": 75.0,
+        "east_gate": 40.0
+      },
+      "threats": {
+        "north_gate": 3,
+        "east_gate": 1
+      },
+      "primary_gate": "north_gate"
+    },
+    {
+      "name": "far-urgent",
+      "worker_position": [
+        14,
+        12
+      ],
+      "gates": {
+        "north_gate": 90.0,
+        "east_gate": 40.0
+      },
+      "threats": {
+        "north_gate": 3,
+        "east_gate": 1
+      },
+      "primary_gate": "north_gate"
+    }
+  ],
+  "rotate_gates": true,
+  "position_search_radius": 4.0
+}

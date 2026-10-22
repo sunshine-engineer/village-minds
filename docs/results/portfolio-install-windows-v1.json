@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "independent_human_setup": false,
+  "platform": "win32",
+  "python": "3.14.7 (tags/v3.14.7:823f032, Aug  5 2026, 10:51:32) [MSC v.1944 64 bit (AMD64)]",
+  "versions": {
+    "village-minds": "0.1.0",
+    "panda3d": "1.10.16"
+  },
+  "checks": [
+    "fresh venv installs built wheel and pinned dependency",
+    "custom action costs/effect",
+    "plugin cooldown rejection",
+    "custom backend intent",
+    "world validation",
+    "persistent plugin cooldown",
+    "client entry point loads packaged startup configuration",
+    "installed authoritative server starts, advances and saves",
+    "installed single-player offscreen render smoke"
+  ],
+  "seconds": 21.568934399998398,
+  "wheel": "village_minds-0.1.0-py3-none-any.whl",
+  "package_from_isolated_venv": true
+}

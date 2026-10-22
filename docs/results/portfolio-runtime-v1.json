@@ -1,0 +1,25 @@
+{
+  "platform": "Windows-11-10.0.26300-SP0",
+  "processor": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel",
+  "logical_cpus": 12,
+  "python": "3.14.7 (tags/v3.14.7:823f032, Aug  5 2026, 10:51:32) [MSC v.1944 64 bit (AMD64)]",
+  "panda3d": "1.10.16",
+  "loaded_models": [
+    {
+      "name": "qwen2.5:1.5b",
+      "size": 1109162720,
+      "size_vram": 0,
+      "context_length": 2048,
+      "details": {
+        "parent_model": "",
+        "format": "gguf",
+        "family": "qwen2",
+        "families": [
+          "qwen2"
+        ],
+        "parameter_size": "1.5B",
+        "quantization_level": "Q4_K_M"
+      }
+    }
+  ]
+}

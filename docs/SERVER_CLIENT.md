@@ -71,7 +71,7 @@ inference or campaign saves. The original `python -m village` remains available.
 
 ## Controls and reconnect
 
-The existing number keys/Tab select a bot, O releases control, movement keys walk,
+The existing number keys/Tab select a bot, **0 (zero)** releases control, movement keys walk,
 action keys perform work and Enter sends dialogue. Actions and possession become
 visible after acknowledgement in a server snapshot. Camera movement remains local.
 Pause, speed and save keys do not modify the server; its simulation keeps running
@@ -103,6 +103,8 @@ All transport settings are under `network` in the normal JSON configuration:
 | `lease_seconds`, `input_seconds` | Possession heartbeat and movement expiry |
 | `queue_capacity`, `max_commands_per_tick` | Bounded inbound/client queues and per-tick command processing |
 | `max_body_bytes`, `max_state_bytes` | Request and snapshot size limits |
+| `exchange_motion`, `wake_on_input`, `tcp_no_delay` | Default `true`; combine post-tick movement/state, wake on changed input, disable server-side Nagle buffering |
+| `interpolation` | Presentation buffer; see the smoothing guide |
 
 Explicit network save paths resolve relative to their config file. Autosave cadence
 uses `runtime.autosave_seconds`. Optional server decision logs use the normal
@@ -115,6 +117,7 @@ HTTP transport uses the Python standard library:
 - `GET /state` returns a snapshot and refreshes the session heartbeat.
 - `POST /command` sends `{sequence, command}`. Commands are `takeover`, `move`,
   `action` and `say`. Every command is validated on the simulation thread.
+- `POST /exchange` sends a sequenced movement command and returns a post-tick snapshot (protocol 2).
 - `POST /disconnect` releases possession/session ownership.
 - `GET /health` reports server identity and simulated time without private state.
 
@@ -146,3 +149,26 @@ prevent accidental cross-client control; they are not an internet security desig
 Only one server process should write a save. There is no simulation catch-up for
 time when the server itself is stopped. Abrupt termination can lose progress since
 the last autosave; ordinary client disconnect does not stop the server.
+
+
+## Responsive movement exchange (protocol 2)
+
+By default the client wakes its worker on changed movement input or a queued
+command. A movement POST to `/exchange` replaces the separate movement POST plus
+snapshot GET. HTTP handlers still enqueue requests; the simulation thread validates
+sequence/session and input, advances the normal tick, then returns authoritative
+state with the acknowledgement. The acknowledgement therefore includes a completed
+physics tick; accepting the intent alone is not treated as rendered movement.
+
+If another queued command disconnects/replaces the session in the same tick, the
+pending exchange returns 401 and cannot expose the replacement session's snapshot.
+Duplicate sequences retain command idempotence; an exchange snapshot may reflect
+a newer tick. Movement expiry, leases and maximum commands/tick remain enforced.
+The renderer still interpolates confirmed states and does not predict movement.
+
+`network.exchange_motion` and `network.wake_on_input` both default to `true`.
+`network.tcp_no_delay` also defaults to `true`. Set all three to `false` in both
+processes to reproduce the legacy transport for measurement. These are
+transport settings and do not invalidate world saves. Client and server must use
+the same wire-protocol version; older clients/servers are rejected during handshake.
+See [responsiveness measurement](CLIENT_SMOOTHING.md) and the readiness checklist.

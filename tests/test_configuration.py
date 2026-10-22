@@ -207,10 +207,11 @@ class ConfigurationTests(unittest.TestCase):
         from village.extensions import Extensions
 
         ext = Extensions()
-        with self.assertRaises(ValueError):
-            ext.register_action(
-                "move", available=lambda w, b: [], execute=lambda w, b, d: True
-            )
+        for name in ("move", "plan_repairs"):
+            with self.assertRaises(ValueError):
+                ext.register_action(
+                    name, available=lambda w, b: [], execute=lambda w, b, d: True
+                )
         ext.register_system("clock", lambda w, dt: None)
         with self.assertRaises(ValueError):
             ext.register_system("clock", lambda w, dt: None)

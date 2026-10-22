@@ -71,7 +71,8 @@ See [configuration](CONFIGURATION.md), [extension recipes](EXTENDING.md), and
 [validation evidence](../VALIDATION.md).
 
 Evaluation uses the same rules, local routines and model-result validation as gameplay,
-with a different timing policy: the simulation pauses at fixed strategic checkpoints.
+with a configurable timing policy: by default simulation pauses at strategic checkpoints;
+fixed/measured-delay modes replay ordinary simulation ticks before applying a response.
 Requests run in spawned processes so a hung adapter cannot stall the suite indefinitely.
 Compare results within that policy; see [evaluation](EVALUATION.md) for limitations.
 
@@ -120,3 +121,16 @@ Repair strategy supports actor-specific offers and opt-in gate-level priority pl
 `allocation.py` computes candidates, `models.py` maps compact choice IDs to intents,
 and `TaskBoard` owns persisted plan expiry and local task ranking. Gate plans do not
 reserve helpers. See [repair priority planning](REPAIR_PRIORITY_PLANS.md).
+
+
+Protocol 2 can acknowledge a movement command with the state after that normal
+simulation tick. Queued requests are still handled only on the simulation thread;
+HTTP workers do not mutate the world. The client uses command acknowledgements to
+track possession while draining its queue, avoiding movement based on an obsolete
+snapshot after release. Input changes wake the bounded transport worker. Neither
+change introduces client physics or movement prediction.
+
+`priority_benchmark.py` builds short causal allocation fixtures without touching
+campaign saves. Its fixed-grid timing replay, paired initial snapshots and adverse
+controls are separate from live network responsiveness measurements. The offline
+contributor backend demonstrates an adapter contract and supplies no AI evidence.

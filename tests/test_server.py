@@ -171,6 +171,34 @@ class HTTPTests(unittest.TestCase):
         finally:
             other.close()
 
+    def test_release_command_does_not_disconnect_from_stale_control_snapshot(self):
+        session = RemoteSession(self.url)
+        try:
+            session.submit(dict(kind="takeover", index=0))
+            deadline = time.monotonic() + 3
+            while time.monotonic() < deadline:
+                state = session.poll()
+                if state and state["controlled"] == 0:
+                    break
+                time.sleep(0.01)
+            else:
+                self.fail("Possession was not acknowledged")
+            epoch = session.connection_epoch
+            session.submit(dict(kind="takeover", index=None))
+            deadline = time.monotonic() + 3
+            while time.monotonic() < deadline:
+                state = session.poll()
+                if state and state["controlled"] is None:
+                    break
+                time.sleep(0.01)
+            else:
+                self.fail("Release was not acknowledged")
+            self.assertEqual(session.connection_epoch, epoch)
+            self.assertTrue(session.connected)
+            self.assertFalse(session.status.startswith("DISCONNECTED"))
+        finally:
+            session.close()
+
     def test_incompatible_client_is_rejected_and_releases_session(self):
         from unittest.mock import patch
 

@@ -1,5 +1,9 @@
 # Repair strategy and logistics experiment v2
 
+> Scope: v2 repair study. Results describe the frozen source identified below,
+> not a new test of the latest checkout. For current evidence and study order, use
+> the [documentation index](INDEX.md) and [handover runbook](HANDOVER.md).
+
 ## Scope and comparison
 
 This experiment gives the model a bounded strategic job: choose a recipient and gate
@@ -45,8 +49,8 @@ repair/defence jobs, possessed villagers and villagers with urgent personal need
 cannot be preempted by the new allocator. Recipient eligibility is checked when constructing choices, while board capacity
 and requester cooldown are checked again when applying the offer. This can reject
 a schema-valid response even during paused evaluation; three elder calls hit that
-limit in this experiment. Filtering those board constraints before inference is a
-remaining efficiency limitation.
+limit in this experiment. That was a limitation of this frozen v2 experiment. Current code filters
+those constraints before inference; see [the v3 correction](EVALUATION_GAPS.md).
 
 A model repair offer receives a configurable
 short lease against automatic reallocation; death, expiry and voluntary release still

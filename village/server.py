@@ -13,7 +13,7 @@ import time
 import uuid
 from .config import get_settings, fingerprint
 
-PROTOCOL = 1
+PROTOCOL = 2
 
 
 @dataclass
@@ -187,6 +187,7 @@ class VillageServer:
 
     def step(self, dt):
         self.expire()
+        exchanges = []
         for _ in range(self.settings["max_commands_per_tick"]):
             try:
                 envelope = self.inbox.get_nowait()
@@ -194,14 +195,30 @@ class VillageServer:
                 break
             if envelope.cancelled.is_set():
                 continue
-            envelope.reply.put_nowait(
-                self.handle(envelope.route, envelope.token, envelope.body)
-            )
+            if envelope.route == "/exchange":
+                result = self.handle("/command", envelope.token, envelope.body)
+                if result[0] == 200:
+                    exchanges.append((envelope, result[1]))
+                else:
+                    envelope.reply.put_nowait(result)
+            else:
+                envelope.reply.put_nowait(
+                    self.handle(envelope.route, envelope.token, envelope.body)
+                )
         if self.clock() < self.motion_until and self.token:
             self.world.move_player(*self.motion, dt)
         self.world.tick(dt)
         self.brains.tick()
         self.frame += 1
+        for envelope, reply in exchanges:
+            # Another queued disconnect/takeover may have revoked ownership in
+            # this tick. Never send the replacement session's private snapshot.
+            if self.authorized(envelope.token):
+                envelope.reply.put_nowait((200, dict(**reply, state=self.state())))
+            else:
+                envelope.reply.put_nowait(
+                    (401, dict(error="Session ended during exchange"))
+                )
         if self.store and (
             self.clock() >= self.next_save
             or self.world.failed
@@ -218,6 +235,8 @@ def make_http_server(runtime, host, port):
     settings = runtime.settings
 
     class Handler(BaseHTTPRequestHandler):
+        disable_nagle_algorithm = settings["tcp_no_delay"]
+
         def setup(self):
             super().setup()
             self.connection.settimeout(settings["request_seconds"])
@@ -234,7 +253,7 @@ def make_http_server(runtime, host, port):
         def dispatch(self, post):
             try:
                 allowed = (
-                    ("/session", "/command", "/disconnect")
+                    ("/session", "/command", "/exchange", "/disconnect")
                     if post
                     else ("/health", "/state")
                 )

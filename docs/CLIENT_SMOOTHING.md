@@ -107,7 +107,10 @@ The original single-process Windows render check passed as well. These checks us
 internal input dispatch rather than OS keyboard automation.
 
 
-## Measured input responsiveness — 22 October 2026
+## Historical eight-sample responsiveness diagnostic — 22 October 2026
+
+This earlier shared-process fixture predates responsive transport. It is not the
+current acceptance measurement; see the separate-process results below.
 
 The [real loopback trace](results/client-responsiveness-v1.json) measures input
 onset through the actual HTTP worker, authoritative snapshots and offscreen
@@ -137,20 +140,21 @@ not a causal estimate of the buffer cost. Small host-specific samples do not
 establish an internet/network performance target.
 
 A substantial part of the measured onset delay occurs before a matching request
-is sent or a state is returned. The worker currently serializes movement POST,
-state GET and a poll wait. The next transport experiment should reduce those
-waits and repeat this trace before adding prediction/reconciliation. This keeps
+is sent or a state is returned. The original worker serialized movement POST,
+state GET and a poll wait. The revised transport combines movement with a post-tick
+snapshot, wakes on input changes, disables server-side Nagle buffering, and publishes
+input before restoring snapshots. The default 200 ms interpolation buffer remains. This keeps
 prediction complexity tied to a measured need. The buffer remains configurable.
 
-Windows reproduction, with no separately running server required:
+Current fixture command, with no separately running server required (it does not
+reproduce the old shared-process implementation):
 
 ```powershell
-.\.venv-win\Scripts\python.exe scripts/check_client_responsiveness.py --samples 8
+.\.venv-win\Scripts\python.exe scripts/check_client_responsiveness.py --samples 50 --transport responsive
 ```
 
 Linux uses `.venv/bin/python` with Panda3D and a working graphics backend. The
-fixture starts a loopback server on an ephemeral port, uses temporary in-memory
-world state and writes `artifacts/server-client/responsiveness.json`; it does not
+fixture starts a loopback server on an ephemeral port, uses a separate server process and a temporary save slot and writes `artifacts/server-client/responsiveness.json`; it does not
 read or write campaign saves. Missing stages or server errors fail the check.
 
 A human playtest remains outstanding: use normal server/client windows, take over
@@ -158,3 +162,24 @@ a bot, walk/stop/reverse near a wall, then release and reacquire it. Compare a
 config override with `network.interpolation.enabled=false` against the default;
 record responsiveness, snapping and collision corrections. This manual check is
 separate from the verified internal-input rendering fixture.
+
+
+## Portfolio measurement revision
+
+The final fixture uses a separate authoritative server process, matching the normal
+server/client architecture. Earlier measurements shared a Python process with the
+renderer, so GIL contention confounded their timing. Those diagnostics are retained
+and must not be presented as the final deployment comparison. The fixture defers
+monster waves, waits for stationary authoritative/display positions, alternates
+interpolation order, and retains partial samples on error. It injects internal key
+state and explicitly renders frames; it does not measure OS input latency.
+
+The production changes are independently covered by protocol, possession-release
+and input-before-poll regressions. Neither transport predicts local movement.
+
+The 2026-10-22 separate-process check collected 50 samples per mode per transport.
+With default interpolation, legacy onset was 395.660/752.009 ms median/p95 and
+responsive onset was 238.693/452.459 ms (maximum 653.546 ms). Direct rendering
+was 96.071/281.647 ms with responsive transport. The interpolated p95 misses the
+predeclared 400 ms target. See the [release evidence](PORTFOLIO_READINESS.md)
+for raw samples, source commit, teardown error and remaining acceptance gates.

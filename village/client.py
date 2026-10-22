@@ -42,6 +42,29 @@ def game_class():
             self.smoke_said = False
 
         def advance_world(self, dt):
+            # Send current input before snapshot validation/scene work can delay it.
+            if self.session.connected:
+                self.orbit += (
+                    (
+                        int(C["orbit_left"] in self.keys)
+                        - int(C["orbit_right"] in self.keys)
+                    )
+                    * dt
+                    * D["orbit_speed"]
+                )
+                right = int(C["right"] in self.keys) - int(C["left"] in self.keys)
+                forward = int(C["forward"] in self.keys) - int(
+                    C["backward"] in self.keys
+                )
+                # Rotating two pressed axes can exceed one; normalize before sending.
+                dx = right * math.cos(self.orbit) - forward * math.sin(self.orbit)
+                dy = right * math.sin(self.orbit) + forward * math.cos(self.orbit)
+                scale = max(1.0, math.hypot(dx, dy))
+                self.session.motion = (
+                    (dx / scale, dy / scale) if not self.typing else (0.0, 0.0)
+                )
+            else:
+                self.session.motion = (0.0, 0.0)
             state = self.session.poll()
             if state is not None and self.presentation.push(state):
                 self.world = restore(state["world"])
@@ -54,22 +77,6 @@ def game_class():
             self.brains.status = self.session.status
             if not self.session.connected:
                 self.world.controlled = None
-                self.session.motion = (0.0, 0.0)
-                return
-            self.orbit += (
-                (int(C["orbit_left"] in self.keys) - int(C["orbit_right"] in self.keys))
-                * dt
-                * D["orbit_speed"]
-            )
-            right = int(C["right"] in self.keys) - int(C["left"] in self.keys)
-            forward = int(C["forward"] in self.keys) - int(C["backward"] in self.keys)
-            # Rotating two pressed axes can exceed one; normalize before sending.
-            dx = right * math.cos(self.orbit) - forward * math.sin(self.orbit)
-            dy = right * math.sin(self.orbit) + forward * math.cos(self.orbit)
-            scale = max(1.0, math.hypot(dx, dy))
-            self.session.motion = (
-                (dx / scale, dy / scale) if not self.typing else (0.0, 0.0)
-            )
 
         def display_position(self, kind, identity, authoritative):
             return self.display_poses.get((kind, identity), authoritative)

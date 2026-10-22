@@ -1,5 +1,9 @@
 # Held-out coordination validation
 
+> Scope: v1 scripted holdout. Results describe the frozen source identified below,
+> not a new test of the latest checkout. For current evidence and study order, use
+> the [documentation index](INDEX.md) and [handover runbook](HANDOVER.md).
+
 This suite tests whether the scripted coordination results generalize beyond the ten development seeds and the original siege. It does not call language models or measure learned cooperation.
 
 ## Frozen protocol

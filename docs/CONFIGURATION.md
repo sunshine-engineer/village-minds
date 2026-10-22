@@ -41,6 +41,10 @@ to use the example's separate save slot. It does not overwrite the default slot.
 | `telemetry` | Optional JSONL path, full observations, byte cap and movement sampling interval |
 | `plugins` | Explicit trusted Python modules to import |
 | `extension_settings` | Plugin-owned JSON settings; each plugin validates its own schema |
+| `coordination` | Task strategy, ownership, expiry, priorities, resource-aware scoring and optional handoffs |
+| `logistics` | Opt-in urgent partial food/wood deliveries and shortage thresholds |
+| `inference_probe` | Four-role fixture, request/suite budgets and minimum valid-response rate |
+| `network` | Loopback server, transport limits, session/input expiry, movement exchange and interpolation |
 
 The asset catalog controls geometry, colors, labels, HUD layout and visual parts.
 The model system prompt is a separate text asset; `{{dialogue_chars}}` expands to
@@ -146,7 +150,7 @@ interpreting model results.
 | `coordination.resource_aware` | `enabled`, `scarce_wood_below`, `scarcity_multiplier`, `resource_weight`, `travel_weight`, `guard_opportunity_cost`, `late_arrival_penalty`, `handoff_gate_health` | Rank repair assignees and bound urgent supply handoffs |
 | `logistics` | `enabled`, `urgent_wood_below`, `urgent_food_below` | Permit useful partial-load deliveries during shortages |
 | `ai.repair_strategy` | `enabled`, `max_choices`, `max_lessons`, `prompt`, `lease_seconds`, `mode`, `controller`, `plan_seconds`, `priority_prompt` | Compact strategic choices, bounded memory/prompt and assignment lease |
-| `inference_probe` | `roles`, `rounds`, `request_seconds`, `suite_seconds`, `seed`, `gate_health` | Controlled per-role reliability diagnostics |
+| `inference_probe` | `roles`, `rounds`, `request_seconds`, `suite_seconds`, `seed`, `gate_health`, `minimum_valid_rate` | Controlled per-role reliability diagnostics |
 
 Repair prompt paths follow the existing prompt convention: an explicitly overridden
 path resolves relative to its config file; otherwise the packaged prompt is used.
@@ -174,3 +178,11 @@ or save compatibility. See [defaults, tradeoffs and checks](CLIENT_SMOOTHING.md)
 
 Gate-level strategy, expiry and the scripted comparator are described in
 [temporary repair priorities](REPAIR_PRIORITY_PLANS.md).
+
+
+`network.exchange_motion=true` returns a post-tick snapshot with movement requests;
+`network.wake_on_input=true` wakes the bounded client worker on input changes.
+`network.tcp_no_delay=true` disables server-side Nagle buffering. Disable all three for the legacy comparison. The loopback protocol is version 2.
+`inference_probe.minimum_valid_rate` defaults to 0.95 and is an operational sample
+acceptance threshold; the report retains each response, deadline and missing call.
+The portfolio reliability preset requests ten rounds across all four roles.

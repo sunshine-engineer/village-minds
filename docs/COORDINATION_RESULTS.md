@@ -1,5 +1,9 @@
 # Coordination comparison: 21 October 2026
 
+> Scope: development coordination comparison. Results describe the frozen source identified below,
+> not a new test of the latest checkout. For current evidence and study order, use
+> the [documentation index](INDEX.md) and [handover runbook](HANDOVER.md).
+
 The primary benchmark compares organization with every survival action enabled. It uses scripted policies, not language-model decisions.
 
 ## Protocol

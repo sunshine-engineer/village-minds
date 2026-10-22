@@ -677,7 +677,8 @@
     "request_seconds": 15.0,
     "suite_seconds": 110.0,
     "seed": 301,
-    "gate_health": 20.0
+    "gate_health": 20.0,
+    "minimum_valid_rate": 0.95
   },
   "network": {
     "host": "127.0.0.1",
@@ -701,6 +702,9 @@
       "buffer_size": 32,
       "catch_up_rate": 1.1,
       "catch_up_threshold_seconds": 0.05
-    }
+    },
+    "exchange_motion": true,
+    "wake_on_input": true,
+    "tcp_no_delay": true
   }
 }
