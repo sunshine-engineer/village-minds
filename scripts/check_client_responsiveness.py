@@ -5,6 +5,7 @@ isolates movement in an open part of the map; this is not a human playtest.
 """
 
 import argparse
+import os
 import json
 import math
 from pathlib import Path
@@ -306,7 +307,17 @@ def main():
         if game:
             game.destroy()
         if process.poll() is None:
-            process.terminate()
+            if os.name == "nt":
+                # Windows venv launchers can own a child interpreter. Stop only
+                # this fixture's process tree so inherited log handles close.
+                subprocess.run(
+                    ["taskkill", "/PID", str(process.pid), "/T", "/F"],
+                    capture_output=True,
+                    timeout=10,
+                    check=False,
+                )
+            else:
+                process.terminate()
             try:
                 process.wait(timeout=5)
             except subprocess.TimeoutExpired:

@@ -1,0 +1,15 @@
+{
+  "status": "incomplete_fixture",
+  "cause_confirmed": false,
+  "completed_samples_retained": false,
+  "error": "Incomplete responsiveness sample: movement request was sent but acknowledgement/snapshot were not observed before deadline",
+  "trial": {
+    "direction": 1,
+    "baseline_x": -3.025000000000001,
+    "display_baseline_x": -3.0412540435791016,
+    "input_at": 107592.6461064,
+    "render_at": 107592.6998078,
+    "request_sent_at": 107592.8804963
+  },
+  "note": "Original long fixture used normal waves and did not retain server status/partial samples. This attempt is excluded from matched latency evidence."
+}

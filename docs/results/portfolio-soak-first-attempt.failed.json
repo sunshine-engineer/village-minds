@@ -1,0 +1,6 @@
+{
+  "passed": false,
+  "error": "villagers snapshot equality assertion at first restore",
+  "cause": "fixture failed to account for documented restore transforms: revision increment, next_think reset and possession release",
+  "production_persistence_changed": false
+}

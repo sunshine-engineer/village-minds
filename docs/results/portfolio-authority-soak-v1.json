@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "simulated_seconds": 1800.0,
+  "wall_seconds": 25.89623225601099,
+  "method": "direct authority API, fixed simulation steps, temporary JSON saves",
+  "http_transport_test": false,
+  "human_playtest": false,
+  "possessions": 10,
+  "reconnects": 3,
+  "save_restore_checks": 6,
+  "attempts": 1,
+  "campaign_failures": 0
+}

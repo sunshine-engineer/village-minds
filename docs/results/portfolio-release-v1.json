@@ -1,0 +1,26 @@
+{
+  "source_commit": "e1cc74829bd9d49ba756f581f26715087d6eaf6c",
+  "date": "2026-10-22",
+  "latency_target_ms": {
+    "median": 250,
+    "p95": 400
+  },
+  "default_interpolation_passed": false,
+  "responsive_measurements_complete": true,
+  "responsive_cleanup_exit_success": false,
+  "cleanup_error": "WinError 32 while removing inherited server log handle after all samples and report were saved",
+  "wheel_sha256": "3228f771a1b74d5e481c8928c2d6e0d0ed88c98f8efe5813d10af95531ee1afa",
+  "unit_tests": {
+    "linux": 176,
+    "windows": 176,
+    "passed": true
+  },
+  "ci_run": "https://github.com/sunshine-engineer/village-minds/actions/runs/39778676003",
+  "soak_fixture_correction": "Only expected revision, next_think and player-action restore transforms are normalized; production persistence unchanged",
+  "soak_new_attempt_path_exercised": false,
+  "human_playtest": false,
+  "independent_human_setup": false,
+  "recorded_demo": false,
+  "cleanup_fix_smoke_passed": true,
+  "cleanup_fix_smoke_samples_per_mode": 2
+}

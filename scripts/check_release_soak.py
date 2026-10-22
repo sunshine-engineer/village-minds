@@ -80,6 +80,13 @@ def main():
                 store.save(server.world)
                 loaded = store.load()
                 after = snapshot(loaded)
+                # Loading intentionally invalidates in-flight model work and
+                # schedules fresh thinking; possession never survives a session.
+                for bot in before["world"]["villagers"]:
+                    bot["revision"] += 1
+                    bot["next_think"] = before["world"]["time"]
+                    if bot["action"] == "player":
+                        bot["action"] = "idle"
                 for key in ("time", "villagers", "gates", "store", "village_health"):
                     assert before["world"][key] == after["world"][key], key
                 assert before["campaign"] == after["campaign"]
