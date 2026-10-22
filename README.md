@@ -340,3 +340,8 @@ single-process launch remains available.
 
 [Evaluation correctness and component results](docs/EVALUATION_GAPS.md) explain why
 experimental policies remain opt-in, and why paused AI gains need a timing check.
+
+Network clients now use [configurable movement smoothing](docs/CLIENT_SMOOTHING.md)
+for villagers, monsters and the follow camera, with continuous walking animation.
+The default 200 ms presentation buffer trades some display latency for smoother
+motion; server movement and collisions stay authoritative.

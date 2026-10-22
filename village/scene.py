@@ -185,6 +185,9 @@ class SceneBuilder:
         speech_path.setTransparency(TransparencyAttrib.MAlpha)
         return root, parts["body"], legs, speech_path, speech
 
+    def display_position(self, kind, identity, authoritative):
+        return authoritative
+
     def update_survival_visuals(self):
         style = self.assets.catalog["style"]
         for crop, (stalks, label) in zip(self.world.crops, self.crop_nodes):
@@ -243,7 +246,9 @@ class SceneBuilder:
                     style["monster_label_size"],
                 )
                 self.monster_nodes[monster.id] = node
-            self.monster_nodes[monster.id].setPos(*monster.position, 0)
+            self.monster_nodes[monster.id].setPos(
+                *self.display_position("monster", monster.id, monster.position), 0
+            )
 
     @staticmethod
     def damage_color(broken, healthy, ratio):

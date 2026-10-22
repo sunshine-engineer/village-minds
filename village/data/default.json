@@ -688,6 +688,15 @@
     "queue_capacity": 64,
     "max_commands_per_tick": 8,
     "max_body_bytes": 65536,
-    "max_state_bytes": 5000000
+    "max_state_bytes": 5000000,
+    "interpolation": {
+      "enabled": true,
+      "delay_seconds": 0.2,
+      "max_gap_seconds": 0.75,
+      "snap_distance": 4.0,
+      "buffer_size": 32,
+      "catch_up_rate": 1.1,
+      "catch_up_threshold_seconds": 0.05
+    }
   }
 }

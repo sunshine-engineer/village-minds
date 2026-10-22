@@ -1,5 +1,12 @@
 # Validation evidence
 
+## Network client visual smoothing — 22 October 2026
+
+- **156 tests passed on Linux and native Windows Python 3.14.** Twelve new interpolation checks cover intermediate poses/time, jitter/loss and bounded catch-up, no prediction past the newest packet, large corrections, respawn/reused IDs, removals, reconnect/server/possession resets, old epochs/frames, long gaps, capacity, disabled behavior, 30/60/144 FPS traces and unchanged save fingerprints. Existing startup-config checks also cover invalid buffer/delay/distance/catch-up settings; HTTP checks verify timestamp/epoch metadata remains present on the worker's latest packet.
+- A native Windows offscreen Panda3D fixture ran 121 render updates at 60 FPS with five snapshots/second. After startup buffering, maximum frame displacement was 0.083334 world units versus 1.0 unit for direct snapshots. Assertions verified camera/actor alignment, matching monster interpolation, animation updates between packets and unchanged authoritative World position/time. Reproduction: `scripts/check_client_interpolation.py`; [recorded trace and design](docs/CLIENT_SMOOTHING.md).
+- Real native Windows server/client checks accepted movement and dialogue, disconnected/reconnected to the same running village, and verified a saved 10-second world. The original single-process Windows rendering check passed after adding the presentation hooks. These are controlled fixtures/internal input checks, not a human playtest or an input-latency benchmark.
+- Smoothing affects client transforms/animation only. It uses a configurable 200 ms buffer, holds on underrun, recovers with bounded playback speed and resets after reconnect/large gaps/corrections. It adds display latency and does not introduce local movement prediction or physics. Gameplay/HUD state and collision validation remain authoritative.
+
 ## Evaluation gaps and persistent server/client — 22 October 2026
 
 - **144 tests passed on Linux and native Windows Python 3.14.** New checks cover proposer cooldown/capacity filtering, reuse of existing repair requests, component independence, delayed stale-intent rejection, real HTTP sessions, exclusive possession, replay/order validation, bounded movement, input/session expiry, malformed/oversized requests, incompatible fingerprints, background snapshots, reconnect, save/restart memories and archived new attempts. The final client stop-path cleanup was followed by focused server/lifecycle checks on both platforms. Python 3.11 grammar passed; no local 3.11 runtime claim.

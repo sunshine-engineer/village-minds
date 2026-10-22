@@ -167,3 +167,7 @@ before applying the response. Both retain original request time/revision.
 
 The new `network` section configures server/client transport, deadlines, leases,
 queues and the separate server save slot. See [all settings and launch commands](SERVER_CLIENT.md).
+
+`network.interpolation` controls presentation smoothing: enabled state, delay, buffer
+capacity, reset gap, snap distance and bounded catch-up. It does not alter physics
+or save compatibility. See [defaults, tradeoffs and checks](CLIENT_SMOOTHING.md).

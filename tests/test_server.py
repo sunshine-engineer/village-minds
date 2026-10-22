@@ -160,6 +160,9 @@ class HTTPTests(unittest.TestCase):
                 time.sleep(0.02)
             self.assertIsNotNone(state)
             self.assertEqual(state["controlled"], 0)
+            self.assertGreaterEqual(state["_client_epoch"], 1)
+            self.assertGreater(state["_client_received_at"], 0)
+            self.assertIn("_client_epoch", session.latest)
         finally:
             session.close()
         other = RemoteSession(self.url, autostart=False)

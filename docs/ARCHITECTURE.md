@@ -108,3 +108,10 @@ Evaluation can replay fixed or measured inference delay with local routines acti
 and apply an intent using its original actor revision/time. Component switches and
 fresh protocols isolate repair scoring, handoffs and deliveries. The completed
 [gap experiments](EVALUATION_GAPS.md) remain separate from the earlier datasets.
+
+`interpolation.py` buffers confirmed poses with local receive times and connection
+epochs. The network client samples it once per render frame. `display_position`
+and `display_time` hooks keep interpolated transforms/animation separate from the
+authoritative World; the default hooks preserve single-process behavior. The
+controlled actor and camera share a pose, and monster nodes use the same sampler.
+See [smoothing design](CLIENT_SMOOTHING.md) for reset/underrun behavior and limits.

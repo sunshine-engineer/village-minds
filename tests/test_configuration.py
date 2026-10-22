@@ -51,6 +51,11 @@ class ConfigurationTests(unittest.TestCase):
     def test_invalid_settings_fail_before_game_import(self):
         invalid = [
             {"rulz": {}},
+            {"network": {"interpolation": {"buffer_size": 1}}},
+            {"network": {"interpolation": {"buffer_size": 513}}},
+            {"network": {"interpolation": {"delay_seconds": 1.0}}},
+            {"network": {"interpolation": {"snap_distance": 0}}},
+            {"network": {"interpolation": {"catch_up_rate": 0.9}}},
             {"rules": {"gate_health": -1}},
             {"runtime": {"pace": True}},
             {"runtime": {"pace": 11}},

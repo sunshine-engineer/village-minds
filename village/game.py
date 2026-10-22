@@ -255,10 +255,14 @@ class VillageGame(SceneBuilder, ShowBase):
             self.next_save_wall = time.monotonic() + RT["autosave_seconds"]
             self.failure_saved = self.world.failed
 
+    def display_time(self):
+        return self.world.time
+
     def update(self, task):
         dt = min(self.clock_dt(), RT["max_step_seconds"])
         self.advance_world(dt)
         self.update_survival_visuals()
+        animation_time = self.display_time()
         speaker = max(
             range(len(self.world.villagers)),
             key=lambda i: (self.world.villagers[i].speech_until, i),
@@ -275,14 +279,14 @@ class VillageGame(SceneBuilder, ShowBase):
                 continue
             root.show()
             previous = root.getPos()
-            x, y = bot.position
+            x, y = self.display_position("villager", bot.name, bot.position)
             root.setPos(x, y, 0)
             walking = math.hypot(x - previous.x, y - previous.y) > 0.001
             if walking:
                 root.setH(math.degrees(math.atan2(-(x - previous.x), y - previous.y)))
             for i, leg in enumerate(legs):
                 leg.setP(
-                    math.sin(self.world.time * D["animation_speed"] + i * math.pi)
+                    math.sin(animation_time * D["animation_speed"] + i * math.pi)
                     * D["leg_swing_degrees"]
                     if walking
                     else 0
@@ -291,8 +295,7 @@ class VillageGame(SceneBuilder, ShowBase):
             body.setZ(
                 body_height
                 + (
-                    abs(math.sin(self.world.time * D["animation_speed"]))
-                    * D["body_bob"]
+                    abs(math.sin(animation_time * D["animation_speed"])) * D["body_bob"]
                     if walking
                     else 0
                 )
@@ -305,7 +308,11 @@ class VillageGame(SceneBuilder, ShowBase):
         target = (
             LOCATIONS["square"]
             if self.world.controlled is None
-            else self.world.villagers[self.world.controlled].position
+            else self.display_position(
+                "villager",
+                self.world.villagers[self.world.controlled].name,
+                self.world.villagers[self.world.controlled].position,
+            )
         )
         self.camera.setPos(
             target[0] + math.sin(self.orbit) * self.zoom,

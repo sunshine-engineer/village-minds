@@ -137,9 +137,11 @@ memories. A Windows offscreen Panda3D check renders the remote world, acquires a
 sends dialogue, disconnects and reconnects while the same server continues. This is
 not an OS keyboard test or a human multiplayer playtest.
 
-This version has no client prediction/interpolation, delta snapshots, multiple
-players, account authentication, TLS, LAN/internet hosting or remote asset sync.
-Snapshots are full-state and movement appears at the polling cadence. Session tokens
+This version uses [configurable position interpolation](CLIENT_SMOOTHING.md) for
+villagers, monsters, animation and the follow camera. It adds a default 200 ms
+presentation buffer while keeping the latest server state authoritative. It has
+no movement prediction, delta snapshots, multiple players, account authentication,
+TLS, LAN/internet hosting or remote asset sync. Snapshots are full-state. Session tokens
 prevent accidental cross-client control; they are not an internet security design.
 Only one server process should write a save. There is no simulation catch-up for
 time when the server itself is stopped. Abrupt termination can lose progress since

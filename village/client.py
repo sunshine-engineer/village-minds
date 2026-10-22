@@ -10,12 +10,21 @@ def game_class():
     # Import rendering only after startup settings and the initial server handshake.
     from .game import VillageGame, C, D
     from .persistence import restore
+    from .interpolation import SnapshotInterpolator
 
     class RemoteGame(VillageGame):
         def __init__(self, args, session):
             self.session = session
-            session.world = restore(session.latest["world"])
-            session.world.controlled = session.latest["controlled"]
+            self.presentation = SnapshotInterpolator(
+                get_settings()["network"]["interpolation"]
+            )
+            initial = session.latest
+            self.presentation.push(initial)
+            self.display_poses, self.animation_time = self.presentation.sample(
+                time.monotonic()
+            )
+            session.world = restore(initial["world"])
+            session.world.controlled = initial["controlled"]
             args.remote_source = session
             super().__init__(args)
             self.controls.setText(
@@ -34,11 +43,14 @@ def game_class():
 
         def advance_world(self, dt):
             state = self.session.poll()
-            if state is not None:
+            if state is not None and self.presentation.push(state):
                 self.world = restore(state["world"])
                 self.world.controlled = state["controlled"]
                 self.brains.local_decisions = state["brains"]["local_decisions"]
                 self.brains.model_decisions = state["brains"]["model_decisions"]
+            self.display_poses, self.animation_time = self.presentation.sample(
+                time.monotonic()
+            )
             self.brains.status = self.session.status
             if not self.session.connected:
                 self.world.controlled = None
@@ -58,6 +70,12 @@ def game_class():
             self.session.motion = (
                 (dx / scale, dy / scale) if not self.typing else (0.0, 0.0)
             )
+
+        def display_position(self, kind, identity, authoritative):
+            return self.display_poses.get((kind, identity), authoritative)
+
+        def display_time(self):
+            return self.animation_time
 
         def takeover(self, index):
             if not self.typing:

@@ -192,6 +192,22 @@ def validate(config, reference):
         or network["input_seconds"] <= network["poll_seconds"]
     ):
         raise ValueError("Network leases must exceed polling interval")
+    smoothing = network["interpolation"]
+    if not 2 <= smoothing["buffer_size"] <= 512:
+        raise ValueError("Interpolation buffer_size must be between 2 and 512")
+    if (
+        smoothing["max_gap_seconds"] <= 0
+        or smoothing["snap_distance"] <= 0
+        or smoothing["catch_up_threshold_seconds"] <= 0
+    ):
+        raise ValueError(
+            "Interpolation gap, snap distance and catch-up threshold must be positive"
+        )
+    if (
+        smoothing["delay_seconds"] > smoothing["max_gap_seconds"]
+        or not 1 <= smoothing["catch_up_rate"] <= 2
+    ):
+        raise ValueError("Invalid interpolation delay or catch-up rate")
     coordination = config["coordination"]
     if coordination["mode"] not in ("independent", "requests", "assigned"):
         raise ValueError("Unknown coordination mode")

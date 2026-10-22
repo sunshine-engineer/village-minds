@@ -3,6 +3,7 @@
 import json
 import queue
 import threading
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -33,6 +34,7 @@ class RemoteSession:
         self.settings = get_settings()["network"]
         self.token = None
         self.sequence = 0
+        self.connection_epoch = 0
         self.frames = queue.Queue(maxsize=1)
         self.commands = queue.Queue(maxsize=self.settings["queue_capacity"])
         self.stop = threading.Event()
@@ -92,7 +94,15 @@ class RemoteSession:
         self.sequence = state["sequence"]
         self.connected = True
         self.status = "CONNECTED"
-        return state
+        self.connection_epoch += 1
+        return self.stamp(state)
+
+    def stamp(self, state):
+        return dict(
+            state,
+            _client_received_at=time.monotonic(),
+            _client_epoch=self.connection_epoch,
+        )
 
     def submit(self, command):
         if not self.connected:
@@ -113,7 +123,6 @@ class RemoteSession:
             state = self.frames.get_nowait()
         except queue.Empty:
             return None
-        self.latest = state
         return state
 
     def publish(self, state):
@@ -121,6 +130,8 @@ class RemoteSession:
             self.frames.get_nowait()
         except queue.Empty:
             pass
+        state = self.stamp(state)
+        self.latest = state
         self.frames.put_nowait(state)
 
     def _worker(self):
@@ -152,7 +163,6 @@ class RemoteSession:
                     )
                 state = self.request("/state")
                 self.publish(state)
-                self.latest = state
                 if self.status.startswith(("DISCONNECTED", "CONNECTING")):
                     self.status = "CONNECTED"
                 self.stop.wait(self.settings["poll_seconds"])
