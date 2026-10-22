@@ -161,6 +161,7 @@ class RemoteSession:
                 if reconnect:
                     self.publish(self.connect())
                     reconnect = False
+                controlled = self.latest.get("controlled")
                 for _ in range(self.settings["max_commands_per_tick"]):
                     if self.stop.is_set():
                         break
@@ -169,7 +170,9 @@ class RemoteSession:
                     except queue.Empty:
                         break
                     try:
-                        self.command(command)
+                        acknowledgement = self.command(command)
+                        if command.get("kind") == "takeover":
+                            controlled = acknowledgement["controlled"]
                     except RemoteError as exc:
                         if exc.status in (400, 409):
                             self.status = str(exc)
@@ -178,7 +181,7 @@ class RemoteSession:
                 if self.stop.is_set():
                     break
                 reply = None
-                if self.latest.get("controlled") is not None:
+                if controlled is not None:
                     reply = self.command(
                         dict(kind="move", dx=self.motion[0], dy=self.motion[1])
                     )
