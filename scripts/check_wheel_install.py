@@ -23,6 +23,7 @@ def main():
         "--output", type=Path, default=Path("artifacts/portfolio/clean-install.json")
     )
     parser.add_argument("--timeout", type=float, default=180.0)
+    parser.add_argument("--render-smoke", action="store_true")
     args = parser.parse_args()
     wheels = list(args.wheel_directory.resolve().glob("village_minds-*.whl"))
     if len(wheels) != 1:
@@ -106,6 +107,15 @@ def main():
         data = json.loads(save.read_text())
         assert data["world"]["time"] > 0
         checks.append("installed authoritative server starts, advances and saves")
+        if args.render_smoke:
+            execute(
+                [python, "-m", "village", "--demo", "--smoke-test", "--no-save"], demo
+            )
+            image = demo / "artifacts" / "village-smoke.png"
+            assert image.exists()
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(image, args.output.with_suffix(".png"))
+            checks.append("installed single-player offscreen render smoke")
         version = execute(
             [
                 python,

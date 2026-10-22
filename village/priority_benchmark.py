@@ -259,6 +259,7 @@ def run_case(
         breaches = set()
         before_gates = w.gates.copy()
         applied = False
+        applied_at = None
         outcome = "no_plan"
         stop_reason = "duration_reached"
 
@@ -299,6 +300,7 @@ def run_case(
             if not applied and w.time + 1e-9 >= delay:
                 applied = True
                 if response is not None:
+                    applied_at = w.time
                     if response["status"] == "ok":
                         selection = response["decision"].get("target")
                         outcome = brains.consume_decision(
@@ -333,11 +335,12 @@ def run_case(
             wall_seconds=time.monotonic() - started,
             response=response,
             outcome=outcome,
+            applied_at=applied_at,
             applied_before_first_claim=bool(
                 response is not None
                 and outcome == "accepted"
                 and first_owner
-                and delay <= first_owner["at"]
+                and applied_at < first_owner["at"]
             ),
             initial=initial,
             log_dropped_records=logger.dropped,

@@ -134,6 +134,27 @@ class ContentionTests(unittest.TestCase):
                 if case["name"] == "far-urgent":
                     self.assertTrue(rows["baseline"]["primary_gate_breached"])
 
+    def test_tick_boundary_response_is_not_credited_before_existing_claim(self):
+        case = self.plan["cases"][1]
+        with tempfile.TemporaryDirectory() as temp:
+            result = run_case(
+                self.plan,
+                case,
+                301,
+                "model",
+                "elder",
+                Path(temp),
+                request=lambda *args: dict(
+                    status="ok",
+                    latency_ms=7250.0,
+                    decision=dict(action="plan_repairs", target="north_gate"),
+                ),
+            )
+        self.assertEqual(result["outcome"], "accepted")
+        self.assertEqual(result["first_repair_owner"]["gate"], "east_gate")
+        self.assertAlmostEqual(result["applied_at"], result["first_repair_owner"]["at"])
+        self.assertFalse(result["applied_before_first_claim"])
+
     def test_model_timeout_keeps_baseline_local_behavior(self):
         case = self.plan["cases"][1]
         with tempfile.TemporaryDirectory() as temp:
