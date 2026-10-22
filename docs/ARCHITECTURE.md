@@ -93,3 +93,30 @@ remain dictionaries, with optional provider timing metadata on `InferenceDecisio
 `evaluation.py` records productive model assignments separately from accepted
 choices, travel time, coverage and urgent deliveries. See
 [repair experiments](STRATEGY_EXPERIMENT.md) for metrics and interpretation limits.
+
+`server.py` owns the authoritative world and persistence on its simulation thread.
+HTTP handlers enqueue bounded envelopes; they never mutate game state directly.
+The single active session has exclusive possession, sequenced commands and expiry.
+
+`network.py` owns bounded HTTP requests and a background client worker. `client.py`
+reuses the Panda3D scene/HUD through the `VillageGame.advance_world` boundary; it
+replaces snapshots and sends commands rather than advancing physics or inference.
+Both startup configuration and protocol/save fingerprints are checked locally.
+See [server/client design and limits](SERVER_CLIENT.md).
+
+Evaluation can replay fixed or measured inference delay with local routines active
+and apply an intent using its original actor revision/time. Component switches and
+fresh protocols isolate repair scoring, handoffs and deliveries. The completed
+[gap experiments](EVALUATION_GAPS.md) remain separate from the earlier datasets.
+
+`interpolation.py` buffers confirmed poses with local receive times and connection
+epochs. The network client samples it once per render frame. `display_position`
+and `display_time` hooks keep interpolated transforms/animation separate from the
+authoritative World; the default hooks preserve single-process behavior. The
+controlled actor and camera share a pose, and monster nodes use the same sampler.
+See [smoothing design](CLIENT_SMOOTHING.md) for reset/underrun behavior and limits.
+
+Repair strategy supports actor-specific offers and opt-in gate-level priority plans.
+`allocation.py` computes candidates, `models.py` maps compact choice IDs to intents,
+and `TaskBoard` owns persisted plan expiry and local task ranking. Gate plans do not
+reserve helpers. See [repair priority planning](REPAIR_PRIORITY_PLANS.md).

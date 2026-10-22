@@ -149,6 +149,13 @@ def validate(config, reference):
     _validate_types(config, reference)
     if not 1 <= config["ai"]["repair_strategy"]["max_choices"] <= 12:
         raise ValueError("repair_strategy.max_choices must be between 1 and 12")
+    strategy = config["ai"]["repair_strategy"]
+    if strategy["mode"] not in ("assignment", "priority_plan") or strategy[
+        "controller"
+    ] not in ("model", "scripted"):
+        raise ValueError("Invalid repair strategy mode or controller")
+    if strategy["plan_seconds"] <= 0:
+        raise ValueError("Repair plan duration must be positive")
     probe = config["inference_probe"]
     if (
         probe["rounds"] < 1
@@ -166,6 +173,48 @@ def validate(config, reference):
             raise ValueError("Inference deadlines and leases must be positive")
     if probe["gate_health"] > config["rules"]["gate_health"]:
         raise ValueError("Probe gate health exceeds maximum")
+    network = config["network"]
+    if network["host"] not in ("127.0.0.1", "localhost"):
+        raise ValueError("Prototype network host must be loopback")
+    if not 0 <= network["port"] <= 65535:
+        raise ValueError("Invalid network port")
+    for key in (
+        "tick_seconds",
+        "poll_seconds",
+        "request_seconds",
+        "lease_seconds",
+        "input_seconds",
+        "reconnect_seconds",
+        "queue_capacity",
+        "max_commands_per_tick",
+        "max_body_bytes",
+        "max_state_bytes",
+    ):
+        if network[key] <= 0:
+            raise ValueError(f"network.{key} must be positive")
+    if network["tick_seconds"] > config["runtime"]["max_step_seconds"]:
+        raise ValueError("Network tick exceeds safe physics step")
+    if (
+        network["lease_seconds"] <= network["poll_seconds"]
+        or network["input_seconds"] <= network["poll_seconds"]
+    ):
+        raise ValueError("Network leases must exceed polling interval")
+    smoothing = network["interpolation"]
+    if not 2 <= smoothing["buffer_size"] <= 512:
+        raise ValueError("Interpolation buffer_size must be between 2 and 512")
+    if (
+        smoothing["max_gap_seconds"] <= 0
+        or smoothing["snap_distance"] <= 0
+        or smoothing["catch_up_threshold_seconds"] <= 0
+    ):
+        raise ValueError(
+            "Interpolation gap, snap distance and catch-up threshold must be positive"
+        )
+    if (
+        smoothing["delay_seconds"] > smoothing["max_gap_seconds"]
+        or not 1 <= smoothing["catch_up_rate"] <= 2
+    ):
+        raise ValueError("Invalid interpolation delay or catch-up rate")
     coordination = config["coordination"]
     if coordination["mode"] not in ("independent", "requests", "assigned"):
         raise ValueError("Unknown coordination mode")
@@ -184,6 +233,12 @@ def validate(config, reference):
             or len(set(roles)) != len(roles)
         ):
             raise ValueError("Invalid coordination role preferences")
+    if config["evaluation"]["timing_policy"] not in (
+        "paused_checkpoints",
+        "fixed_delay",
+        "measured_delay",
+    ):
+        raise ValueError("Unknown evaluation timing policy")
     world, display = config["world"], config["display"]
     runtime, evaluation = config["runtime"], config["evaluation"]
     if not runtime["speed_steps"] or any(
@@ -403,7 +458,11 @@ def load_config(path=None):
         _merge(result, override)
     validate(result, reference)
     for section, key in (("ai", "system_prompt"), ("assets", "manifest")):
-        base = path.parent if path and key in override.get(section, {}) else DATA
+        base = (
+            path.parent
+            if path and key in override.get(section, {})
+            else DEFAULT_PATH.parent
+        )
         result[section][key] = str((base / result[section][key]).resolve())
         if not Path(result[section][key]).is_file():
             raise ValueError(f"Missing {section}.{key}: {result[section][key]}")
@@ -411,13 +470,32 @@ def load_config(path=None):
     strategy_base = (
         path.parent
         if path and "prompt" in override.get("ai", {}).get("repair_strategy", {})
-        else DATA
+        else DEFAULT_PATH.parent
     )
     result["ai"]["repair_strategy"]["prompt"] = str(
         (strategy_base / strategy_prompt).resolve()
     )
     if not Path(result["ai"]["repair_strategy"]["prompt"]).is_file():
         raise ValueError("Missing repair strategy prompt")
+    priority_prompt = result["ai"]["repair_strategy"]["priority_prompt"]
+    priority_base = (
+        path.parent
+        if path
+        and "priority_prompt" in override.get("ai", {}).get("repair_strategy", {})
+        else DEFAULT_PATH.parent
+    )
+    result["ai"]["repair_strategy"]["priority_prompt"] = str(
+        (priority_base / priority_prompt).resolve()
+    )
+    if not Path(result["ai"]["repair_strategy"]["priority_prompt"]).is_file():
+        raise ValueError("Missing priority prompt")
+
+    network_base = (
+        path.parent if path and "save_path" in override.get("network", {}) else PROJECT
+    )
+    result["network"]["save_path"] = str(
+        (network_base / result["network"]["save_path"]).resolve()
+    )
     save_base = (
         path.parent if path and "save_path" in override.get("runtime", {}) else PROJECT
     )

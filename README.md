@@ -322,3 +322,30 @@ adds resource-aware repair offers, urgent partial deliveries and supply-task han
 It includes a bounded per-role inference probe and matched scripted/model evaluation
 on fresh seeds. Enable it with `--config configs/strategy-v2/development.json`.
 The existing controller remains the default until evidence supports changing it.
+
+### Run a persistent server and connect the 3D client
+
+The [server/client guide](docs/SERVER_CLIENT.md) covers the single-client loopback
+prototype, reconnect, exclusive possession and saved worlds. From two terminals:
+
+```powershell
+.\.venv-win\Scripts\python.exe -m village.server --demo
+.\.venv-win\Scripts\python.exe -m village.client
+```
+
+Linux uses `.venv/bin/python` with the same module arguments. Keep the server running
+when closing the client; it owns the world and autosaves. Optional compact Docker
+inference uses `--config configs/server-local.json` on both processes. The original
+single-process launch remains available.
+
+[Evaluation correctness and component results](docs/EVALUATION_GAPS.md) explain why
+experimental policies remain opt-in, and why paused AI gains need a timing check.
+
+Network clients now use [configurable movement smoothing](docs/CLIENT_SMOOTHING.md)
+for villagers, monsters and the follow camera, with continuous walking animation.
+The default 200 ms presentation buffer trades some display latency for smoother
+motion; server movement and collisions stay authoritative.
+
+An opt-in [temporary repair-priority planner](docs/REPAIR_PRIORITY_PLANS.md) lets
+the model choose a gate while local volunteers select helpers and validate resources.
+The matched experiment includes a scripted planner to measure the benefit of inference.

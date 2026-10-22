@@ -1,0 +1,131 @@
+{
+  "protocol": {
+    "plan": {
+      "name": "repair-paused-checkpoints-v3",
+      "seeds": [
+        439,
+        443
+      ],
+      "excluded_seeds": [
+        7,
+        19,
+        31,
+        43,
+        59,
+        71,
+        83,
+        97,
+        109,
+        127,
+        211,
+        223,
+        227,
+        229,
+        233,
+        239,
+        241,
+        251,
+        301,
+        307,
+        401,
+        409,
+        419,
+        431,
+        433
+      ],
+      "duration_seconds": 900,
+      "request_seconds": 15,
+      "run_wall_seconds": 90,
+      "suite_seconds": 360,
+      "model_calls": 4,
+      "conditions": [
+        "scripted",
+        "model"
+      ],
+      "cases": [
+        {
+          "name": "siege",
+          "config": "../cooperation-siege.json"
+        }
+      ],
+      "timing_policy": "paused_checkpoints",
+      "inference_delay_seconds": 5.0
+    },
+    "sources": {
+      "__init__.py": "dbe5552c40f0d78217b59622478b43fdb180614192ba1c0d04e64d5fef1a8eec",
+      "__main__.py": "c47c05f25172b5e83bfc03c16289ccc182139ab471d5836c7aa45ba83667ab9c",
+      "allocation.py": "e5b5a85f0e34424624310de60c67707c924c14811efc1fae0d556cfd6f4a018e",
+      "assets.py": "c1870267ba7740f9fd8b333fa8ee99db11ca22910553d0d67b798b3a0961ea36",
+      "brains.py": "087ad6e3ae169d24b77ef752b5f0e0bccec3cf32d7c84b23f92a1eb7e9db27a4",
+      "cli.py": "db2530dc598cfb55d1ec1b7b7b888bb68174f625e8b53ce75e80bab0d27bcff8",
+      "config.py": "84e0e98d786025a55953f88022d50b269efad8b932153548ca443b72beffccbe",
+      "controls.py": "0e316f8f80ba83251e658404bbaa4c40a695d8ac2d343327d17cfda82bbd011b",
+      "coordination.py": "5c31f01b2202194c247d39532229af1254bbfd843b6488f805c95b820c12a006",
+      "data\\assets\\catalog.json": "dc3d62d654dc55499efefea7d03a75fc7143d9aea5913e3e6bda7675a34e8604",
+      "data\\default.json": "021960c7f55773332467b92e388278cbea56e490081daa8cc8168460b5c2e9c4",
+      "data\\prompts\\repair_coordinator.txt": "c47c86176106293957f3398be39b3da06b29f46e4b6e3b187414d42091261c8a",
+      "data\\prompts\\villager.txt": "dcf4aca137a54ba51cab33d391dd7ed74d6c0af77aa32376c8c842ed1dad362c",
+      "decisions.py": "f1a9393d1ea9242f4068bb283efc3e1e90b3d7516d7aa5c7b496e69a2d4c452f",
+      "entities.py": "d10a6bed164d974075037a0d72a7c1967093e70b6069441749614b10048a6c25",
+      "evaluation.py": "06d5042b476052f8dfece8ba0afcd3f1d10d178af2806b82a27fe6b1bc0c3035",
+      "evaluation_controls.py": "0ac2948fe1893872f75a2d95111f7d2d65bcbc6b40821ad03f0ba5adc6f384bc",
+      "evaluation_schedule.py": "62a407851e6a46a9cb98aaf00ae753546f257a007d178ab58ccfac3cdd0489fc",
+      "extensions.py": "0acfc85105dfcbd7d09a3b8f44a4789f8df3d00e77ea501c7b5db61006238d9d",
+      "game.py": "cd58fd0a7d14645422edc38d494cc0cf558f64af357338c4ff640ec9f94abeaf",
+      "inference.py": "a4b0f991b28d9e051d3aecc2323b4b9cbe0d2433757c8027022c93ec4d6be691",
+      "inference_probe.py": "9b320e467b3c784e9bcd525454b18d18a880ab28678b8c0c640403e6c6e91767",
+      "logistics.py": "a451f574c9e96addde7225a6d874307b4a3e926d3ba4359583764389c650f4fd",
+      "map_data.py": "7d977ee3c2c0f35afb1c2505da6a222462eeab86989bdd3302a90b6b401b3234",
+      "models.py": "4dcea2798be7038357df2fed0e50e8c82ddab156028d3a989a00cb1712fefb85",
+      "navigation.py": "434df819eb6b6f7a607411999c8a553571b60f2b076008557fee62234bf098ae",
+      "persistence.py": "282bcd9ed533522469473df61c7ee088a01571c11e293246808c9fdc4841ea5b",
+      "plugins\\__init__.py": "b900ad6ddfd656b4b7441f67a7196d130037afe027f207b7c9aefe8026b7cfa7",
+      "plugins\\encourage.py": "e7314e889c98b9a28a32a202720c7140839cb9102307eeaf2214da19108ad5ca",
+      "policies.py": "1d88cd6e2b217724bb08f9c1a57908e40ae7bde85a6481e2f967c5089470cc02",
+      "probe.py": "c94ac8b76bd44e9c8f108301807491bccd9ada30b4bbbfd20e7c604432ba44d8",
+      "scene.py": "c0d84daa92a03ab69c956a398630cd0cad291242a99ecb77b969e397c7532b35",
+      "simulation.py": "077d1753c08d9a44f9d3991e1f0cf029eb5baaa172432048f934789ff5efb204",
+      "strategy_experiment.py": "965a38f3c737157055b62a46320ae22b83289bab752936b782bd97f545e04226",
+      "survival.py": "b5823b0c3ed749ea23f6e68b18bd0ec7b81e310dc4e04b00f079bf505d3311dd",
+      "telemetry.py": "8b326de38a92b0139682ebedc8647c025d52be9f11fe3801bd16b09a82122f23",
+      "timing.py": "1704d392a1caa08c3679b01ca0118abc8952fd215ff4ee2f0ffc292a4e006cc1",
+      "ui.py": "b0fd157b53ecbfe0eb476add7b7a2f8278a89f611e11c56a064df8f667f52cf5",
+      "world.py": "33d05b03ddf85563214dc35023a02593124b76a31f79807bc6b7c2c057ae3a08"
+    },
+    "interpreter": "3.14.7 (tags/v3.14.7:823f032, Aug  5 2026, 10:51:32) [MSC v.1944 64 bit (AMD64)]",
+    "timing_policy": "paused_checkpoints",
+    "expected_runs": 4,
+    "config_hashes": {
+      "siege-scripted.json": "8ea75b8504d2f5bbe8f68b24a6f56727b94c798f288b6bf4cb7bf85052983c9d",
+      "siege-model.json": "8ea75b8504d2f5bbe8f68b24a6f56727b94c798f288b6bf4cb7bf85052983c9d"
+    }
+  },
+  "runs": [],
+  "failures": [
+    {
+      "case": "siege",
+      "seed": 439,
+      "condition": "scripted",
+      "error": "Command '['D:\\\\projects\\\\3d_game\\\\.venv-win\\\\Scripts\\\\python.exe', '-m', 'village.evaluation', '--config', 'D:\\\\projects\\\\3d_game\\\\artifacts\\\\strategy-v3\\\\repair-paused-checkpoints-v3-20261022T083314-2ac6af38\\\\siege-scripted.json', '--modes', 'scripted', '--seeds', '439', '--duration', '900', '--max-model-calls', '4', '--model-timeout', '15', '--wall-seconds', '90', '--suite-seconds', '90', '--output', 'D:\\\\projects\\\\3d_game\\\\artifacts\\\\strategy-v3\\\\repair-paused-checkpoints-v3-20261022T083314-2ac6af38\\\\siege-439-scripted']' timed out after 95 seconds"
+    },
+    {
+      "case": "siege",
+      "seed": 439,
+      "condition": "model",
+      "error": "Command '['D:\\\\projects\\\\3d_game\\\\.venv-win\\\\Scripts\\\\python.exe', '-m', 'village.evaluation', '--config', 'D:\\\\projects\\\\3d_game\\\\artifacts\\\\strategy-v3\\\\repair-paused-checkpoints-v3-20261022T083314-2ac6af38\\\\siege-model.json', '--modes', 'hybrid', '--seeds', '439', '--duration', '900', '--max-model-calls', '4', '--model-timeout', '15', '--wall-seconds', '90', '--suite-seconds', '90', '--output', 'D:\\\\projects\\\\3d_game\\\\artifacts\\\\strategy-v3\\\\repair-paused-checkpoints-v3-20261022T083314-2ac6af38\\\\siege-439-model']' timed out after 95 seconds"
+    },
+    {
+      "case": "siege",
+      "seed": 443,
+      "condition": "scripted",
+      "error": "suite_deadline"
+    },
+    {
+      "case": "siege",
+      "seed": 443,
+      "condition": "model",
+      "error": "suite_deadline"
+    }
+  ],
+  "paired_model_vs_scripted": []
+}

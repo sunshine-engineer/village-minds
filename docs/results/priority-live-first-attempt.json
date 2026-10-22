@@ -1,0 +1,9 @@
+{
+  "status": "failed_fixture_assertion",
+  "assertion": "persisted repair_plan is not None",
+  "server_completed": true,
+  "server_saved_at_least_21_seconds": true,
+  "model_requests_and_responses_present": true,
+  "persisted_plan": null,
+  "note": "Short-wave fixture completed repair task before final save; exact response outcomes were not retained. No claim of successful live plan integration from this attempt."
+}

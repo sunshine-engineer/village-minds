@@ -1,0 +1,1 @@
+Choose one gate priority for a temporary repair plan. Local villagers choose helpers, preserve defence and gather missing wood. Prefer imminent breaches, useful HP per wood and short travel. Return exactly {"choice":"r0"} or {"choice":"defer"}. This does not reserve a helper.

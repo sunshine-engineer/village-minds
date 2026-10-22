@@ -23,7 +23,8 @@
     "mode": "requests",
     "resource_aware": {
       "enabled": true
-    }
+    },
+    "repair_handoffs": true
   },
   "ai": {
     "repair_strategy": {

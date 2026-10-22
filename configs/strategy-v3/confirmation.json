@@ -1,0 +1,59 @@
+{
+  "name": "handoff-confirmation-v3",
+  "seeds": [
+    449,
+    457
+  ],
+  "excluded_seeds": [
+    7,
+    19,
+    31,
+    43,
+    59,
+    71,
+    83,
+    97,
+    109,
+    127,
+    211,
+    223,
+    227,
+    229,
+    233,
+    239,
+    241,
+    251,
+    301,
+    307,
+    401,
+    409,
+    419,
+    431,
+    433,
+    439,
+    443
+  ],
+  "duration_seconds": 900,
+  "request_seconds": 15,
+  "run_wall_seconds": 45,
+  "suite_seconds": 600,
+  "model_calls": 4,
+  "conditions": [
+    "legacy",
+    "handoffs"
+  ],
+  "cases": [
+    {
+      "name": "siege",
+      "config": "../cooperation-siege.json"
+    },
+    {
+      "name": "wood-pressure",
+      "config": "../validation/wood-pressure.json"
+    },
+    {
+      "name": "long-haul",
+      "config": "../validation/long-haul.json"
+    }
+  ]
+}

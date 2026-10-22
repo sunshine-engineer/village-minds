@@ -1,0 +1,23 @@
+{
+  "ai": {
+    "repair_strategy": {
+      "enabled": true,
+      "mode": "priority_plan",
+      "plan_seconds": 60
+    },
+    "profiles": {
+      "local_qwen": {
+        "context_size": 2048,
+        "max_tokens": 24,
+        "temperature": 0.0,
+        "timeout": 15.0
+      }
+    }
+  },
+  "coordination": {
+    "mode": "requests",
+    "resource_aware": {
+      "enabled": true
+    }
+  }
+}

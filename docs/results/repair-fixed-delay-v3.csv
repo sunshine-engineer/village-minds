@@ -1,0 +1,5 @@
+case,seed,condition,stop_reason,completed_horizon,failed,simulated_seconds,village_health,repair_hp_per_wood,repair_hp,repair_wood,travel_villager_seconds,store_travel_villager_seconds,uncovered_threat_gate_seconds,uncovered_threat_fraction,urgent_partial_deliveries,model_requests,productive_model_allocations,model_deferrals,wall_seconds,log_dropped_records
+siege,439,scripted,village_destroyed,False,True,747.6,0,12.603191489361707,1184.7000000000005,94.0,3141.8,837.3,574.3,0.7248516975893133,17,0,0,0,25.767628,0
+siege,439,model,village_destroyed,False,True,629.4,0,12.4439024390244,1020.4000000000009,82.0,2572.9,708.5,568.3,0.7180037902716495,8,3,1,0,35.139857,0
+siege,443,scripted,village_destroyed,False,True,756.6,0,12.601162790697714,1083.7000000000035,86.0,2936.7,825.6,439.3,0.6309968399885036,8,0,0,0,20.657943,0
+siege,443,model,village_destroyed,False,True,811.9,0,11.561702127659622,1086.8000000000045,94.0,3290.3,900.4,471.2,0.6571827057182703,13,4,0,0,54.873352,0

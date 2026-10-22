@@ -145,7 +145,7 @@ interpreting model results.
 | --- | --- | --- |
 | `coordination.resource_aware` | `enabled`, `scarce_wood_below`, `scarcity_multiplier`, `resource_weight`, `travel_weight`, `guard_opportunity_cost`, `late_arrival_penalty`, `handoff_gate_health` | Rank repair assignees and bound urgent supply handoffs |
 | `logistics` | `enabled`, `urgent_wood_below`, `urgent_food_below` | Permit useful partial-load deliveries during shortages |
-| `ai.repair_strategy` | `enabled`, `max_choices`, `max_lessons`, `prompt`, `lease_seconds` | Compact strategic choices, bounded memory/prompt and assignment lease |
+| `ai.repair_strategy` | `enabled`, `max_choices`, `max_lessons`, `prompt`, `lease_seconds`, `mode`, `controller`, `plan_seconds`, `priority_prompt` | Compact strategic choices, bounded memory/prompt and assignment lease |
 | `inference_probe` | `roles`, `rounds`, `request_seconds`, `suite_seconds`, `seed`, `gate_health` | Controlled per-role reliability diagnostics |
 
 Repair prompt paths follow the existing prompt convention: an explicitly overridden
@@ -154,3 +154,23 @@ The live model profile's `timeout` is a hard request wall deadline. The probe an
 experiment have additional explicit request and suite budgets. Profile context size,
 output budget, temperature, endpoint and model remain configurable as before.
 Experiment plans fix scenario config paths, fresh/excluded seeds, horizon and budgets.
+
+`coordination.repair_handoffs` now controls automatic repair reallocation and supply
+preemption separately from `resource_aware.enabled` scoring. It defaults to false.
+The v2 combined preset sets it explicitly. The factorial plans under
+`configs/strategy-v3/` vary scoring, handoffs and deliveries independently.
+
+`evaluation.timing_policy` accepts `paused_checkpoints`, `fixed_delay` and
+`measured_delay`. Fixed delay uses `evaluation.inference_delay_seconds`; measured
+delay replays the returned client wall interval with ordinary physics/local routines
+before applying the response. Both retain original request time/revision.
+
+The new `network` section configures server/client transport, deadlines, leases,
+queues and the separate server save slot. See [all settings and launch commands](SERVER_CLIENT.md).
+
+`network.interpolation` controls presentation smoothing: enabled state, delay, buffer
+capacity, reset gap, snap distance and bounded catch-up. It does not alter physics
+or save compatibility. See [defaults, tradeoffs and checks](CLIENT_SMOOTHING.md).
+
+Gate-level strategy, expiry and the scripted comparator are described in
+[temporary repair priorities](REPAIR_PRIORITY_PLANS.md).

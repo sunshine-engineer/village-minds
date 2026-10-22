@@ -16,9 +16,25 @@ from .config import load_config, read_json
 from .validation import source_hashes, digest
 
 CONDITIONS = ("legacy", "scripted", "model")
+ABLATIONS = (
+    "legacy",
+    "scoring",
+    "handoffs",
+    "deliveries",
+    "scoring-handoffs",
+    "scoring-deliveries",
+    "handoffs-deliveries",
+    "scripted",
+)
 
 
 def validate_plan(plan):
+    strategy_mode = plan.get("strategy_mode", "assignment")
+    if strategy_mode not in ("assignment", "priority_plan") or (
+        "scripted-priority" in plan.get("conditions", ())
+        and strategy_mode != "priority_plan"
+    ):
+        raise ValueError("Scripted priority comparison requires priority_plan strategy")
     if not plan["seeds"] or any(type(s) is not int or s < 0 for s in plan["seeds"]):
         raise ValueError("Invalid seeds")
     if len(set(plan["seeds"])) != len(plan["seeds"]) or set(plan["seeds"]) & set(
@@ -70,7 +86,7 @@ def repair_audit(path):
     )
 
 
-def paired_results(rows):
+def paired_results(rows, baseline_condition="scripted"):
     pairs = []
     for row in rows:
         if row["condition"] != "model":
@@ -79,7 +95,7 @@ def paired_results(rows):
             (
                 r
                 for r in rows
-                if r["condition"] == "scripted"
+                if r["condition"] == baseline_condition
                 and (r["seed"], r["case"]) == (row["seed"], row["case"])
             ),
             None,
@@ -92,6 +108,7 @@ def paired_results(rows):
             dict(
                 case=row["case"],
                 seed=row["seed"],
+                baseline=baseline_condition,
                 eligible=valid,
                 health_delta=(
                     row["village_health"] - baseline["village_health"]
@@ -117,6 +134,13 @@ def main():
     plan_path = Path(args.plan).resolve()
     plan = read_json(plan_path)
     validate_plan(plan)
+    conditions = tuple(plan.get("conditions", CONDITIONS))
+    if (
+        not conditions
+        or len(set(conditions)) != len(conditions)
+        or any(c not in (*ABLATIONS, "model", "scripted-priority") for c in conditions)
+    ):
+        parser.error("Invalid experiment conditions")
     root = Path(args.output).resolve() / (
         plan["name"]
         + "-"
@@ -130,8 +154,8 @@ def main():
         plan=deepcopy(plan),
         sources=sources,
         interpreter=sys.version,
-        timing_policy="paused_checkpoints",
-        expected_runs=len(plan["seeds"]) * len(plan["cases"]) * len(CONDITIONS),
+        timing_policy=plan.get("timing_policy", "paused_checkpoints"),
+        expected_runs=len(plan["seeds"]) * len(plan["cases"]) * len(conditions),
     )
     (root / "protocol.json").write_text(json.dumps(frozen, indent=2) + "\n")
     deadline = time.monotonic() + plan["suite_seconds"]
@@ -140,12 +164,40 @@ def main():
     # Freeze resolved inputs before looking at any results.
     for case in plan["cases"]:
         base = load_config(plan_path.parent / case["config"])
-        for condition in CONDITIONS:
+        for condition in conditions:
             config = deepcopy(base)
             config["coordination"]["mode"] = "requests"
-            config["coordination"]["resource_aware"]["enabled"] = condition != "legacy"
-            config["logistics"]["enabled"] = condition != "legacy"
+            config["coordination"]["resource_aware"]["enabled"] = condition in (
+                "scoring",
+                "scoring-handoffs",
+                "scoring-deliveries",
+                "scripted",
+                "scripted-priority",
+                "model",
+            )
+            config["coordination"]["repair_handoffs"] = condition in (
+                "handoffs",
+                "scoring-handoffs",
+                "handoffs-deliveries",
+                "scripted",
+                "scripted-priority",
+                "model",
+            )
+            config["logistics"]["enabled"] = condition in (
+                "deliveries",
+                "scoring-deliveries",
+                "handoffs-deliveries",
+                "scripted",
+                "scripted-priority",
+                "model",
+            )
             config["ai"]["repair_strategy"]["enabled"] = True
+            config["ai"]["repair_strategy"]["mode"] = plan.get(
+                "strategy_mode", "assignment"
+            )
+            config["ai"]["repair_strategy"]["controller"] = (
+                "scripted" if condition == "scripted-priority" else "model"
+            )
             config["ai"]["profiles"]["local_qwen"].update(
                 context_size=2048,
                 max_tokens=24,
@@ -153,7 +205,10 @@ def main():
                 timeout=plan["request_seconds"],
             )
             config["evaluation"].update(
-                stop_requests_on_error=False, full_observations=False
+                stop_requests_on_error=False,
+                full_observations=False,
+                timing_policy=plan.get("timing_policy", "paused_checkpoints"),
+                inference_delay_seconds=plan.get("inference_delay_seconds", 5.0),
             )
             path = root / f"{case['name']}-{condition}.json"
             path.write_text(json.dumps(config, indent=2) + "\n")
@@ -165,7 +220,7 @@ def main():
     for case in plan["cases"]:
         for seed in plan["seeds"]:
             # Deterministic alternating order reduces constant warm-cache ordering bias.
-            order = CONDITIONS if seed % 2 else tuple(reversed(CONDITIONS))
+            order = conditions if seed % 2 else tuple(reversed(conditions))
             for condition in order:
                 if source_hashes() != sources or any(
                     digest(root / p) != h for p, h in frozen["config_hashes"].items()
@@ -191,7 +246,11 @@ def main():
                     "--config",
                     str(configs[case["name"], condition]),
                     "--modes",
-                    "hybrid" if condition == "model" else "scripted",
+                    (
+                        "hybrid"
+                        if condition in ("model", "scripted-priority")
+                        else "scripted"
+                    ),
                     "--seeds",
                     str(seed),
                     "--duration",
@@ -250,6 +309,9 @@ def main():
                             runs=rows,
                             failures=failures,
                             paired_model_vs_scripted=paired_results(rows),
+                            paired_model_vs_scripted_priority=paired_results(
+                                rows, "scripted-priority"
+                            ),
                         ),
                         indent=2,
                     )
@@ -267,6 +329,9 @@ def main():
                 runs=rows,
                 failures=failures,
                 paired_model_vs_scripted=paired_results(rows),
+                paired_model_vs_scripted_priority=paired_results(
+                    rows, "scripted-priority"
+                ),
             ),
             indent=2,
         )
@@ -291,6 +356,7 @@ def main():
         "urgent_partial_deliveries",
         "model_requests",
         "productive_model_allocations",
+        "productive_priority_plans",
         "model_deferrals",
         "wall_seconds",
         "log_dropped_records",

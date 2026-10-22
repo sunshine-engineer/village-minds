@@ -30,6 +30,7 @@ class TaskBoard:
         self.next_request = {}
         self.next_maintenance = 0.0
         self.strategy_leases = {}
+        self.repair_plan = None
 
     def emit(self, event, task, actor=None, source="task_board"):
         self.counts[event] += 1
@@ -281,6 +282,42 @@ class TaskBoard:
             self.emit("released", task, bot.name)
         return True
 
+    def plan_priority(self, task):
+        plan = self.repair_plan
+        strategy = get_settings()["ai"]["repair_strategy"]
+        return (
+            0
+            if (
+                strategy["enabled"]
+                and strategy["mode"] == "priority_plan"
+                and plan
+                and self.world.time < plan["expires_at"]
+                and task["kind"] == "repair"
+                and task["target"] == plan["gate"]
+                and not self.done(task)
+                and self.world.store["wood"]
+                >= get_settings()["rules"]["repair_wood_cost"]
+            )
+            else 1
+        )
+
+    def install_repair_plan(self, bot, gate):
+        from .allocation import priority_candidates
+
+        strategy = get_settings()["ai"]["repair_strategy"]
+        if strategy["mode"] != "priority_plan" or gate not in [
+            c["target"] for c in priority_candidates(self)
+        ]:
+            return False
+        self.repair_plan = dict(
+            gate=gate,
+            proposed_by=bot.name,
+            created_at=self.world.time,
+            expires_at=self.world.time + strategy["plan_seconds"],
+        )
+        self.counts["repair_plans"] += 1
+        return True
+
     def score(self, task, bot):
         if self.settings["resource_aware"]["enabled"] and task["kind"] == "repair":
             from .allocation import repair_features
@@ -325,7 +362,7 @@ class TaskBoard:
                         source="coordination",
                     )
                     break
-        if self.settings["resource_aware"]["enabled"]:
+        if self.settings["repair_handoffs"]:
             self.rebalance_repairs()
         elders = [
             v
@@ -338,6 +375,7 @@ class TaskBoard:
                 self.tasks,
                 key=lambda t: (
                     self.settings["priority"].index(t["kind"]),
+                    self.plan_priority(t),
                     t["created_at"],
                 ),
             ):
@@ -505,6 +543,7 @@ class TaskBoard:
                     choices,
                     key=lambda t: (
                         self.settings["priority"].index(t["kind"]),
+                        self.plan_priority(t),
                         self.score(t, bot),
                     ),
                 )
@@ -604,6 +643,7 @@ class TaskBoard:
             dict(
                 tasks=self.tasks,
                 strategy_leases=self.strategy_leases,
+                repair_plan=self.repair_plan,
                 next_id=self.next_id,
                 counts=dict(self.counts),
                 response_seconds=self.response_seconds,
@@ -618,6 +658,7 @@ class TaskBoard:
         saved = deepcopy(saved)
         if isinstance(saved, dict):
             saved.setdefault("strategy_leases", {})
+            saved.setdefault("repair_plan", None)
         if not isinstance(saved, dict) or set(saved) != set(self.snapshot()):
             raise ValueError("Invalid task board state")
         names = {v.name for v in self.world.villagers}
@@ -698,6 +739,7 @@ class TaskBoard:
         if not isinstance(saved["counts"], dict) or any(
             k
             not in (
+                "repair_plans",
                 "requested",
                 "offered",
                 "accepted",
@@ -778,6 +820,20 @@ class TaskBoard:
             or any(k not in ids or not number(v) for k, v in leases.items())
         ):
             raise ValueError("Invalid strategic leases")
+        plan = saved["repair_plan"]
+        if plan is not None and (
+            not isinstance(plan, dict)
+            or set(plan) != {"gate", "proposed_by", "created_at", "expires_at"}
+            or not isinstance(plan["gate"], str)
+            or plan["gate"] not in self.world.gates
+            or not isinstance(plan["proposed_by"], str)
+            or plan["proposed_by"] not in names
+            or not number(plan["created_at"])
+            or not number(plan["expires_at"])
+            or plan["expires_at"] <= plan["created_at"]
+        ):
+            raise ValueError("Invalid repair priority plan")
+        self.repair_plan = deepcopy(plan)
         self.strategy_leases = leases.copy()
         self.tasks = deepcopy(saved["tasks"])
         self.next_id = saved["next_id"]

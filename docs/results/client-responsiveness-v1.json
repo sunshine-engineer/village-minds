@@ -1,0 +1,200 @@
+{
+  "method": "real loopback HTTP, offscreen Panda3D renderFrame, monotonic wall time",
+  "human_playtest": false,
+  "network": {
+    "host": "127.0.0.1",
+    "port": 8765,
+    "save_path": "D:\\projects\\3d_game\\saves\\server-village.json",
+    "tick_seconds": 0.05,
+    "poll_seconds": 0.1,
+    "request_seconds": 2.0,
+    "lease_seconds": 5.0,
+    "input_seconds": 0.4,
+    "reconnect_seconds": 1.0,
+    "queue_capacity": 64,
+    "max_commands_per_tick": 8,
+    "max_body_bytes": 65536,
+    "max_state_bytes": 5000000,
+    "interpolation": {
+      "enabled": true,
+      "delay_seconds": 0.2,
+      "max_gap_seconds": 0.75,
+      "snap_distance": 4.0,
+      "buffer_size": 32,
+      "catch_up_rate": 1.1,
+      "catch_up_threshold_seconds": 0.05
+    }
+  },
+  "samples": [
+    {
+      "interpolation": false,
+      "sample": 0,
+      "request_sent_ms": 139.212,
+      "ack_received_ms": 216.547,
+      "snapshot_ms": 292.041,
+      "render_ms": 306.538
+    },
+    {
+      "interpolation": true,
+      "sample": 0,
+      "request_sent_ms": 148.682,
+      "ack_received_ms": 216.596,
+      "snapshot_ms": 279.36,
+      "render_ms": 293.364
+    },
+    {
+      "interpolation": true,
+      "sample": 1,
+      "request_sent_ms": 145.574,
+      "ack_received_ms": 162.173,
+      "snapshot_ms": 236.89,
+      "render_ms": 298.067
+    },
+    {
+      "interpolation": false,
+      "sample": 1,
+      "request_sent_ms": 109.097,
+      "ack_received_ms": 182.391,
+      "snapshot_ms": 247.511,
+      "render_ms": 271.662
+    },
+    {
+      "interpolation": false,
+      "sample": 2,
+      "request_sent_ms": 98.756,
+      "ack_received_ms": 150.99,
+      "snapshot_ms": 225.83,
+      "render_ms": 238.398
+    },
+    {
+      "interpolation": true,
+      "sample": 2,
+      "request_sent_ms": 95.961,
+      "ack_received_ms": 168.03,
+      "snapshot_ms": 240.42,
+      "render_ms": 256.648
+    },
+    {
+      "interpolation": true,
+      "sample": 3,
+      "request_sent_ms": 184.378,
+      "ack_received_ms": 255.573,
+      "snapshot_ms": 328.344,
+      "render_ms": 341.434
+    },
+    {
+      "interpolation": false,
+      "sample": 3,
+      "request_sent_ms": 118.781,
+      "ack_received_ms": 135.327,
+      "snapshot_ms": 203.632,
+      "render_ms": 218.316
+    },
+    {
+      "interpolation": false,
+      "sample": 4,
+      "request_sent_ms": 137.0,
+      "ack_received_ms": 203.06,
+      "snapshot_ms": 267.838,
+      "render_ms": 285.03
+    },
+    {
+      "interpolation": true,
+      "sample": 4,
+      "request_sent_ms": 214.224,
+      "ack_received_ms": 271.984,
+      "snapshot_ms": 332.052,
+      "render_ms": 358.74
+    },
+    {
+      "interpolation": true,
+      "sample": 5,
+      "request_sent_ms": 179.025,
+      "ack_received_ms": 248.718,
+      "snapshot_ms": 305.971,
+      "render_ms": 334.174
+    },
+    {
+      "interpolation": false,
+      "sample": 5,
+      "request_sent_ms": 156.188,
+      "ack_received_ms": 210.664,
+      "snapshot_ms": 284.043,
+      "render_ms": 298.939
+    },
+    {
+      "interpolation": false,
+      "sample": 6,
+      "request_sent_ms": 111.808,
+      "ack_received_ms": 128.347,
+      "snapshot_ms": 201.725,
+      "render_ms": 215.545
+    },
+    {
+      "interpolation": true,
+      "sample": 6,
+      "request_sent_ms": 155.84,
+      "ack_received_ms": 222.417,
+      "snapshot_ms": 300.741,
+      "render_ms": 313.183
+    },
+    {
+      "interpolation": true,
+      "sample": 7,
+      "request_sent_ms": 217.889,
+      "ack_received_ms": 271.0,
+      "snapshot_ms": 333.783,
+      "render_ms": 362.922
+    },
+    {
+      "interpolation": false,
+      "sample": 7,
+      "request_sent_ms": 154.954,
+      "ack_received_ms": 209.043,
+      "snapshot_ms": 279.702,
+      "render_ms": 293.267
+    }
+  ],
+  "summary": [
+    {
+      "interpolation": false,
+      "samples": 8,
+      "request_sent_ms": {
+        "median": 127.891,
+        "max": 156.188
+      },
+      "ack_received_ms": {
+        "median": 192.726,
+        "max": 216.547
+      },
+      "snapshot_ms": {
+        "median": 257.675,
+        "max": 292.041
+      },
+      "render_ms": {
+        "median": 278.346,
+        "max": 306.538
+      }
+    },
+    {
+      "interpolation": true,
+      "samples": 8,
+      "request_sent_ms": {
+        "median": 167.433,
+        "max": 217.889
+      },
+      "ack_received_ms": {
+        "median": 235.567,
+        "max": 271.984
+      },
+      "snapshot_ms": {
+        "median": 303.356,
+        "max": 333.783
+      },
+      "render_ms": {
+        "median": 323.678,
+        "max": 362.922
+      }
+    }
+  ]
+}

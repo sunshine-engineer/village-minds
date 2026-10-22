@@ -1,0 +1,61 @@
+{
+  "name": "repair-priority-grid-measured-v4",
+  "seeds": [
+    461,
+    463
+  ],
+  "excluded_seeds": [
+    7,
+    19,
+    31,
+    43,
+    59,
+    71,
+    83,
+    97,
+    109,
+    127,
+    211,
+    223,
+    227,
+    229,
+    233,
+    239,
+    241,
+    251,
+    301,
+    307,
+    401,
+    409,
+    419,
+    431,
+    433,
+    439,
+    443,
+    449,
+    457
+  ],
+  "duration_seconds": 900,
+  "request_seconds": 15,
+  "run_wall_seconds": 100,
+  "suite_seconds": 600,
+  "model_calls": 4,
+  "conditions": [
+    "scripted",
+    "scripted-priority",
+    "model"
+  ],
+  "cases": [
+    {
+      "name": "siege",
+      "config": "../cooperation-siege.json"
+    },
+    {
+      "name": "wood-pressure",
+      "config": "../validation/wood-pressure.json"
+    }
+  ],
+  "timing_policy": "measured_delay",
+  "inference_delay_seconds": 5.0,
+  "strategy_mode": "priority_plan"
+}

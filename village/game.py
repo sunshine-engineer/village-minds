@@ -42,28 +42,39 @@ class VillageGame(SceneBuilder, ShowBase):
         self.assets = AssetCatalog(get_settings()["assets"]["manifest"])
         if args.smoke_test:
             loadPrcFileData("", "window-type offscreen\nback-buffers 0")
+        remote = getattr(args, "remote_source", None)
         self.save_store = (
             None
-            if args.smoke_test or getattr(args, "no_save", False)
+            if remote or args.smoke_test or getattr(args, "no_save", False)
             else SaveStore(getattr(args, "save_path", DEFAULT_SAVE_PATH))
         )
         self.world = (
-            (
-                self.save_store.new_attempt()
-                if getattr(args, "new_game", False)
-                else self.save_store.load()
+            remote.world
+            if remote
+            else (
+                (
+                    self.save_store.new_attempt()
+                    if getattr(args, "new_game", False)
+                    else self.save_store.load()
+                )
+                if self.save_store
+                else None
             )
-            if self.save_store
-            else None
-        ) or World()
-        self.world.task_board.mode = getattr(
-            args, "coordination", get_settings()["coordination"]["mode"]
+            or World()
         )
+        if not remote:
+            self.world.task_board.mode = getattr(
+                args, "coordination", get_settings()["coordination"]["mode"]
+            )
         from .telemetry import DecisionLog
         from .timing import SimulationClock
 
-        trace = getattr(
-            args, "decision_log", get_settings()["telemetry"]["decision_log"]
+        trace = (
+            None
+            if remote
+            else getattr(
+                args, "decision_log", get_settings()["telemetry"]["decision_log"]
+            )
         )
         if (
             trace
@@ -103,13 +114,21 @@ class VillageGame(SceneBuilder, ShowBase):
         self.camLens.setFov(D["fov"])
         self.camLens.setNearFar(D["near"], D["far"])
         self.setBackgroundColor(*D["background"])
-        self.brains = BrainScheduler(
-            self.world,
-            args.url,
-            args.model,
-            args.demo or args.smoke_test,
-            profile=getattr(args, "model_profile", None),
-        )
+        if remote:
+            from types import SimpleNamespace
+
+            self.brains = SimpleNamespace(
+                status="CONNECTED", local_decisions=0, model_decisions=0, busy=False
+            )
+            self.save_status = "Server owns simulation and autosaves"
+        else:
+            self.brains = BrainScheduler(
+                self.world,
+                args.url,
+                args.model,
+                args.demo or args.smoke_test,
+                profile=getattr(args, "model_profile", None),
+            )
         self.keys = set()
         self.typing = False
         self.orbit = 0
@@ -159,9 +178,7 @@ class VillageGame(SceneBuilder, ShowBase):
                 (m for m in self.world.monsters if m.id in choices),
                 key=lambda m: distance(bot.position, m.position),
             ).id
-        if not self.world.apply(
-            bot, {"action": action, "target": target}, source="player"
-        ):
+        if not self.apply_player_decision(bot, {"action": action, "target": target}):
             self.world.log(
                 f"Cannot {action} here: check distance, energy, cooldown, and shared supplies."
             )
@@ -213,8 +230,10 @@ class VillageGame(SceneBuilder, ShowBase):
         else:
             self.userExit()
 
-    def update(self, task):
-        dt = min(self.clock_dt(), RT["max_step_seconds"])
+    def apply_player_decision(self, bot, decision):
+        return self.world.apply(bot, decision, source="player")
+
+    def advance_world(self, dt):
         if not self.typing and not self.paused:
             self.orbit += (
                 (int(C["orbit_left"] in self.keys) - int(C["orbit_right"] in self.keys))
@@ -235,7 +254,15 @@ class VillageGame(SceneBuilder, ShowBase):
             self.save_world()
             self.next_save_wall = time.monotonic() + RT["autosave_seconds"]
             self.failure_saved = self.world.failed
+
+    def display_time(self):
+        return self.world.time
+
+    def update(self, task):
+        dt = min(self.clock_dt(), RT["max_step_seconds"])
+        self.advance_world(dt)
         self.update_survival_visuals()
+        animation_time = self.display_time()
         speaker = max(
             range(len(self.world.villagers)),
             key=lambda i: (self.world.villagers[i].speech_until, i),
@@ -252,14 +279,14 @@ class VillageGame(SceneBuilder, ShowBase):
                 continue
             root.show()
             previous = root.getPos()
-            x, y = bot.position
+            x, y = self.display_position("villager", bot.name, bot.position)
             root.setPos(x, y, 0)
             walking = math.hypot(x - previous.x, y - previous.y) > 0.001
             if walking:
                 root.setH(math.degrees(math.atan2(-(x - previous.x), y - previous.y)))
             for i, leg in enumerate(legs):
                 leg.setP(
-                    math.sin(self.world.time * D["animation_speed"] + i * math.pi)
+                    math.sin(animation_time * D["animation_speed"] + i * math.pi)
                     * D["leg_swing_degrees"]
                     if walking
                     else 0
@@ -268,8 +295,7 @@ class VillageGame(SceneBuilder, ShowBase):
             body.setZ(
                 body_height
                 + (
-                    abs(math.sin(self.world.time * D["animation_speed"]))
-                    * D["body_bob"]
+                    abs(math.sin(animation_time * D["animation_speed"])) * D["body_bob"]
                     if walking
                     else 0
                 )
@@ -282,7 +308,11 @@ class VillageGame(SceneBuilder, ShowBase):
         target = (
             LOCATIONS["square"]
             if self.world.controlled is None
-            else self.world.villagers[self.world.controlled].position
+            else self.display_position(
+                "villager",
+                self.world.villagers[self.world.controlled].name,
+                self.world.villagers[self.world.controlled].position,
+            )
         )
         self.camera.setPos(
             target[0] + math.sin(self.orbit) * self.zoom,

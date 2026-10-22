@@ -154,6 +154,7 @@ def run_scenario(
     circuit_open = False
     inference_records = []
     allocations = []
+    plans = []
     memory = (
         (lesson_fixture or {}).get("lessons", {}) if mode == "hybrid-memory" else {}
     )
@@ -168,12 +169,43 @@ def run_scenario(
         scenario_name=options["scenario_name"],
         disabled_actions=control["disabled_actions"],
         routines=control["routines"],
-        timing_policy="paused_checkpoints",
+        timing_policy=options.get("timing_policy", "paused_checkpoints"),
         memory_available=bool(memory),
         checkpoint_strategy=schedule.strategy,
         planned_times=schedule.planned_times,
         role_order=schedule.roles,
     )
+
+    def advance_step(dt):
+        previous_repairs = {v.name: v.contributions["repairs"] for v in world.villagers}
+        metrics.step(world, dt)
+        world.tick(dt)
+        if control["routines"]:
+            brains.tick()
+        metrics.after_step(world)
+        if plans:
+            plan = plans[-1]
+            if world.time <= plan["expires_at"]:
+                plan["repair_actions_during_plan"] += sum(
+                    max(0, v.contributions["repairs"] - previous_repairs[v.name])
+                    for v in world.villagers
+                    if v.action == f"repairing {plan['gate']}"
+                )
+        for allocation in allocations:
+            person = next(
+                v for v in world.villagers if v.name == allocation["recipient"]
+            )
+            task = allocation["task"]
+            if (
+                task["assigned_to"] == person.name
+                and task["status"] in ("offered", "accepted")
+                and person.action == f"repairing {allocation['gate']}"
+            ):
+                allocation["repairs"] += max(
+                    0, person.contributions["repairs"] - allocation["last_repairs"]
+                )
+            allocation["last_repairs"] = person.contributions["repairs"]
+
     try:
         while world.time < options["duration_seconds"] - 1e-9 and not world.failed:
             if time.monotonic() >= deadline:
@@ -193,7 +225,18 @@ def run_scenario(
                     or repair_candidates(world.task_board)
                 )
             ):
-                selection = schedule.take(world)
+                selection = schedule.take(
+                    world,
+                    eligible=(
+                        (
+                            lambda person: bool(
+                                repair_candidates(world.task_board, person)
+                            )
+                        )
+                        if get_settings()["ai"]["repair_strategy"]["enabled"]
+                        else None
+                    ),
+                )
                 if selection is not None:
                     index, checkpoint_context = selection
                     bot = world.villagers[index]
@@ -227,7 +270,35 @@ def run_scenario(
                         selected["timeout"],
                         max(0, deadline - time.monotonic()),
                     )
+                    sent_at, revision = world.time, bot.revision
                     response = request(selected, observation, config_path, timeout)
+                    delay_policy = options.get("timing_policy", "paused_checkpoints")
+                    delay = (
+                        response["latency_ms"] / 1000
+                        if delay_policy == "measured_delay"
+                        else (
+                            options.get("inference_delay_seconds", 5.0)
+                            if delay_policy == "fixed_delay"
+                            else 0.0
+                        )
+                    )
+                    # Keep the same integration grid as the no-inference baseline.
+                    # Splitting a tick by arbitrary HTTP latency changes physics,
+                    # cooldowns and random-event order even for a no-op response.
+                    # Apply at the next normal tick (at most one step later).
+                    elapsed = 0.0
+                    while (
+                        elapsed < delay - 1e-9
+                        and not world.failed
+                        and world.time < options["duration_seconds"] - 1e-9
+                        and time.monotonic() < deadline
+                    ):
+                        dt = min(
+                            options["step_seconds"],
+                            options["duration_seconds"] - world.time,
+                        )
+                        advance_step(dt)
+                        elapsed += dt
                     requests += 1
                     latencies.append(response["latency_ms"])
                     # Do not apply a response beyond the scenario's wall deadline.
@@ -235,8 +306,8 @@ def run_scenario(
                     if response["status"] == "ok" and not expired:
                         outcome = brains.consume_decision(
                             index,
-                            bot.revision,
-                            world.time,
+                            revision,
+                            sent_at,
                             response["decision"],
                             request_id=request_id,
                             observation=observation,
@@ -258,6 +329,14 @@ def run_scenario(
                             backend=selected["backend"],
                         )
                     record = dict(
+                        sent_at=sent_at,
+                        response_at=world.time,
+                        simulated_delay_seconds=elapsed,
+                        requested_delay_seconds=delay,
+                        delay_quantization_seconds=max(0.0, elapsed - delay),
+                        controller=get_settings()["ai"]["repair_strategy"][
+                            "controller"
+                        ],
                         role=bot.role,
                         actor=bot.name,
                         request_id=request_id,
@@ -266,6 +345,21 @@ def run_scenario(
                         latency_ms=response["latency_ms"],
                         inference=response.get("inference", {}),
                     )
+                    if (
+                        outcome == "accepted"
+                        and response["decision"].get("action") == "plan_repairs"
+                    ):
+                        if plans:
+                            plans[-1]["expires_at"] = min(
+                                plans[-1]["expires_at"], world.time
+                            )
+                        plans.append(
+                            dict(
+                                world.task_board.repair_plan,
+                                request_id=request_id,
+                                repair_actions_during_plan=0,
+                            )
+                        )
                     inference_records.append(record)
                     logger.record(
                         "model_inference", world.time, source="model", **record
@@ -307,25 +401,7 @@ def run_scenario(
                     if expired:
                         continue
             dt = min(options["step_seconds"], options["duration_seconds"] - world.time)
-            metrics.step(world, dt)
-            world.tick(dt)
-            if control["routines"]:
-                brains.tick()
-            metrics.after_step(world)
-            for allocation in allocations:
-                person = next(
-                    v for v in world.villagers if v.name == allocation["recipient"]
-                )
-                task = allocation["task"]
-                if (
-                    task["assigned_to"] == person.name
-                    and task["status"] in ("offered", "accepted")
-                    and person.action == f"repairing {allocation['gate']}"
-                ):
-                    allocation["repairs"] += max(
-                        0, person.contributions["repairs"] - allocation["last_repairs"]
-                    )
-                allocation["last_repairs"] = person.contributions["repairs"]
+            advance_step(dt)
         if world.failed:
             reason = "village_destroyed"
         completed = (
@@ -334,6 +410,7 @@ def run_scenario(
         contributions = {v.name: v.contributions.copy() for v in world.villagers}
         result = {
             "seed": seed,
+            "timing_policy": options.get("timing_policy", "paused_checkpoints"),
             "mode": mode,
             "control": control_name,
             "scenario_name": options["scenario_name"],
@@ -373,9 +450,14 @@ def run_scenario(
                 for a in allocations
             ],
             "productive_model_allocations": sum(a["repairs"] > 0 for a in allocations),
+            "repair_priority_plans": plans,
+            "productive_priority_plans": sum(
+                p["repair_actions_during_plan"] > 0 for p in plans
+            ),
             "model_deferrals": (
                 sum(r["outcome"] == "accepted" for r in inference_records)
                 - len(allocations)
+                - len(plans)
                 if get_settings()["ai"]["repair_strategy"]["enabled"]
                 else 0
             ),
@@ -409,7 +491,7 @@ def run_scenario(
                 round(statistics.mean(latencies), 3) if latencies else None
             ),
             "memory_available": bool(memory),
-            "timing_policy": "paused_checkpoints",
+            "timing_policy": options.get("timing_policy", "paused_checkpoints"),
             "decision_log": "decisions.jsonl",
             "log_dropped_records": logger.dropped,
         }
@@ -670,7 +752,7 @@ def write_report(output, results, manifest):
         "",
         f"Scenario: {scenario_name}. Controls: {control_names}",
         "",
-        "Fixed substeps without rendering; simulation pauses at bounded model checkpoints.",
+        "Fixed substeps without rendering; see summary timing_policy for paused or delayed decision application.",
         "Observed durations include censored runs: they are not mean time-to-failure estimates.",
         "",
         "| Mode | Control | Coordination | Runs | Horizon completed | Village lost | Wall limited | Model requests | Accepted AI | Timeouts | Errors |",
@@ -933,7 +1015,7 @@ def main():
             "backend": args.model_profile["backend"],
             "model": args.model_profile["model"],
         },
-        "timing_policy": "paused_checkpoints",
+        "timing_policy": options.get("timing_policy", "paused_checkpoints"),
         "skipped_scenarios": 0,
         "interrupted": False,
     }

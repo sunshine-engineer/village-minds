@@ -425,7 +425,11 @@
       "max_choices": 4,
       "max_lessons": 1,
       "prompt": "prompts/repair_coordinator.txt",
-      "lease_seconds": 30.0
+      "lease_seconds": 30.0,
+      "mode": "assignment",
+      "plan_seconds": 60.0,
+      "controller": "model",
+      "priority_prompt": "prompts/repair_priority.txt"
     }
   },
   "display": {
@@ -594,7 +598,9 @@
         "routines": false,
         "disabled_actions": []
       }
-    }
+    },
+    "timing_policy": "paused_checkpoints",
+    "inference_delay_seconds": 5.0
   },
   "coordination": {
     "enabled": true,
@@ -652,7 +658,8 @@
       "guard_opportunity_cost": 60.0,
       "late_arrival_penalty": 120.0,
       "handoff_gate_health": 90.0
-    }
+    },
+    "repair_handoffs": false
   },
   "logistics": {
     "enabled": false,
@@ -671,5 +678,29 @@
     "suite_seconds": 110.0,
     "seed": 301,
     "gate_health": 20.0
+  },
+  "network": {
+    "host": "127.0.0.1",
+    "port": 8765,
+    "save_path": "saves/server-village.json",
+    "tick_seconds": 0.05,
+    "poll_seconds": 0.1,
+    "request_seconds": 2.0,
+    "lease_seconds": 5.0,
+    "input_seconds": 0.4,
+    "reconnect_seconds": 1.0,
+    "queue_capacity": 64,
+    "max_commands_per_tick": 8,
+    "max_body_bytes": 65536,
+    "max_state_bytes": 5000000,
+    "interpolation": {
+      "enabled": true,
+      "delay_seconds": 0.2,
+      "max_gap_seconds": 0.75,
+      "snap_distance": 4.0,
+      "buffer_size": 32,
+      "catch_up_rate": 1.1,
+      "catch_up_threshold_seconds": 0.05
+    }
   }
 }

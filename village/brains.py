@@ -368,7 +368,14 @@ class BrainScheduler:
         elif (
             world.failed
             or not bot.alive
-            or revision != bot.revision
+            or (
+                revision != bot.revision
+                and not (
+                    isinstance(result, dict)
+                    and result.get("action") == "plan_repairs"
+                    and (observation or {}).get("decision_layer") == "repair_priority"
+                )
+            )
             or index == world.controlled
             or world.time - sent_at >= A["max_decision_age_seconds"]
         ):
@@ -406,6 +413,7 @@ class BrainScheduler:
                 self.status += " | outdated/unavailable choice skipped"
             if accepted and result.get("action") in (
                 "dispatch_repair",
+                "plan_repairs",
                 "defer_strategy",
             ):
                 self.model_tasks[index] = None

@@ -23,10 +23,14 @@ class ModelBackend(Protocol):
 
 
 def messages(observation):
-    if observation.get("decision_layer") == "repair_allocation":
+    if observation.get("decision_layer") in ("repair_allocation", "repair_priority"):
         prompt = Path(get_settings()["ai"]["repair_strategy"]["prompt"]).read_text(
             encoding="utf-8"
         )
+        if observation.get("decision_layer") == "repair_priority":
+            prompt = Path(
+                get_settings()["ai"]["repair_strategy"]["priority_prompt"]
+            ).read_text(encoding="utf-8")
         compact = {
             k: observation[k]
             for k in ("role", "wood", "choices", "lessons")
@@ -172,13 +176,26 @@ def request_decision(url, model, observation, timeout=None, *, profile=None):
     profile.update(url=url, model=model)
     if profile["backend"] not in BACKENDS:
         raise ValueError(f'Unknown model backend: {profile["backend"]}')
+    if (
+        observation.get("decision_layer") == "repair_priority"
+        and get_settings()["ai"]["repair_strategy"]["controller"] == "scripted"
+    ):
+        choices = observation["choices"]
+        return InferenceDecision(
+            (
+                dict(action="plan_repairs", target=choices[0]["target"], dialogue="")
+                if choices
+                else dict(action="defer_strategy", target="", dialogue="")
+            ),
+            {"controller": "scripted_priority", "provider_called": False},
+        )
     backend = BACKENDS[profile["backend"]]()
     result = backend.decide(
         profile, observation, profile["timeout"] if timeout is None else timeout
     )
     if not isinstance(result, dict):
         raise ValueError("Expected a decision object")
-    if observation.get("decision_layer") == "repair_allocation":
+    if observation.get("decision_layer") in ("repair_allocation", "repair_priority"):
         if set(result) != {"choice"} or not isinstance(result["choice"], str):
             raise ValueError("Expected exactly one strategy choice")
         choice = result["choice"]
@@ -191,7 +208,11 @@ def request_decision(url, model, observation, timeout=None, *, profile=None):
             if candidate is None:
                 raise ValueError("Unknown strategy choice")
             decision = {
-                "action": "dispatch_repair",
+                "action": (
+                    "plan_repairs"
+                    if observation.get("decision_layer") == "repair_priority"
+                    else "dispatch_repair"
+                ),
                 "target": candidate["target"],
                 "dialogue": "",
             }
