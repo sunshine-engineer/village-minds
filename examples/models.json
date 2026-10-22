@@ -1,0 +1,21 @@
+{
+  "ai": {
+    "default_profile": "local_qwen",
+    "profiles": {
+      "local_server": {
+        "backend": "openai_compatible",
+        "url": "http://localhost:8000/v1",
+        "model": "your-installed-model",
+        "timeout": 25.0,
+        "temperature": 0.8,
+        "max_tokens": 160,
+        "context_size": 4096,
+        "keep_alive": "10m",
+        "api_key_env": "LOCAL_MODEL_API_KEY"
+      }
+    },
+    "villager_profiles": {
+      "Edda": "local_server"
+    }
+  }
+}

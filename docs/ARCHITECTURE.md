@@ -1,54 +1,95 @@
 # Architecture
 
-Village Minds is a single-player Python/Panda3D survival prototype. Python owns
-world state; model responses are proposals checked against the current rules.
+The host runs Panda3D and authoritative simulation rules. Docker runs an independent
+model server. Model responses propose actions; they cannot execute code or directly
+mutate state. Local routines keep every unpossessed actor active during inference.
 
-## Decision flow
+## Ownership and modules
 
-1. Panda3D advances the world and movement each frame.
-2. Independent local role routines handle needs, work, patrols and urgent threats.
-3. A background worker sends bounded JSON observations to Ollama over HTTP.
-4. Slower model decisions provide destinations, guard assignments or dialogue.
-5. The simulation validates responses before applying them. Stale or invalid
-   decisions are discarded; local activity continues during model delays/errors.
-
-One inference worker limits load on local hardware. It does not serialize villager
-movement. Separate local and model counters expose which controller acted.
-
-## Modules
-
-| File | Responsibility |
+| Module | Responsibility |
 | --- | --- |
-| `village/simulation.py` | Rules, navigation, perception, resources, monsters and failure |
-| `village/brains.py` | Role routines, model schema, background requests and arbitration |
-| `village/game.py` | Panda3D rendering, input, possession, HUD and save integration |
-| `village/persistence.py` | Validated JSON snapshots, backups and retained failure lessons |
-| `village/__main__.py` | Command-line options and application lifecycle |
-| `village/probe.py` | Model API connectivity and action validation check |
+| `config.py`, `data/default.json` | Validated startup configuration and compatibility fingerprints |
+| `entities.py` | Villager, crop and monster dataclasses |
+| `map_data.py` | Configured map and roster shared by navigation and scene |
+| `navigation.py` | Distance, collision and grid A* |
+| `world.py` | World lifecycle, perception, validated dispatch and movement |
+| `survival.py` | Crops, inventory, combat, waves and failure rules |
+| `policies.py` | Default needs/role decisions |
+| `extensions.py`, `plugins/` | Action, policy, timed-system, model and state registration |
+| `decisions.py` | Observation-specific JSON action schema |
+| `models.py` | Transport registry, Ollama and local compatible chat adapters |
+| `brains.py` | Routine scheduling, model worker, ownership checks and arbitration |
+| `assets.py`, `data/assets/catalog.json` | Validated prefab catalog and model loading |
+| `scene.py` | Procedural geometry and world/actor visual synchronization |
+| `ui.py`, `controls.py` | Configured HUD widgets and input bindings |
+| `game.py` | Panda3D lifecycle, frame orchestration, camera, possession and saving |
+| `telemetry.py` | Bounded JSONL traces and aggregate event counters |
+| `evaluation_schedule.py` | Seed-deterministic role rotation, horizon-spread threat checkpoints and coverage |
+| `evaluation.py` | Headless experiments, factual failure fixtures, bounded model processes and reports |
+| `timing.py` | Fast-forward substeps and retained frame backlog |
+| `persistence.py` | Validated versioned JSON, atomic writes and backup recovery |
+| `cli.py`, `__main__.py`, `probe.py` | Config/profile startup, game entry and API probe |
+| `simulation.py` | Compatibility imports for existing scripts/tests |
 
-## Persistence and ownership
+## Startup and frame flow
 
-The default checkout-relative slot is `saves/village.json`. Saves include world
-resources, villagers, monsters, crops, timers, memories and campaign lessons.
-Atomic replacement and a backup protect against interrupted writes. No offline
-simulation occurs. Use one process per save slot; concurrent writers are unsupported.
+1. Parse the config path and merge validated overrides with packaged defaults.
+2. Import simulation modules, register explicit trusted plugins, restore/create state.
+3. Load prefab data, initialize Panda3D, build scene/UI and bind configured controls.
+4. Each frame: accept player movement, advance survival/system/movement rules, run
+   local needs policies and consume/dispatch background strategic decisions.
+5. Synchronize visuals and HUD; autosave on its wall-clock schedule or after failure.
 
-Player takeover excludes that actor from autonomous control. Ownership revisions
-prevent an earlier pending model response from overriding a newly possessed actor.
+No simulation module depends on Panda3D or network I/O. The model worker never
+mutates the world or scene; it sends decision objects back through a bounded queue.
+Every model decision is checked again on the game thread. Possession revisions reject
+responses issued before takeover/release. A per-actor model plan can be interrupted
+by urgent needs. Model/local counters remain separate.
 
-Restarting resumes the attempt, including a destroyed village. `--new-game` starts
-a fresh attempt with retained failure lessons. These are prompt memories, not model
-training or evidence that cooperation improves automatically.
+## Extension boundaries
 
-## Deployment boundaries
+Use data for content and tuning, registered hooks for new behavior, and explicit
+schema changes for new entity fields. Dependencies point toward configuration,
+entities and navigation. The compatibility facade lets existing imports continue to
+work; new code should import the module that owns the behavior.
 
-The game runs on the host desktop. Docker runs Ollama; its port binds to localhost.
-The game sends observations and dialogue to the configured model URL. Keep that
-endpoint trusted. Models and containers retain their own licenses; the repository
-MIT license covers this project's original code and docs.
+The current world uses a survival rules mixin to separate the rules from lifecycle
+orchestration. It is not a general entity-component engine. Plugins execute trusted
+Python on the simulation thread, so their correctness and performance need review.
 
-## Validation limits
+## Persistence
 
-Logic tests run without a graphics window or model server. Rendering, keyboard
-integration and real inference require separate checks. See [validation](../VALIDATION.md)
-for recorded evidence and [contributing](../CONTRIBUTING.md) for commands.
+Format 2 stores a configuration fingerprint and registered plugin state. Format 1
+remains readable under default gameplay settings. Atomic file replacement and a
+previous-snapshot backup protect interrupted writes. Use one writer per save slot;
+there is no concurrent save locking, offline simulation or arbitrary schema migration.
+
+Restarting resumes the same attempt, including a destroyed village. `--new-game`
+retains prompt lessons. These memories do not train the model or prove improvement.
+
+See [configuration](CONFIGURATION.md), [extension recipes](EXTENDING.md), and
+[validation evidence](../VALIDATION.md).
+
+Evaluation uses the same rules, local routines and model-result validation as gameplay,
+with a different timing policy: the simulation pauses at fixed strategic checkpoints.
+Requests run in spawned processes so a hung adapter cannot stall the suite indefinitely.
+Compare results within that policy; see [evaluation](EVALUATION.md) for limitations.
+
+`evaluation_controls.py` owns evaluation-only action interventions through an `EvaluationWorld` subclass. It logs blocked actions without changing ordinary `World` behavior or campaign persistence. `configs/cooperation-siege.json` supplies the opt-in siege balance; no scenario constants are embedded in survival code.
+
+`coordination.py` owns structured requests, exclusive task ownership, assignment/acceptance, progress, expiry, task policies and validated save state. `World` exposes board actions and public observations; `BrainScheduler` drives automation. Existing role routines remain the independent baseline and handle urgent needs. Evaluation compares the three strategies with a fixed action set and records paired seed differences.
+
+`validation.py` supervises the multi-scenario holdout protocol in fresh evaluator processes. It freezes effective configs and code hashes, enforces batch deadlines, validates result identities/capabilities, and reports missing or censored runs separately. Scenario definitions and seeds live in `configs/validation/`; full-size matrices do not run in ordinary unit tests.
+
+`allocation.py` computes legal repair candidates and resource/travel/urgency features;
+`logistics.py` handles urgent partial-load delivery. `coordination.py` owns handoffs
+and persisted strategic leases. `models.py` translates compact choice IDs into
+validated intents. `inference.py` owns the shared hard-deadline subprocess boundary
+for live scheduling, reliability probes and paused evaluations. Backend decisions
+remain dictionaries, with optional provider timing metadata on `InferenceDecision`.
+
+`inference_probe.py` measures controlled per-role inference reliability.
+`strategy_experiment.py` freezes matched legacy/scripted/model runs using new seeds.
+`evaluation.py` records productive model assignments separately from accepted
+choices, travel time, coverage and urgent deliveries. See
+[repair experiments](STRATEGY_EXPERIMENT.md) for metrics and interpretation limits.

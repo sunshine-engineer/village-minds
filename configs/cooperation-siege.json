@@ -1,0 +1,24 @@
+{
+  "rules": {
+    "initial_food": 2,
+    "initial_wood": 2,
+    "first_wave_seconds": 60.0,
+    "wave_interval_seconds": 60.0,
+    "wave_growth_every": 2,
+    "monster_health": 60.0,
+    "monster_gate_damage": 3.0,
+    "hunger_per_second": 0.3,
+    "starvation_damage_per_second": 0.8
+  },
+  "evaluation": {
+    "duration_seconds": 900.0,
+    "max_model_calls": 4,
+    "scenario_name": "cooperation-siege"
+  },
+  "runtime": {
+    "save_path": "../saves/cooperation-siege.json"
+  },
+  "coordination": {
+    "mode": "requests"
+  }
+}

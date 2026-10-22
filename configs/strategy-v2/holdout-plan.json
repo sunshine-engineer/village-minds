@@ -1,0 +1,49 @@
+{
+  "name": "holdout-plan",
+  "seeds": [
+    401,
+    409,
+    419
+  ],
+  "excluded_seeds": [
+    7,
+    19,
+    31,
+    43,
+    59,
+    71,
+    83,
+    97,
+    109,
+    127,
+    211,
+    223,
+    227,
+    229,
+    233,
+    239,
+    241,
+    251,
+    301,
+    307
+  ],
+  "duration_seconds": 900,
+  "request_seconds": 15,
+  "run_wall_seconds": 90,
+  "suite_seconds": 600,
+  "model_calls": 4,
+  "cases": [
+    {
+      "name": "siege",
+      "config": "../cooperation-siege.json"
+    },
+    {
+      "name": "wood-pressure",
+      "config": "../validation/wood-pressure.json"
+    },
+    {
+      "name": "long-haul",
+      "config": "../validation/long-haul.json"
+    }
+  ]
+}

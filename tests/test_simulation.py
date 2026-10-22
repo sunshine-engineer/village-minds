@@ -132,8 +132,8 @@ class APIContractTests(unittest.TestCase):
         calls = []
         def infer(*args, **kwargs):
             calls.append(threading.get_ident())
-            return {'action':'rest'}
-        with patch('village.brains.request_decision', side_effect=infer):
+            return {'status':'ok','decision':{'action':'rest'}}
+        with patch('village.brains.bounded_decision', side_effect=infer):
             scheduler = BrainScheduler(world, 'http://localhost:11434', 'test-model')
             scheduler.tick()
             self.assertTrue(scheduler.busy)

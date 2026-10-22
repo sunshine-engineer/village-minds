@@ -19,8 +19,8 @@ class AutonomyTests(unittest.TestCase):
         def slow_request(*args,**kwargs):
             entered.set()
             release.wait(5)
-            return {'action':'move','target':'farm','dialogue':''}
-        with patch('village.brains.request_decision',side_effect=slow_request) as request:
+            return {'status':'ok','decision':{'action':'move','target':'farm','dialogue':''}}
+        with patch('village.brains.bounded_decision',side_effect=slow_request) as request:
             brains=BrainScheduler(world,'http://localhost:11434','test-model')
             try:
                 brains.tick()

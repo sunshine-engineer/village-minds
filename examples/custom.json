@@ -1,0 +1,39 @@
+{
+  "runtime": {
+    "pace": 0.75,
+    "save_path": "../saves/custom-village.json"
+  },
+  "rules": {
+    "first_wave_seconds": 240.0,
+    "crop_grow_seconds": 30.0
+  },
+  "display": {
+    "window_size": [
+      1280,
+      800
+    ]
+  },
+  "controls": {
+    "actions": {
+      "harvest": "b"
+    }
+  },
+  "plugins": [
+    "village.plugins.encourage"
+  ],
+  "extension_settings": {
+    "encourage": {
+      "energy_cost": 2,
+      "energy_restore": 3,
+      "cooldown_seconds": 10
+    }
+  },
+  "ai": {
+    "strategic_actions": [
+      "move",
+      "guard",
+      "talk",
+      "encourage"
+    ]
+  }
+}

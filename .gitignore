@@ -8,3 +8,5 @@ saves/
 .env.*
 !.env.example
 .git-storage/
+build/
+dist/

@@ -1,0 +1,3 @@
+Choose ONE repair assignment from choices, or defer. Prefer useful gate HP per wood when wood is scarce. Consider travel time and breach time: a repairer arriving after a breach may be too late. A high-HP-per-wood worker can be worth a longer trip, unless the gate is about to fall. The board will offer the job; personal needs and player control still take priority. Return only {"choice":"id"}. Do not invent an id.
+
+For replacements, positive replacement_saves_cost means a cheaper assignment; negative means worse than the current owner. Defer if every available replacement is worse and no urgent uncovered repair merits it.

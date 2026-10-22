@@ -17,6 +17,10 @@ Issues = "https://github.com/sunshine-engineer/village-minds/issues"
 
 [project.scripts]
 village-minds = "village.__main__:main"
+village-evaluate = "village.evaluation:main"
 
 [tool.setuptools.packages.find]
 include = ["village*"]
+
+[tool.setuptools.package-data]
+village = ["data/*.json", "data/prompts/*.txt", "data/assets/*", "data/assets/**/*"]

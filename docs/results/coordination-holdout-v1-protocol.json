@@ -1,0 +1,125 @@
+{
+  "plan": {
+    "name": "coordination-holdout-v1",
+    "seeds": [
+      211,
+      223,
+      227,
+      229,
+      233,
+      239,
+      241,
+      251
+    ],
+    "excluded_development_seeds": [
+      7,
+      19,
+      31,
+      43,
+      59,
+      71,
+      83,
+      97,
+      109,
+      127
+    ],
+    "duration_seconds": 900.0,
+    "step_seconds": 0.1,
+    "run_wall_seconds": 30.0,
+    "scenario_wall_seconds": 180.0,
+    "suite_wall_seconds": 600.0,
+    "output_dir": "../../artifacts/validation",
+    "scenarios": [
+      {
+        "name": "cooperation-siege",
+        "config": "../cooperation-siege.json"
+      },
+      {
+        "name": "food-pressure",
+        "config": "food-pressure.json"
+      },
+      {
+        "name": "wood-pressure",
+        "config": "wood-pressure.json"
+      },
+      {
+        "name": "long-haul",
+        "config": "long-haul.json"
+      }
+    ]
+  },
+  "plan_sha256": "a34f5cf178180bc3a735aa6603d94b810903ddf016e0ec36eb41c20d67aa0ca4",
+  "source_sha256": {
+    "__init__.py": "dbe5552c40f0d78217b59622478b43fdb180614192ba1c0d04e64d5fef1a8eec",
+    "__main__.py": "c47c05f25172b5e83bfc03c16289ccc182139ab471d5836c7aa45ba83667ab9c",
+    "assets.py": "c1870267ba7740f9fd8b333fa8ee99db11ca22910553d0d67b798b3a0961ea36",
+    "brains.py": "bc77ef610b5479a99963a8dba693887a5e7a6b877980ab48d12659a086c202b2",
+    "cli.py": "db2530dc598cfb55d1ec1b7b7b888bb68174f625e8b53ce75e80bab0d27bcff8",
+    "config.py": "c76b257177b354962f67167ebdf1863e6ddf66612f542fa9a9df5695a702e3ee",
+    "controls.py": "0e316f8f80ba83251e658404bbaa4c40a695d8ac2d343327d17cfda82bbd011b",
+    "coordination.py": "d5d0c575a37a7f952535e23435ae8ac109b99a8b439905866ec4ed9dbf54201e",
+    "data/assets/catalog.json": "dc3d62d654dc55499efefea7d03a75fc7143d9aea5913e3e6bda7675a34e8604",
+    "data/default.json": "56036aa862959f763c4c130bd959ee7313555f7543ca18572c92b509204cfb91",
+    "data/prompts/villager.txt": "dcf4aca137a54ba51cab33d391dd7ed74d6c0af77aa32376c8c842ed1dad362c",
+    "decisions.py": "3aa7088f884a43056a97dc0bec7e1f555a69bfa666d3b269d487f1198b67c470",
+    "entities.py": "d10a6bed164d974075037a0d72a7c1967093e70b6069441749614b10048a6c25",
+    "evaluation.py": "83a4471414320f8147191aa86f5f099dbed13a326fc2457feb74ffd8752c17b9",
+    "evaluation_controls.py": "0ac2948fe1893872f75a2d95111f7d2d65bcbc6b40821ad03f0ba5adc6f384bc",
+    "evaluation_schedule.py": "3ebc3ceda0a3e14660b0bfac0de7fca35b2254defe441c5989f2736222731e61",
+    "extensions.py": "eebcfeecc72de3602cdab0076672a23707009a0e18dbd75e8064bf1b57c46ea0",
+    "game.py": "cd58fd0a7d14645422edc38d494cc0cf558f64af357338c4ff640ec9f94abeaf",
+    "map_data.py": "7d977ee3c2c0f35afb1c2505da6a222462eeab86989bdd3302a90b6b401b3234",
+    "models.py": "b2720c663c187e2a2bbd44f91e0658ac2f1676decfd3fa0edd2a2bd8e52e31ca",
+    "navigation.py": "434df819eb6b6f7a607411999c8a553571b60f2b076008557fee62234bf098ae",
+    "persistence.py": "282bcd9ed533522469473df61c7ee088a01571c11e293246808c9fdc4841ea5b",
+    "plugins/__init__.py": "b900ad6ddfd656b4b7441f67a7196d130037afe027f207b7c9aefe8026b7cfa7",
+    "plugins/encourage.py": "e7314e889c98b9a28a32a202720c7140839cb9102307eeaf2214da19108ad5ca",
+    "policies.py": "1d88cd6e2b217724bb08f9c1a57908e40ae7bde85a6481e2f967c5089470cc02",
+    "probe.py": "c94ac8b76bd44e9c8f108301807491bccd9ada30b4bbbfd20e7c604432ba44d8",
+    "scene.py": "c0d84daa92a03ab69c956a398630cd0cad291242a99ecb77b969e397c7532b35",
+    "simulation.py": "077d1753c08d9a44f9d3991e1f0cf029eb5baaa172432048f934789ff5efb204",
+    "survival.py": "b5823b0c3ed749ea23f6e68b18bd0ec7b81e310dc4e04b00f079bf505d3311dd",
+    "telemetry.py": "8b326de38a92b0139682ebedc8647c025d52be9f11fe3801bd16b09a82122f23",
+    "timing.py": "1704d392a1caa08c3679b01ca0118abc8952fd215ff4ee2f0ffc292a4e006cc1",
+    "ui.py": "b0fd157b53ecbfe0eb476add7b7a2f8278a89f611e11c56a064df8f667f52cf5",
+    "world.py": "b15fdaabed099ae80c47fc33635735675378f811c2f6e3e737dc18fdac7a1c03"
+  },
+  "runner_sha256": "998c1fdeacbe59b393062a086165b69a3f4e1a79d570492f878cb5461f68dd82",
+  "scenarios": [
+    {
+      "name": "cooperation-siege",
+      "source_config_sha256": "a22b3eebefed7b4113e1ff16b1b86fd1c03072fb30a4b0dad9e282404cdb247f",
+      "frozen_config_sha256": "a9cc773b8773a3dfec95d8a24cfd7a583b68d768c33be7e0d38bc772121e6210",
+      "frozen_config": "cooperation-siege-config.json"
+    },
+    {
+      "name": "food-pressure",
+      "source_config_sha256": "40ea72b99263c7be73e8855c8c020c88599f4360c9b1e8ddd67b610654f328c3",
+      "frozen_config_sha256": "97cbb1d8f538db1f41ad82fa27b54283e529b6a378ebfbf6fe46463b23185b3f",
+      "frozen_config": "food-pressure-config.json"
+    },
+    {
+      "name": "wood-pressure",
+      "source_config_sha256": "36bb0bfe504c3da1d9e1fb60b02597c377e956b24a08e8017fde6287aaf7acd6",
+      "frozen_config_sha256": "f1c7f444de62c83eeddd9af72c861e5e04f12d6730effc1bc71691baf3e32766",
+      "frozen_config": "wood-pressure-config.json"
+    },
+    {
+      "name": "long-haul",
+      "source_config_sha256": "a527bce26f30bd36e1724a3992edffedb5022960f310740176d85d756359c701",
+      "frozen_config_sha256": "1c5b1fe6c5f68e3b4ba8c6ce69a6a96b92e61cfff1533cf93f26712f8df2dd65",
+      "frozen_config": "long-haul-config.json"
+    }
+  ],
+  "started_at": "2026-10-21T23:41:06.581322+00:00",
+  "policy_commit": "1ff6c75",
+  "finished_at": "2026-10-21T23:46:10.802554+00:00",
+  "status": "complete",
+  "expected_runs": 96,
+  "observed_runs": 96,
+  "runtime_reported_after_run": {
+    "python": "3.14.4",
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43"
+  },
+  "local_artifact": "artifacts/validation/coordination-holdout-v1-20261021T234106-f40823d3"
+}

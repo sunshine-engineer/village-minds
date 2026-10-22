@@ -60,6 +60,31 @@ docker compose exec ollama ollama pull qwen2.5:1.5b
 
 Python 3.11+ is required. Panda3D 1.10.16 is pinned. The game window runs on the host; only the model runs in Docker. The Linux `.venv` and Windows `.venv-win` are different environments and must not be shared.
 
+## Fast-forward and AI evaluation
+
+Press **V** during play to cycle 0.5x, 1x, 2x, 5x and 10x; the HUD shows speed.
+Use `--pace 10` to start fast. Survival rules advance in small substeps.
+
+To test fifteen simulated minutes without waiting for a game window:
+
+```powershell
+.\.venv-win\Scripts\python.exe -m village.evaluation --seeds 7 --duration 900
+```
+
+```bash
+.venv/bin/python -m village.evaluation --seeds 7 --duration 900
+```
+
+This runs scripted villagers without Docker and generates a report under
+`artifacts/evaluations/`. Add `--modes all` for scripted / AI / AI-with-memory
+comparisons. Model calls now wait for active monster threats, spread across the
+scenario horizon and rotate among roles. Reports show actual role/threat coverage.
+Individual requests and whole suites have time/call limits.
+AI inference still takes real time; evaluation pauses at bounded decision checkpoints.
+
+See the [evaluation guide](docs/EVALUATION.md) for short AI commands, metrics, limits
+and `--decision-log artifacts/decisions.jsonl` during normal play.
+
 ## Roles and cooperation
 
 | Villager | Role | Responsibility / bonus |
@@ -112,6 +137,7 @@ Select the game window before pressing keys.
 | J | Repair a nearby damaged gate using shared wood |
 | K | Attack a nearby monster |
 | L | Elder rally; uses one shared food to support nearby villagers |
+| Q / U / Y / X | Request help / elder offers task / accept task / release task |
 | P | Pause / resume simulation |
 | F5 | Save immediately |
 | Escape | Cancel dialogue, or quit and save |
@@ -192,14 +218,14 @@ Successful model decisions have a 15-simulation-second minimum interval per vill
 
 The HUD separately counts **local actions** and **accepted AI decisions**. An active village is not proof that a model is responding; local routines are explicit game AI. Nearby routine chatter is globally limited to one line every 12 simulation seconds and each speaker has a longer cooldown.
 
-No extra flag or new game is needed. Restart with the usual command to resume your save under the new controller. The save format has not changed.
+Restart with the usual command to resume your campaign under the default rules. Version 1 saves are upgraded to format 2 when saved; customized world/rules settings require a separate save slot.
 
 
 Configuration:
 
 - `--model TAG` or `VILLAGE_MODEL`: use a different installed Ollama model.
 - `--url URL` or `OLLAMA_URL`: default `http://localhost:11434`.
-- `--pace NUMBER`: between 0.1 and 2; default 0.5.
+- `--pace NUMBER`: between 0.1 and the configured maximum (10 by default); default 0.5.
 - The Compose API binds to host loopback only. Observations and dialogue go to the configured endpoint.
 - The inspected Ollama 0.32.15 image digest is pinned in `compose.yaml`.
 
@@ -250,14 +276,29 @@ This remains a flat-grid prototype with radius combat, simplified monster steeri
 
 ## Source layout and references
 
-- `village/simulation.py`: authoritative survival rules, perception, actions, waves, crops, roles, and failure records.
-- `village/persistence.py`: validated versioned JSON, atomic writes, backup recovery, and retained campaign lessons.
-- `village/brains.py`: independent local routines, patrols, contextual chatter, model-order handling, and bounded background Ollama requests.
-- `village/game.py`: procedural scene, HUD, controls, saving, and pause.
-- `tests/`: simulation, API contract, survival, and persistence tests.
-- `scripts/check_window.py`: targeted X11 keyboard integration checks; optional `--save-path artifacts/window-test-save.json` also checks F5 save/reload in an isolated slot.
-- `scripts/check_restart.py`: two actual CLI processes checking normal exit saving and automatic resume.
-- `scripts/check_autonomy.py`: temporary five-second game check that all six villagers move while model inference is pending; works on native Windows and Linux.
+The code separates simulation, local policies, model transports, rendering, assets,
+controls and persistence. Existing `village.simulation` imports remain supported.
+See [architecture](docs/ARCHITECTURE.md) for the module ownership map.
+
+### Customizing and contributing
+
+Use a startup JSON override to change settings without editing Python:
+
+```powershell
+.\.venv-win\Scripts\python.exe -m village --config examples/custom.json --demo --no-save
+```
+
+```bash
+.venv/bin/python -m village --config examples/custom.json --demo --no-save
+```
+
+- [Configuration reference](docs/CONFIGURATION.md): defaults, overrides, paths and save compatibility.
+- [Extension recipes](docs/EXTENDING.md): visual prefabs, custom actions, roles, systems and model backends.
+- [Default settings](village/data/default.json), [asset catalog](village/data/assets/catalog.json), and [model profiles example](examples/models.json).
+
+New saves use format 2. Existing format 1 campaigns load with default gameplay rules.
+Changing gameplay/map settings requires a separate save slot; it never silently resets
+a campaign. Camera, visuals, controls and model settings can change without resetting.
 
 References: [Panda3D tasks](https://docs.panda3d.org/1.10/python/programming/tasks-and-events/tasks), [Panda3D configuration](https://docs.panda3d.org/1.10/python/programming/configuration/list-of-all-config-variables), [Ollama chat API](https://docs.ollama.com/api/chat), [Ollama Docker](https://docs.ollama.com/docker), [Qwen2.5 1.5B model/license](https://ollama.com/library/qwen2.5:1.5b).
 
@@ -269,3 +310,15 @@ References: [Panda3D tasks](https://docs.panda3d.org/1.10/python/programming/tas
 
 Project code and documentation are available under the [MIT License](LICENSE).
 Panda3D, Ollama and downloaded models retain their own licenses.
+
+For a harder benchmark, try the [cooperation siege scenario](docs/COOPERATION_SCENARIO.md). It combines earlier, stronger waves with scarce reserves. Compare independent routines, volunteers responding to requests, and elder-assigned tasks while keeping all survival actions enabled. See [task coordination](docs/COORDINATION.md) for player/model actions and save behavior.
+
+To test generalization beyond the development seeds, run `python -m village.validation` using your platform’s virtual-environment Python. The [held-out validation guide](docs/HELD_OUT_VALIDATION.md) describes the frozen 96-run matrix, new scenarios, time limits and evidence.
+
+### Repair allocation experiment
+
+The opt-in [repair strategy and logistics prototype](docs/STRATEGY_EXPERIMENT.md)
+adds resource-aware repair offers, urgent partial deliveries and supply-task handoffs.
+It includes a bounded per-role inference probe and matched scripted/model evaluation
+on fresh seeds. Enable it with `--config configs/strategy-v2/development.json`.
+The existing controller remains the default until evidence supports changing it.
