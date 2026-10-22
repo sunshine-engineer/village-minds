@@ -1,0 +1,3353 @@
+{
+  "protocol": {
+    "plan": {
+      "name": "repair-priority-measured-v4",
+      "seeds": [
+        461,
+        463
+      ],
+      "excluded_seeds": [
+        7,
+        19,
+        31,
+        43,
+        59,
+        71,
+        83,
+        97,
+        109,
+        127,
+        211,
+        223,
+        227,
+        229,
+        233,
+        239,
+        241,
+        251,
+        301,
+        307,
+        401,
+        409,
+        419,
+        431,
+        433,
+        439,
+        443,
+        449,
+        457
+      ],
+      "duration_seconds": 900,
+      "request_seconds": 15,
+      "run_wall_seconds": 100,
+      "suite_seconds": 600,
+      "model_calls": 4,
+      "conditions": [
+        "scripted",
+        "scripted-priority",
+        "model"
+      ],
+      "cases": [
+        {
+          "name": "siege",
+          "config": "../cooperation-siege.json"
+        },
+        {
+          "name": "wood-pressure",
+          "config": "../validation/wood-pressure.json"
+        }
+      ],
+      "timing_policy": "measured_delay",
+      "inference_delay_seconds": 5.0,
+      "strategy_mode": "priority_plan"
+    },
+    "sources": {
+      "__init__.py": "dbe5552c40f0d78217b59622478b43fdb180614192ba1c0d04e64d5fef1a8eec",
+      "__main__.py": "c47c05f25172b5e83bfc03c16289ccc182139ab471d5836c7aa45ba83667ab9c",
+      "allocation.py": "93d441936bc3d80a5c60711e22b50a078a7eb8344096298b351b9c790583c94a",
+      "assets.py": "c1870267ba7740f9fd8b333fa8ee99db11ca22910553d0d67b798b3a0961ea36",
+      "brains.py": "b7be6cf67b4e90f04e166cd43b4a1a56a05c58cdf0d5283b5905cbc8b173656a",
+      "cli.py": "db2530dc598cfb55d1ec1b7b7b888bb68174f625e8b53ce75e80bab0d27bcff8",
+      "client.py": "be55bff91d7a02d38f22665cfd15c1615cd1569a9c292ce3640e4b2f8300637d",
+      "config.py": "c21094a8772070eb343bdd07b9950320802e6989a5c5d08d2f55e5fb7ff6d93c",
+      "controls.py": "0e316f8f80ba83251e658404bbaa4c40a695d8ac2d343327d17cfda82bbd011b",
+      "coordination.py": "49498984f27e852512747e85d3e5e2c0e84248efc3453f33f831322a1a826e5f",
+      "data\\assets\\catalog.json": "dc3d62d654dc55499efefea7d03a75fc7143d9aea5913e3e6bda7675a34e8604",
+      "data\\default.json": "e1e6e82393f35b5962ccf137f5f977e0cbd869c8953c9babc3d86bc505407f8e",
+      "data\\prompts\\repair_coordinator.txt": "c47c86176106293957f3398be39b3da06b29f46e4b6e3b187414d42091261c8a",
+      "data\\prompts\\repair_priority.txt": "36b2206d4773ebc10b69b5ae58ba58cb285a764e5eb83a946ab37954ae49b3cc",
+      "data\\prompts\\villager.txt": "dcf4aca137a54ba51cab33d391dd7ed74d6c0af77aa32376c8c842ed1dad362c",
+      "decisions.py": "1d2754bac40a74f808115a925e43d6409386830fb410a148ce1d112a6f17cefa",
+      "entities.py": "d10a6bed164d974075037a0d72a7c1967093e70b6069441749614b10048a6c25",
+      "evaluation.py": "8b25e54296836299f12f68a33c54dcf269648ab66a7ba5e19d1ad82fd94665e7",
+      "evaluation_controls.py": "0ac2948fe1893872f75a2d95111f7d2d65bcbc6b40821ad03f0ba5adc6f384bc",
+      "evaluation_schedule.py": "62a407851e6a46a9cb98aaf00ae753546f257a007d178ab58ccfac3cdd0489fc",
+      "extensions.py": "0acfc85105dfcbd7d09a3b8f44a4789f8df3d00e77ea501c7b5db61006238d9d",
+      "game.py": "50d5b1124f3683ee4c223543397ca0cefa2e1c5e549459f0b102e00ce78e29f8",
+      "inference.py": "a4b0f991b28d9e051d3aecc2323b4b9cbe0d2433757c8027022c93ec4d6be691",
+      "inference_probe.py": "9b320e467b3c784e9bcd525454b18d18a880ab28678b8c0c640403e6c6e91767",
+      "interpolation.py": "deb9ac9b26424e245e77ef27d445c60055d52e258e8fd6995c21930948191c64",
+      "logistics.py": "a451f574c9e96addde7225a6d874307b4a3e926d3ba4359583764389c650f4fd",
+      "map_data.py": "7d977ee3c2c0f35afb1c2505da6a222462eeab86989bdd3302a90b6b401b3234",
+      "models.py": "63fcdb4f9f98c6187c5b926ec7e70ae1a6ca2f98280093ad3ea6347f7c727452",
+      "navigation.py": "434df819eb6b6f7a607411999c8a553571b60f2b076008557fee62234bf098ae",
+      "network.py": "ca6e13c5407a2c6811f7a1a0e937bc537c063925bb235a55fea1fdd96b3711a3",
+      "persistence.py": "282bcd9ed533522469473df61c7ee088a01571c11e293246808c9fdc4841ea5b",
+      "plugins\\__init__.py": "b900ad6ddfd656b4b7441f67a7196d130037afe027f207b7c9aefe8026b7cfa7",
+      "plugins\\encourage.py": "e7314e889c98b9a28a32a202720c7140839cb9102307eeaf2214da19108ad5ca",
+      "policies.py": "1d88cd6e2b217724bb08f9c1a57908e40ae7bde85a6481e2f967c5089470cc02",
+      "probe.py": "c94ac8b76bd44e9c8f108301807491bccd9ada30b4bbbfd20e7c604432ba44d8",
+      "scene.py": "1939b4a58f06cd6becdf6f670f17d1848796f50f9a81537a8744f27e0beffb08",
+      "server.py": "6e572d97f044a79bbb49c98a56dee9bf9f513bdce9e3e7f671117fac22a43688",
+      "simulation.py": "077d1753c08d9a44f9d3991e1f0cf029eb5baaa172432048f934789ff5efb204",
+      "strategy_experiment.py": "2a3a94767ffb32c70495ea88f54acb746371cb55f64104efd32ecfcd8978e302",
+      "survival.py": "b5823b0c3ed749ea23f6e68b18bd0ec7b81e310dc4e04b00f079bf505d3311dd",
+      "telemetry.py": "8b326de38a92b0139682ebedc8647c025d52be9f11fe3801bd16b09a82122f23",
+      "timing.py": "1704d392a1caa08c3679b01ca0118abc8952fd215ff4ee2f0ffc292a4e006cc1",
+      "ui.py": "b0fd157b53ecbfe0eb476add7b7a2f8278a89f611e11c56a064df8f667f52cf5",
+      "world.py": "1d8c50376f8722dd974c4d3c1eb7318b4cd342d1985352af94ebcdaf49a0cee2"
+    },
+    "interpreter": "3.14.7 (tags/v3.14.7:823f032, Aug  5 2026, 10:51:32) [MSC v.1944 64 bit (AMD64)]",
+    "timing_policy": "measured_delay",
+    "expected_runs": 12,
+    "config_hashes": {
+      "siege-scripted.json": "aa7e8873f7470e087b8051f17fab4b6f5d0b8817610907e19524ad5bab53326b",
+      "siege-scripted-priority.json": "1f155db47aa44a754d9f34488f3d134d5690bdce3d2593108fac4b3896e8b1c8",
+      "siege-model.json": "aa7e8873f7470e087b8051f17fab4b6f5d0b8817610907e19524ad5bab53326b",
+      "wood-pressure-scripted.json": "12bd70b6dc02965ce96b6bbc4b0b9f92b5fb946726854e4b1b4aaab06bd64e50",
+      "wood-pressure-scripted-priority.json": "9e1393c0a78b869a83e03090d7f2bb175050d5ecb716b2e40629405857155d58",
+      "wood-pressure-model.json": "12bd70b6dc02965ce96b6bbc4b0b9f92b5fb946726854e4b1b4aaab06bd64e50"
+    }
+  },
+  "runs": [
+    {
+      "seed": 461,
+      "timing_policy": "measured_delay",
+      "mode": "scripted",
+      "control": "cooperative",
+      "scenario_name": "cooperation-siege",
+      "blocked_actions": {},
+      "coordination_mode": "requests",
+      "coordination": {
+        "mode": "requests",
+        "counts": {
+          "requested": 51,
+          "accepted": 71,
+          "progress": 50,
+          "completed": 33,
+          "offered": 25,
+          "released": 22,
+          "expired": 9,
+          "resolved": 2
+        },
+        "active": 7,
+        "mean_response_seconds": 14.753521126763847,
+        "mean_productive_response_seconds": 23.40800000000466,
+        "latency_sample_limit": 100,
+        "mean_completion_seconds": 23.239393939397825
+      },
+      "uncovered_threat_gate_seconds": 440.1,
+      "threat_gate_seconds": 636.3,
+      "uncovered_threat_fraction": 0.6916548797737024,
+      "stop_reason": "village_destroyed",
+      "failed": true,
+      "completed_horizon": false,
+      "censored": false,
+      "simulated_seconds": 636.3,
+      "wall_seconds": 10.630117,
+      "village_health": 0,
+      "villagers_lost": 0,
+      "food_shortage_seconds": 0.0,
+      "starvation_villager_seconds": 0.0,
+      "gate_breaches": 4,
+      "waves": 10,
+      "final_store": {
+        "food": 172,
+        "wood": 0
+      },
+      "contributions": {
+        "Mira": {
+          "planted": 9,
+          "harvested": 78,
+          "deposited_food": 77,
+          "deposited_wood": 0,
+          "repairs": 11,
+          "kills": 1,
+          "rallies": 0
+        },
+        "Bram": {
+          "planted": 3,
+          "harvested": 8,
+          "deposited_food": 8,
+          "deposited_wood": 39,
+          "repairs": 31,
+          "kills": 1,
+          "rallies": 0
+        },
+        "Iris": {
+          "planted": 15,
+          "harvested": 84,
+          "deposited_food": 84,
+          "deposited_wood": 2,
+          "repairs": 18,
+          "kills": 1,
+          "rallies": 0
+        },
+        "Otto": {
+          "planted": 0,
+          "harvested": 0,
+          "deposited_food": 0,
+          "deposited_wood": 0,
+          "repairs": 3,
+          "kills": 12,
+          "rallies": 0
+        },
+        "Nell": {
+          "planted": 0,
+          "harvested": 0,
+          "deposited_food": 0,
+          "deposited_wood": 0,
+          "repairs": 1,
+          "kills": 10,
+          "rallies": 0
+        },
+        "Edda": {
+          "planted": 13,
+          "harvested": 52,
+          "deposited_food": 44,
+          "deposited_wood": 28,
+          "repairs": 7,
+          "kills": 1,
+          "rallies": 14
+        }
+      },
+      "local_actions": 753,
+      "model_requests": 0,
+      "inference_records": [],
+      "model_allocations": [],
+      "productive_model_allocations": 0,
+      "repair_priority_plans": [],
+      "productive_priority_plans": 0,
+      "model_deferrals": 0,
+      "travel_villager_seconds": 2512.4,
+      "store_travel_villager_seconds": 671.2,
+      "urgent_partial_deliveries": 5,
+      "checkpoint_strategy": "threats",
+      "model_coverage": {
+        "roles_expected": [
+          "elder",
+          "farmer",
+          "soldier",
+          "worker"
+        ],
+        "roles_requested": [],
+        "actors_requested": [],
+        "requests_by_role": {},
+        "active_threat_requests": 0,
+        "quiet_requests": 0,
+        "planned_times": [
+          60.0,
+          270.0,
+          480.0,
+          690.0
+        ],
+        "history": []
+      },
+      "unused_model_calls": 0,
+      "model_outcomes": {},
+      "model_circuit_open": false,
+      "model_acceptance_rate": null,
+      "decision_counts": {
+        "local": {
+          "accepted": 674,
+          "rejected": 0
+        },
+        "model": {
+          "accepted": 0,
+          "rejected": 0
+        },
+        "player": {
+          "accepted": 0,
+          "rejected": 0
+        },
+        "external": {
+          "accepted": 0,
+          "rejected": 0
+        }
+      },
+      "accepted_model_actions": 0,
+      "mean_model_latency_ms": null,
+      "memory_available": false,
+      "decision_log": "decisions.jsonl",
+      "log_dropped_records": 0,
+      "model_evidence": "not_requested",
+      "condition": "scripted",
+      "case": "siege",
+      "repair_hp": 949.9000000000016,
+      "repair_wood": 71.0,
+      "repair_hp_per_wood": 13.378873239436642
+    },
+    {
+      "seed": 461,
+      "timing_policy": "measured_delay",
+      "mode": "hybrid",
+      "control": "cooperative",
+      "scenario_name": "cooperation-siege",
+      "blocked_actions": {},
+      "coordination_mode": "requests",
+      "coordination": {
+        "mode": "requests",
+        "counts": {
+          "requested": 43,
+          "accepted": 55,
+          "progress": 42,
+          "completed": 29,
+          "repair_plans": 3,
+          "offered": 23,
+          "released": 16,
+          "expired": 7
+        },
+        "active": 7,
+        "mean_response_seconds": 14.6981491454586,
+        "mean_productive_response_seconds": 22.94047225476662,
+        "latency_sample_limit": 100,
+        "mean_completion_seconds": 22.464565679313147
+      },
+      "uncovered_threat_gate_seconds": 351.942112,
+      "threat_gate_seconds": 534.85636,
+      "uncovered_threat_fraction": 0.6580123902750538,
+      "stop_reason": "village_destroyed",
+      "failed": true,
+      "completed_horizon": false,
+      "censored": false,
+      "simulated_seconds": 572.699835,
+      "wall_seconds": 8.324955,
+      "village_health": 0,
+      "villagers_lost": 0,
+      "food_shortage_seconds": 0.0,
+      "starvation_villager_seconds": 0.0,
+      "gate_breaches": 3,
+      "waves": 9,
+      "final_store": {
+        "food": 168,
+        "wood": 4
+      },
+      "contributions": {
+        "Mira": {
+          "planted": 9,
+          "harvested": 84,
+          "deposited_food": 83,
+          "deposited_wood": 6,
+          "repairs": 3,
+          "kills": 0,
+          "rallies": 0
+        },
+        "Bram": {
+          "planted": 4,
+          "harvested": 0,
+          "deposited_food": 0,
+          "deposited_wood": 48,
+          "repairs": 15,
+          "kills": 1,
+          "rallies": 0
+        },
+        "Iris": {
+          "planted": 8,
+          "harvested": 66,
+          "deposited_food": 66,
+          "deposited_wood": 2,
+          "repairs": 18,
+          "kills": 1,
+          "rallies": 0
+        },
+        "Otto": {
+          "planted": 0,
+          "harvested": 0,
+          "deposited_food": 0,
+          "deposited_wood": 2,
+          "repairs": 1,
+          "kills": 11,
+          "rallies": 0
+        },
+        "Nell": {
+          "planted": 0,
+          "harvested": 0,
+          "deposited_food": 0,
+          "deposited_wood": 0,
+          "repairs": 3,
+          "kills": 8,
+          "rallies": 0
+        },
+        "Edda": {
+          "planted": 18,
+          "harvested": 56,
+          "deposited_food": 54,
+          "deposited_wood": 0,
+          "repairs": 16,
+          "kills": 1,
+          "rallies": 16
+        }
+      },
+      "local_actions": 682,
+      "model_requests": 3,
+      "inference_records": [
+        {
+          "sent_at": 67.30000000000045,
+          "response_at": 67.54271070001167,
+          "simulated_delay_seconds": 0.24271070001123007,
+          "controller": "scripted",
+          "role": "soldier",
+          "actor": "Otto",
+          "request_id": "checkpoint-1",
+          "status": "ok",
+          "outcome": "accepted",
+          "latency_ms": 242.71070001123007,
+          "inference": {
+            "controller": "scripted_priority",
+            "provider_called": false
+          }
+        },
+        {
+          "sent_at": 270.04271070000414,
+          "response_at": 270.3001341999962,
+          "simulated_delay_seconds": 0.25742349999200087,
+          "controller": "scripted",
+          "role": "worker",
+          "actor": "Bram",
+          "request_id": "checkpoint-2",
+          "status": "ok",
+          "outcome": "accepted",
+          "latency_ms": 257.42349999200087,
+          "inference": {
+            "controller": "scripted_priority",
+            "provider_called": false
+          }
+        },
+        {
+          "sent_at": 480.30013420004394,
+          "response_at": 480.599834700051,
+          "simulated_delay_seconds": 0.2997005000070203,
+          "controller": "scripted",
+          "role": "farmer",
+          "actor": "Mira",
+          "request_id": "checkpoint-3",
+          "status": "ok",
+          "outcome": "accepted",
+          "latency_ms": 299.7005000070203,
+          "inference": {
+            "controller": "scripted_priority",
+            "provider_called": false
+          }
+        }
+      ],
+      "model_allocations": [],
+      "productive_model_allocations": 0,
+      "repair_priority_plans": [
+        {
+          "gate": "east_gate",
+          "proposed_by": "Otto",
+          "created_at": 67.54271070001167,
+          "expires_at": 127.54271070001167,
+          "request_id": "checkpoint-1",
+          "repair_actions_during_plan": 2
+        },
+        {
+          "gate": "east_gate",
+          "proposed_by": "Bram",
+          "created_at": 270.3001341999962,
+          "expires_at": 330.3001341999962,
+          "request_id": "checkpoint-2",
+          "repair_actions_during_plan": 10
+        },
+        {
+          "gate": "east_gate",
+          "proposed_by": "Mira",
+          "created_at": 480.599834700051,
+          "expires_at": 540.599834700051,
+          "request_id": "checkpoint-3",
+          "repair_actions_during_plan": 0
+        }
+      ],
+      "productive_priority_plans": 2,
+      "model_deferrals": 0,
+      "travel_villager_seconds": 2246.426903,
+      "store_travel_villager_seconds": 595.942411,
+      "urgent_partial_deliveries": 9,
+      "checkpoint_strategy": "threats",
+      "model_coverage": {
+        "roles_expected": [
+          "elder",
+          "farmer",
+          "soldier",
+          "worker"
+        ],
+        "roles_requested": [
+          "farmer",
+          "soldier",
+          "worker"
+        ],
+        "actors_requested": [
+          "Bram",
+          "Mira",
+          "Otto"
+        ],
+        "requests_by_role": {
+          "soldier": 1,
+          "worker": 1,
+          "farmer": 1
+        },
+        "active_threat_requests": 3,
+        "quiet_requests": 0,
+        "planned_times": [
+          60.0,
+          270.0,
+          480.0,
+          690.0
+        ],
+        "history": [
+          {
+            "checkpoint_strategy": "threats",
+            "planned_time": 60.0,
+            "sim_time": 67.30000000000045,
+            "actor": "Otto",
+            "role": "soldier",
+            "wave": 1,
+            "active_threats": {
+              "east_gate": 1
+            }
+          },
+          {
+            "checkpoint_strategy": "threats",
+            "planned_time": 270.0,
+            "sim_time": 270.04271070000414,
+            "actor": "Bram",
+            "role": "worker",
+            "wave": 4,
+            "active_threats": {
+              "east_gate": 1,
+              "west_gate": 1
+            }
+          },
+          {
+            "checkpoint_strategy": "threats",
+            "planned_time": 480.0,
+            "sim_time": 480.30013420004394,
+            "actor": "Mira",
+            "role": "farmer",
+            "wave": 8,
+            "active_threats": {
+              "north_gate": 1,
+              "south_gate": 1,
+              "east_gate": 1,
+              "west_gate": 1
+            }
+          }
+        ]
+      },
+      "unused_model_calls": 1,
+      "model_outcomes": {
+        "accepted": 3
+      },
+      "model_circuit_open": false,
+      "model_acceptance_rate": 1.0,
+      "decision_counts": {
+        "local": {
+          "accepted": 585,
+          "rejected": 0
+        },
+        "model": {
+          "accepted": 3,
+          "rejected": 0
+        },
+        "player": {
+          "accepted": 0,
+          "rejected": 0
+        },
+        "external": {
+          "accepted": 0,
+          "rejected": 0
+        }
+      },
+      "accepted_model_actions": 3,
+      "mean_model_latency_ms": 266.612,
+      "memory_available": false,
+      "decision_log": "decisions.jsonl",
+      "log_dropped_records": 0,
+      "model_evidence": "accepted_decisions",
+      "condition": "scripted-priority",
+      "case": "siege",
+      "repair_hp": 672.0281321000351,
+      "repair_wood": 56.0,
+      "repair_hp_per_wood": 12.000502358929198
+    },
+    {
+      "seed": 461,
+      "timing_policy": "measured_delay",
+      "mode": "hybrid",
+      "control": "cooperative",
+      "scenario_name": "cooperation-siege",
+      "blocked_actions": {},
+      "coordination_mode": "requests",
+      "coordination": {
+        "mode": "requests",
+        "counts": {
+          "requested": 74,
+          "accepted": 114,
+          "progress": 66,
+          "completed": 41,
+          "offered": 42,
+          "repair_plans": 4,
+          "released": 46,
+          "expired": 23,
+          "resolved": 5
+        },
+        "active": 5,
+        "mean_response_seconds": 20.41934554100374,
+        "mean_productive_response_seconds": 23.31720692879197,
+        "latency_sample_limit": 100,
+        "mean_completion_seconds": 25.029393892687285
+      },
+      "uncovered_threat_gate_seconds": 530.67143,
+      "threat_gate_seconds": 824.97143,
+      "uncovered_threat_fraction": 0.6432603733578328,
+      "stop_reason": "duration_reached",
+      "failed": false,
+      "completed_horizon": true,
+      "censored": true,
+      "simulated_seconds": 900.0,
+      "wall_seconds": 38.939087,
+      "village_health": 78.20000000000339,
+      "villagers_lost": 0,
+      "food_shortage_seconds": 0.0,
+      "starvation_villager_seconds": 0.0,
+      "gate_breaches": 12,
+      "waves": 14,
+      "final_store": {
+        "food": 233,
+        "wood": 0
+      },
+      "contributions": {
+        "Mira": {
+          "planted": 11,
+          "harvested": 126,
+          "deposited_food": 125,
+          "deposited_wood": 4,
+          "repairs": 15,
+          "kills": 3,
+          "rallies": 0
+        },
+        "Bram": {
+          "planted": 0,
+          "harvested": 4,
+          "deposited_food": 4,
+          "deposited_wood": 60,
+          "repairs": 24,
+          "kills": 2,
+          "rallies": 0
+        },
+        "Iris": {
+          "planted": 16,
+          "harvested": 96,
+          "deposited_food": 95,
+          "deposited_wood": 8,
+          "repairs": 10,
+          "kills": 5,
+          "rallies": 0
+        },
+        "Otto": {
+          "planted": 0,
+          "harvested": 0,
+          "deposited_food": 0,
+          "deposited_wood": 8,
+          "repairs": 13,
+          "kills": 17,
+          "rallies": 0
+        },
+        "Nell": {
+          "planted": 0,
+          "harvested": 0,
+          "deposited_food": 0,
+          "deposited_wood": 6,
+          "repairs": 18,
+          "kills": 17,
+          "rallies": 0
+        },
+        "Edda": {
+          "planted": 27,
+          "harvested": 68,
+          "deposited_food": 67,
+          "deposited_wood": 10,
+          "repairs": 18,
+          "kills": 3,
+          "rallies": 21
+        }
+      },
+      "local_actions": 1104,
+      "model_requests": 4,
+      "inference_records": [
+        {
+          "sent_at": 67.30000000000045,
+          "response_at": 71.29952060000237,
+          "simulated_delay_seconds": 3.9995206000021426,
+          "controller": "model",
+          "role": "soldier",
+          "actor": "Otto",
+          "request_id": "checkpoint-1",
+          "status": "ok",
+          "outcome": "accepted",
+          "latency_ms": 3999.5206000021426,
+          "inference": {
+            "http_ms": 3696.065099997213,
+            "request_bytes": 873,
+            "server_total_ms": 1625.066817,
+            "load_ms": 1.766277,
+            "prompt_ms": 1297.727,
+            "generation_ms": 313.162,
+            "prompt_tokens": 149,
+            "generated_tokens": 7
+          }
+        },
+        {
+          "sent_at": 270.09952059999506,
+          "response_at": 275.12560869999567,
+          "simulated_delay_seconds": 5.02608809999947,
+          "controller": "model",
+          "role": "worker",
+          "actor": "Bram",
+          "request_id": "checkpoint-2",
+          "status": "ok",
+          "outcome": "accepted",
+          "latency_ms": 5026.08809999947,
+          "inference": {
+            "http_ms": 4729.253500001505,
+            "request_bytes": 1033,
+            "server_total_ms": 2662.988856,
+            "load_ms": 0.981243,
+            "prompt_ms": 2349.224,
+            "generation_ms": 307.348,
+            "prompt_tokens": 212,
+            "generated_tokens": 7
+          }
+        },
+        {
+          "sent_at": 480.3256087000423,
+          "response_at": 484.5435861000393,
+          "simulated_delay_seconds": 4.217977399996016,
+          "controller": "model",
+          "role": "farmer",
+          "actor": "Mira",
+          "request_id": "checkpoint-3",
+          "status": "ok",
+          "outcome": "accepted",
+          "latency_ms": 4217.977399996016,
+          "inference": {
+            "http_ms": 4030.7738999981666,
+            "request_bytes": 1002,
+            "server_total_ms": 1970.04285,
+            "load_ms": 0.805778,
+            "prompt_ms": 1653.202,
+            "generation_ms": 307.007,
+            "prompt_tokens": 181,
+            "generated_tokens": 7
+          }
+        },
+        {
+          "sent_at": 690.043586100086,
+          "response_at": 696.1417704000773,
+          "simulated_delay_seconds": 6.098184299989953,
+          "controller": "model",
+          "role": "elder",
+          "actor": "Edda",
+          "request_id": "checkpoint-4",
+          "status": "ok",
+          "outcome": "accepted",
+          "latency_ms": 6098.184299989953,
+          "inference": {
+            "http_ms": 5860.5702000058955,
+            "request_bytes": 1288,
+            "server_total_ms": 3790.189435,
+            "load_ms": 1.186477,
+            "prompt_ms": 3458.993,
+            "generation_ms": 322.903,
+            "prompt_tokens": 263,
+            "generated_tokens": 7
+          }
+        }
+      ],
+      "model_allocations": [],
+      "productive_model_allocations": 0,
+      "repair_priority_plans": [
+        {
+          "gate": "east_gate",
+          "proposed_by": "Otto",
+          "created_at": 71.29952060000237,
+          "expires_at": 131.29952060000238,
+          "request_id": "checkpoint-1",
+          "repair_actions_during_plan": 2
+        },
+        {
+          "gate": "east_gate",
+          "proposed_by": "Bram",
+          "created_at": 275.12560869999567,
+          "expires_at": 335.12560869999567,
+          "request_id": "checkpoint-2",
+          "repair_actions_during_plan": 6
+        },
+        {
+          "gate": "east_gate",
+          "proposed_by": "Mira",
+          "created_at": 484.5435861000393,
+          "expires_at": 544.5435861000393,
+          "request_id": "checkpoint-3",
+          "repair_actions_during_plan": 0
+        },
+        {
+          "gate": "south_gate",
+          "proposed_by": "Edda",
+          "created_at": 696.1417704000773,
+          "expires_at": 756.1417704000773,
+          "request_id": "checkpoint-4",
+          "repair_actions_during_plan": 3
+        }
+      ],
+      "productive_priority_plans": 3,
+      "model_deferrals": 0,
+      "travel_villager_seconds": 3678.23366,
+      "store_travel_villager_seconds": 1066.111007,
+      "urgent_partial_deliveries": 22,
+      "checkpoint_strategy": "threats",
+      "model_coverage": {
+        "roles_expected": [
+          "elder",
+          "farmer",
+          "soldier",
+          "worker"
+        ],
+        "roles_requested": [
+          "elder",
+          "farmer",
+          "soldier",
+          "worker"
+        ],
+        "actors_requested": [
+          "Bram",
+          "Edda",
+          "Mira",
+          "Otto"
+        ],
+        "requests_by_role": {
+          "soldier": 1,
+          "worker": 1,
+          "farmer": 1,
+          "elder": 1
+        },
+        "active_threat_requests": 4,
+        "quiet_requests": 0,
+        "planned_times": [
+          60.0,
+          270.0,
+          480.0,
+          690.0
+        ],
+        "history": [
+          {
+            "checkpoint_strategy": "threats",
+            "planned_time": 60.0,
+            "sim_time": 67.30000000000045,
+            "actor": "Otto",
+            "role": "soldier",
+            "wave": 1,
+            "active_threats": {
+              "east_gate": 1
+            }
+          },
+          {
+            "checkpoint_strategy": "threats",
+            "planned_time": 270.0,
+            "sim_time": 270.09952059999506,
+            "actor": "Bram",
+            "role": "worker",
+            "wave": 4,
+            "active_threats": {
+              "east_gate": 1,
+              "west_gate": 1
+            }
+          },
+          {
+            "checkpoint_strategy": "threats",
+            "planned_time": 480.0,
+            "sim_time": 480.3256087000423,
+            "actor": "Mira",
+            "role": "farmer",
+            "wave": 8,
+            "active_threats": {
+              "north_gate": 1,
+              "south_gate": 1,
+              "east_gate": 1,
+              "west_gate": 1
+            }
+          },
+          {
+            "checkpoint_strategy": "threats",
+            "planned_time": 690.0,
+            "sim_time": 690.043586100086,
+            "actor": "Edda",
+            "role": "elder",
+            "wave": 11,
+            "active_threats": {
+              "south_gate": 2
+            }
+          }
+        ]
+      },
+      "unused_model_calls": 0,
+      "model_outcomes": {
+        "accepted": 4
+      },
+      "model_circuit_open": false,
+      "model_acceptance_rate": 1.0,
+      "decision_counts": {
+        "local": {
+          "accepted": 1007,
+          "rejected": 0
+        },
+        "model": {
+          "accepted": 4,
+          "rejected": 0
+        },
+        "player": {
+          "accepted": 0,
+          "rejected": 0
+        },
+        "external": {
+          "accepted": 0,
+          "rejected": 0
+        }
+      },
+      "accepted_model_actions": 4,
+      "mean_model_latency_ms": 4835.443,
+      "memory_available": false,
+      "decision_log": "decisions.jsonl",
+      "log_dropped_records": 0,
+      "model_evidence": "accepted_decisions",
+      "condition": "model",
+      "case": "siege",
+      "repair_hp": 1154.4985618000085,
+      "repair_wood": 98.0,
+      "repair_hp_per_wood": 11.780597569387842
+    },
+    {
+      "seed": 463,
+      "timing_policy": "measured_delay",
+      "mode": "scripted",
+      "control": "cooperative",
+      "scenario_name": "cooperation-siege",
+      "blocked_actions": {},
+      "coordination_mode": "requests",
+      "coordination": {
+        "mode": "requests",
+        "counts": {
+          "requested": 56,
+          "accepted": 81,
+          "progress": 53,
+          "completed": 34,
+          "offered": 34,
+          "released": 31,
+          "resolved": 2,
+          "expired": 12
+        },
+        "active": 8,
+        "mean_response_seconds": 15.146913580250297,
+        "mean_productive_response_seconds": 22.069811320759214,
+        "latency_sample_limit": 100,
+        "mean_completion_seconds": 19.355882352944477
+      },
+      "uncovered_threat_gate_seconds": 387.8,
+      "threat_gate_seconds": 590.9,
+      "uncovered_threat_fraction": 0.6562870198002981,
+      "stop_reason": "village_destroyed",
+      "failed": true,
+      "completed_horizon": false,
+      "censored": false,
+      "simulated_seconds": 672.0,
+      "wall_seconds": 9.306778,
+      "village_health": 0,
+      "villagers_lost": 0,
+      "food_shortage_seconds": 0.0,
+      "starvation_villager_seconds": 0.0,
+      "gate_breaches": 2,
+      "waves": 11,
+      "final_store": {
+        "food": 189,
+        "wood": 0
+      },
+      "contributions": {
+        "Mira": {
+          "planted": 9,
+          "harvested": 102,
+          "deposited_food": 101,
+          "deposited_wood": 8,
+          "repairs": 13,
+          "kills": 0,
+          "rallies": 0
+        },
+        "Bram": {
+          "planted": 3,
+          "harvested": 4,
+          "deposited_food": 3,
+          "deposited_wood": 42,
+          "repairs": 18,
+          "kills": 2,
+          "rallies": 0
+        },
+        "Iris": {
+          "planted": 12,
+          "harvested": 78,
+          "deposited_food": 78,
+          "deposited_wood": 6,
+          "repairs": 27,
+          "kills": 0,
+          "rallies": 0
+        },
+        "Otto": {
+          "planted": 0,
+          "harvested": 0,
+          "deposited_food": 0,
+          "deposited_wood": 4,
+          "repairs": 2,
+          "kills": 14,
+          "rallies": 0
+        },
+        "Nell": {
+          "planted": 0,
+          "harvested": 0,
+          "deposited_food": 0,
+          "deposited_wood": 8,
+          "repairs": 8,
+          "kills": 12,
+          "rallies": 0
+        },
+        "Edda": {
+          "planted": 18,
+          "harvested": 52,
+          "deposited_food": 51,
+          "deposited_wood": 12,
+          "repairs": 14,
+          "kills": 1,
+          "rallies": 19
+        }
+      },
+      "local_actions": 846,
+      "model_requests": 0,
+      "inference_records": [],
+      "model_allocations": [],
+      "productive_model_allocations": 0,
+      "repair_priority_plans": [],
+      "productive_priority_plans": 0,
+      "model_deferrals": 0,
+      "travel_villager_seconds": 2647.7,
+      "store_travel_villager_seconds": 726.5,
+      "urgent_partial_deliveries": 9,
+      "checkpoint_strategy": "threats",
+      "model_coverage": {
+        "roles_expected": [
+          "elder",
+          "farmer",
+          "soldier",
+          "worker"
+        ],
+        "roles_requested": [],
+        "actors_requested": [],
+        "requests_by_role": {},
+        "active_threat_requests": 0,
+        "quiet_requests": 0,
+        "planned_times": [
+          60.0,
+          270.0,
+          480.0,
+          690.0
+        ],
+        "history": []
+      },
+      "unused_model_calls": 0,
+      "model_outcomes": {},
+      "model_circuit_open": false,
+      "model_acceptance_rate": null,
+      "decision_counts": {
+        "local": {
+          "accepted": 749,
+          "rejected": 0
+        },
+        "model": {
+          "accepted": 0,
+          "rejected": 0
+        },
+        "player": {
+          "accepted": 0,
+          "rejected": 0
+        },
+        "external": {
+          "accepted": 0,
+          "rejected": 0
+        }
+      },
+      "accepted_model_actions": 0,
+      "mean_model_latency_ms": null,
+      "memory_available": false,
+      "decision_log": "decisions.jsonl",
+      "log_dropped_records": 0,
+      "model_evidence": "not_requested",
+      "condition": "scripted",
+      "case": "siege",
+      "repair_hp": 954.100000000002,
+      "repair_wood": 82.0,
+      "repair_hp_per_wood": 11.635365853658561
+    },
+    {
+      "seed": 463,
+      "timing_policy": "measured_delay",
+      "mode": "hybrid",
+      "control": "cooperative",
+      "scenario_name": "cooperation-siege",
+      "blocked_actions": {},
+      "coordination_mode": "requests",
+      "coordination": {
+        "mode": "requests",
+        "counts": {
+          "requested": 64,
+          "accepted": 92,
+          "progress": 63,
+          "completed": 40,
+          "repair_plans": 4,
+          "offered": 35,
+          "released": 31,
+          "expired": 15,
+          "resolved": 2
+        },
+        "active": 7,
+        "mean_response_seconds": 15.39368000435147,
+        "mean_productive_response_seconds": 24.686295100005328,
+        "latency_sample_limit": 100,
+        "mean_completion_seconds": 20.29123428250354
+      },
+      "uncovered_threat_gate_seconds": 400.866968,
+      "threat_gate_seconds": 668.381675,
+      "uncovered_threat_fraction": 0.599757568518051,
+      "stop_reason": "village_destroyed",
+      "failed": true,
+      "completed_horizon": false,
+      "censored": false,
+      "simulated_seconds": 801.969521,
+      "wall_seconds": 11.483168,
+      "village_health": 0,
+      "villagers_lost": 0,
+      "food_shortage_seconds": 0.0,
+      "starvation_villager_seconds": 0.0,
+      "gate_breaches": 8,
+      "waves": 13,
+      "final_store": {
+        "food": 225,
+        "wood": 0
+      },
+      "contributions": {
+        "Mira": {
+          "planted": 15,
+          "harvested": 126,
+          "deposited_food": 125,
+          "deposited_wood": 2,
+          "repairs": 16,
+          "kills": 2,
+          "rallies": 0
+        },
+        "Bram": {
+          "planted": 3,
+          "harvested": 4,
+          "deposited_food": 3,
+          "deposited_wood": 60,
+          "repairs": 34,
+          "kills": 1,
+          "rallies": 0
+        },
+        "Iris": {
+          "planted": 14,
+          "harvested": 108,
+          "deposited_food": 105,
+          "deposited_wood": 2,
+          "repairs": 20,
+          "kills": 3,
+          "rallies": 0
+        },
+        "Otto": {
+          "planted": 0,
+          "harvested": 0,
+          "deposited_food": 0,
+          "deposited_wood": 2,
+          "repairs": 11,
+          "kills": 13,
+          "rallies": 0
+        },
+        "Nell": {
+          "planted": 0,
+          "harvested": 0,
+          "deposited_food": 0,
+          "deposited_wood": 4,
+          "repairs": 3,
+          "kills": 16,
+          "rallies": 0
+        },
+        "Edda": {
+          "planted": 17,
+          "harvested": 36,
+          "deposited_food": 34,
+          "deposited_wood": 22,
+          "repairs": 10,
+          "kills": 3,
+          "rallies": 15
+        }
+      },
+      "local_actions": 964,
+      "model_requests": 4,
+      "inference_records": [
+        {
+          "sent_at": 127.39999999999704,
+          "response_at": 127.67303609999647,
+          "simulated_delay_seconds": 0.27303609999944456,
+          "controller": "scripted",
+          "role": "farmer",
+          "actor": "Mira",
+          "request_id": "checkpoint-1",
+          "status": "ok",
+          "outcome": "accepted",
+          "latency_ms": 273.03609999944456,
+          "inference": {
+            "controller": "scripted_priority",
+            "provider_called": false
+          }
+        },
+        {
+          "sent_at": 306.8730361000007,
+          "response_at": 307.1538503000002,
+          "simulated_delay_seconds": 0.28081419999944046,
+          "controller": "scripted",
+          "role": "elder",
+          "actor": "Edda",
+          "request_id": "checkpoint-2",
+          "status": "ok",
+          "outcome": "accepted",
+          "latency_ms": 280.81419999944046,
+          "inference": {
+            "controller": "scripted_priority",
+            "provider_called": false
+          }
+        },
+        {
+          "sent_at": 480.3538503000396,
+          "response_at": 480.66855710003586,
+          "simulated_delay_seconds": 0.3147067999962019,
+          "controller": "scripted",
+          "role": "soldier",
+          "actor": "Otto",
+          "request_id": "checkpoint-3",
+          "status": "ok",
+          "outcome": "accepted",
+          "latency_ms": 314.7067999962019,
+          "inference": {
+            "controller": "scripted_priority",
+            "provider_called": false
+          }
+        },
+        {
+          "sent_at": 720.3685571000904,
+          "response_at": 720.669520500095,
+          "simulated_delay_seconds": 0.300963400004548,
+          "controller": "scripted",
+          "role": "worker",
+          "actor": "Bram",
+          "request_id": "checkpoint-4",
+          "status": "ok",
+          "outcome": "accepted",
+          "latency_ms": 300.963400004548,
+          "inference": {
+            "controller": "scripted_priority",
+            "provider_called": false
+          }
+        }
+      ],
+      "model_allocations": [],
+      "productive_model_allocations": 0,
+      "repair_priority_plans": [
+        {
+          "gate": "west_gate",
+          "proposed_by": "Mira",
+          "created_at": 127.67303609999647,
+          "expires_at": 187.67303609999647,
+          "request_id": "checkpoint-1",
+          "repair_actions_during_plan": 4
+        },
+        {
+          "gate": "west_gate",
+          "proposed_by": "Edda",
+          "created_at": 307.1538503000002,
+          "expires_at": 367.1538503000002,
+          "request_id": "checkpoint-2",
+          "repair_actions_during_plan": 4
+        },
+        {
+          "gate": "south_gate",
+          "proposed_by": "Otto",
+          "created_at": 480.66855710003586,
+          "expires_at": 540.6685571000359,
+          "request_id": "checkpoint-3",
+          "repair_actions_during_plan": 0
+        },
+        {
+          "gate": "east_gate",
+          "proposed_by": "Bram",
+          "created_at": 720.669520500095,
+          "expires_at": 780.669520500095,
+          "request_id": "checkpoint-4",
+          "repair_actions_during_plan": 2
+        }
+      ],
+      "productive_priority_plans": 3,
+      "model_deferrals": 0,
+      "travel_villager_seconds": 3193.099003,
+      "store_travel_villager_seconds": 822.310591,
+      "urgent_partial_deliveries": 15,
+      "checkpoint_strategy": "threats",
+      "model_coverage": {
+        "roles_expected": [
+          "elder",
+          "farmer",
+          "soldier",
+          "worker"
+        ],
+        "roles_requested": [
+          "elder",
+          "farmer",
+          "soldier",
+          "worker"
+        ],
+        "actors_requested": [
+          "Bram",
+          "Edda",
+          "Mira",
+          "Otto"
+        ],
+        "requests_by_role": {
+          "farmer": 1,
+          "elder": 1,
+          "soldier": 1,
+          "worker": 1
+        },
+        "active_threat_requests": 4,
+        "quiet_requests": 0,
+        "planned_times": [
+          60.0,
+          270.0,
+          480.0,
+          690.0
+        ],
+        "history": [
+          {
+            "checkpoint_strategy": "threats",
+            "planned_time": 60.0,
+            "sim_time": 127.39999999999704,
+            "actor": "Mira",
+            "role": "farmer",
+            "wave": 2,
+            "active_threats": {
+              "west_gate": 1
+            }
+          },
+          {
+            "checkpoint_strategy": "threats",
+            "planned_time": 270.0,
+            "sim_time": 306.8730361000007,
+            "actor": "Edda",
+            "role": "elder",
+            "wave": 5,
+            "active_threats": {
+              "east_gate": 1,
+              "west_gate": 1
+            }
+          },
+          {
+            "checkpoint_strategy": "threats",
+            "planned_time": 480.0,
+            "sim_time": 480.3538503000396,
+            "actor": "Otto",
+            "role": "soldier",
+            "wave": 8,
+            "active_threats": {
+              "south_gate": 2,
+              "east_gate": 1,
+              "west_gate": 1
+            }
+          },
+          {
+            "checkpoint_strategy": "threats",
+            "planned_time": 690.0,
+            "sim_time": 720.3685571000904,
+            "actor": "Bram",
+            "role": "worker",
+            "wave": 12,
+            "active_threats": {
+              "north_gate": 2,
+              "east_gate": 1,
+              "west_gate": 1
+            }
+          }
+        ]
+      },
+      "unused_model_calls": 0,
+      "model_outcomes": {
+        "accepted": 4
+      },
+      "model_circuit_open": false,
+      "model_acceptance_rate": 1.0,
+      "decision_counts": {
+        "local": {
+          "accepted": 870,
+          "rejected": 0
+        },
+        "model": {
+          "accepted": 4,
+          "rejected": 0
+        },
+        "player": {
+          "accepted": 0,
+          "rejected": 0
+        },
+        "external": {
+          "accepted": 0,
+          "rejected": 0
+        }
+      },
+      "accepted_model_actions": 4,
+      "mean_model_latency_ms": 292.38,
+      "memory_available": false,
+      "decision_log": "decisions.jsonl",
+      "log_dropped_records": 0,
+      "model_evidence": "accepted_decisions",
+      "condition": "scripted-priority",
+      "case": "siege",
+      "repair_hp": 1196.661550900001,
+      "repair_wood": 94.0,
+      "repair_hp_per_wood": 12.730442030851075
+    },
+    {
+      "seed": 463,
+      "timing_policy": "measured_delay",
+      "mode": "hybrid",
+      "control": "cooperative",
+      "scenario_name": "cooperation-siege",
+      "blocked_actions": {},
+      "coordination_mode": "requests",
+      "coordination": {
+        "mode": "requests",
+        "counts": {
+          "requested": 45,
+          "accepted": 67,
+          "progress": 42,
+          "completed": 28,
+          "offered": 26,
+          "repair_plans": 2,
+          "released": 24,
+          "resolved": 1,
+          "expired": 9
+        },
+        "active": 7,
+        "mean_response_seconds": 14.434623401495196,
+        "mean_productive_response_seconds": 21.133176157145574,
+        "latency_sample_limit": 100,
+        "mean_completion_seconds": 19.393122567858473
+      },
+      "uncovered_threat_gate_seconds": 303.559234,
+      "threat_gate_seconds": 510.583333,
+      "uncovered_threat_fraction": 0.5945341621638572,
+      "stop_reason": "village_destroyed",
+      "failed": true,
+      "completed_horizon": false,
+      "censored": false,
+      "simulated_seconds": 616.297366,
+      "wall_seconds": 23.322399,
+      "village_health": 0,
+      "villagers_lost": 0,
+      "food_shortage_seconds": 0.0,
+      "starvation_villager_seconds": 0.0,
+      "gate_breaches": 5,
+      "waves": 10,
+      "final_store": {
+        "food": 158,
+        "wood": 2
+      },
+      "contributions": {
+        "Mira": {
+          "planted": 9,
+          "harvested": 84,
+          "deposited_food": 78,
+          "deposited_wood": 2,
+          "repairs": 5,
+          "kills": 3,
+          "rallies": 0
+        },
+        "Bram": {
+          "planted": 3,
+          "harvested": 4,
+          "deposited_food": 3,
+          "deposited_wood": 45,
+          "repairs": 22,
+          "kills": 1,
+          "rallies": 0
+        },
+        "Iris": {
+          "planted": 10,
+          "harvested": 90,
+          "deposited_food": 88,
+          "deposited_wood": 8,
+          "repairs": 14,
+          "kills": 1,
+          "rallies": 0
+        },
+        "Otto": {
+          "planted": 0,
+          "harvested": 0,
+          "deposited_food": 0,
+          "deposited_wood": 2,
+          "repairs": 5,
+          "kills": 7,
+          "rallies": 0
+        },
+        "Nell": {
+          "planted": 0,
+          "harvested": 0,
+          "deposited_food": 0,
+          "deposited_wood": 2,
+          "repairs": 2,
+          "kills": 13,
+          "rallies": 0
+        },
+        "Edda": {
+          "planted": 15,
+          "harvested": 32,
+          "deposited_food": 30,
+          "deposited_wood": 6,
+          "repairs": 17,
+          "kills": 1,
+          "rallies": 19
+        }
+      },
+      "local_actions": 731,
+      "model_requests": 3,
+      "inference_records": [
+        {
+          "sent_at": 127.39999999999704,
+          "response_at": 131.39233349998804,
+          "simulated_delay_seconds": 3.9923334999912186,
+          "controller": "model",
+          "role": "farmer",
+          "actor": "Mira",
+          "request_id": "checkpoint-1",
+          "status": "ok",
+          "outcome": "rejected",
+          "latency_ms": 3992.3334999912186,
+          "inference": {
+            "http_ms": 3685.874999995576,
+            "request_bytes": 871,
+            "server_total_ms": 1596.418097,
+            "load_ms": 1.612275,
+            "prompt_ms": 1262.933,
+            "generation_ms": 315.497,
+            "prompt_tokens": 148,
+            "generated_tokens": 7
+          }
+        },
+        {
+          "sent_at": 306.9923334999925,
+          "response_at": 311.01643239998015,
+          "simulated_delay_seconds": 4.024098899986711,
+          "controller": "model",
+          "role": "elder",
+          "actor": "Edda",
+          "request_id": "checkpoint-2",
+          "status": "ok",
+          "outcome": "accepted",
+          "latency_ms": 4024.0988999867113,
+          "inference": {
+            "http_ms": 3747.4664999899687,
+            "request_bytes": 872,
+            "server_total_ms": 1686.515114,
+            "load_ms": 0.985741,
+            "prompt_ms": 1369.445,
+            "generation_ms": 309.975,
+            "prompt_tokens": 149,
+            "generated_tokens": 7
+          }
+        },
+        {
+          "sent_at": 480.31643240001864,
+          "response_at": 486.69736630002,
+          "simulated_delay_seconds": 6.380933899999945,
+          "controller": "model",
+          "role": "soldier",
+          "actor": "Otto",
+          "request_id": "checkpoint-3",
+          "status": "ok",
+          "outcome": "accepted",
+          "latency_ms": 6380.933899999945,
+          "inference": {
+            "http_ms": 5990.512799995486,
+            "request_bytes": 1196,
+            "server_total_ms": 3877.358262,
+            "load_ms": 1.748604,
+            "prompt_ms": 3334.509,
+            "generation_ms": 532.333999,
+            "prompt_tokens": 273,
+            "generated_tokens": 7
+          }
+        }
+      ],
+      "model_allocations": [],
+      "productive_model_allocations": 0,
+      "repair_priority_plans": [
+        {
+          "gate": "west_gate",
+          "proposed_by": "Edda",
+          "created_at": 311.01643239998015,
+          "expires_at": 371.01643239998015,
+          "request_id": "checkpoint-2",
+          "repair_actions_during_plan": 3
+        },
+        {
+          "gate": "west_gate",
+          "proposed_by": "Otto",
+          "created_at": 486.69736630002,
+          "expires_at": 546.69736630002,
+          "request_id": "checkpoint-3",
+          "repair_actions_during_plan": 6
+        }
+      ],
+      "productive_priority_plans": 2,
+      "model_deferrals": 0,
+      "travel_villager_seconds": 2429.283098,
+      "store_travel_villager_seconds": 622.316069,
+      "urgent_partial_deliveries": 7,
+      "checkpoint_strategy": "threats",
+      "model_coverage": {
+        "roles_expected": [
+          "elder",
+          "farmer",
+          "soldier",
+          "worker"
+        ],
+        "roles_requested": [
+          "elder",
+          "farmer",
+          "soldier"
+        ],
+        "actors_requested": [
+          "Edda",
+          "Mira",
+          "Otto"
+        ],
+        "requests_by_role": {
+          "farmer": 1,
+          "elder": 1,
+          "soldier": 1
+        },
+        "active_threat_requests": 3,
+        "quiet_requests": 0,
+        "planned_times": [
+          60.0,
+          270.0,
+          480.0,
+          690.0
+        ],
+        "history": [
+          {
+            "checkpoint_strategy": "threats",
+            "planned_time": 60.0,
+            "sim_time": 127.39999999999704,
+            "actor": "Mira",
+            "role": "farmer",
+            "wave": 2,
+            "active_threats": {
+              "west_gate": 1
+            }
+          },
+          {
+            "checkpoint_strategy": "threats",
+            "planned_time": 270.0,
+            "sim_time": 306.9923334999925,
+            "actor": "Edda",
+            "role": "elder",
+            "wave": 5,
+            "active_threats": {
+              "east_gate": 1,
+              "west_gate": 1
+            }
+          },
+          {
+            "checkpoint_strategy": "threats",
+            "planned_time": 480.0,
+            "sim_time": 480.31643240001864,
+            "actor": "Otto",
+            "role": "soldier",
+            "wave": 8,
+            "active_threats": {
+              "south_gate": 2,
+              "east_gate": 1,
+              "west_gate": 1
+            }
+          }
+        ]
+      },
+      "unused_model_calls": 1,
+      "model_outcomes": {
+        "rejected": 1,
+        "accepted": 2
+      },
+      "model_circuit_open": false,
+      "model_acceptance_rate": 0.6666666666666666,
+      "decision_counts": {
+        "local": {
+          "accepted": 644,
+          "rejected": 0
+        },
+        "model": {
+          "accepted": 2,
+          "rejected": 1
+        },
+        "player": {
+          "accepted": 0,
+          "rejected": 0
+        },
+        "external": {
+          "accepted": 0,
+          "rejected": 0
+        }
+      },
+      "accepted_model_actions": 2,
+      "mean_model_latency_ms": 4799.122,
+      "memory_available": false,
+      "decision_log": "decisions.jsonl",
+      "log_dropped_records": 0,
+      "model_evidence": "accepted_decisions",
+      "condition": "model",
+      "case": "siege",
+      "repair_hp": 816.0770004999756,
+      "repair_wood": 65.0,
+      "repair_hp_per_wood": 12.555030776922703
+    },
+    {
+      "seed": 461,
+      "timing_policy": "measured_delay",
+      "mode": "scripted",
+      "control": "cooperative",
+      "scenario_name": "wood-pressure",
+      "blocked_actions": {},
+      "coordination_mode": "requests",
+      "coordination": {
+        "mode": "requests",
+        "counts": {
+          "requested": 41,
+          "accepted": 56,
+          "progress": 30,
+          "completed": 19,
+          "offered": 17,
+          "expired": 14,
+          "released": 18,
+          "resolved": 1
+        },
+        "active": 7,
+        "mean_response_seconds": 18.017857142860787,
+        "mean_productive_response_seconds": 18.34333333333553,
+        "latency_sample_limit": 100,
+        "mean_completion_seconds": 20.768421052634363
+      },
+      "uncovered_threat_gate_seconds": 359.2,
+      "threat_gate_seconds": 517.8,
+      "uncovered_threat_fraction": 0.6937041328698287,
+      "stop_reason": "village_destroyed",
+      "failed": true,
+      "completed_horizon": false,
+      "censored": false,
+      "simulated_seconds": 537.2,
+      "wall_seconds": 7.668434,
+      "village_health": 0,
+      "villagers_lost": 0,
+      "food_shortage_seconds": 0.0,
+      "starvation_villager_seconds": 0.0,
+      "gate_breaches": 6,
+      "waves": 8,
+      "final_store": {
+        "food": 153,
+        "wood": 0
+      },
+      "contributions": {
+        "Mira": {
+          "planted": 9,
+          "harvested": 96,
+          "deposited_food": 88,
+          "deposited_wood": 0,
+          "repairs": 6,
+          "kills": 0,
+          "rallies": 0
+        },
+        "Bram": {
+          "planted": 0,
+          "harvested": 0,
+          "deposited_food": 0,
+          "deposited_wood": 19,
+          "repairs": 3,
+          "kills": 0,
+          "rallies": 0
+        },
+        "Iris": {
+          "planted": 10,
+          "harvested": 66,
+          "deposited_food": 60,
+          "deposited_wood": 3,
+          "repairs": 0,
+          "kills": 1,
+          "rallies": 0
+        },
+        "Otto": {
+          "planted": 0,
+          "harvested": 0,
+          "deposited_food": 0,
+          "deposited_wood": 0,
+          "repairs": 2,
+          "kills": 10,
+          "rallies": 0
+        },
+        "Nell": {
+          "planted": 0,
+          "harvested": 0,
+          "deposited_food": 0,
+          "deposited_wood": 0,
+          "repairs": 0,
+          "kills": 9,
+          "rallies": 0
+        },
+        "Edda": {
+          "planted": 16,
+          "harvested": 40,
+          "deposited_food": 39,
+          "deposited_wood": 0,
+          "repairs": 11,
+          "kills": 1,
+          "rallies": 15
+        }
+      },
+      "local_actions": 779,
+      "model_requests": 0,
+      "inference_records": [],
+      "model_allocations": [],
+      "productive_model_allocations": 0,
+      "repair_priority_plans": [],
+      "productive_priority_plans": 0,
+      "model_deferrals": 0,
+      "travel_villager_seconds": 2080.0,
+      "store_travel_villager_seconds": 573.6,
+      "urgent_partial_deliveries": 11,
+      "checkpoint_strategy": "threats",
+      "model_coverage": {
+        "roles_expected": [
+          "elder",
+          "farmer",
+          "soldier",
+          "worker"
+        ],
+        "roles_requested": [],
+        "actors_requested": [],
+        "requests_by_role": {},
+        "active_threat_requests": 0,
+        "quiet_requests": 0,
+        "planned_times": [
+          60.0,
+          270.0,
+          480.0,
+          690.0
+        ],
+        "history": []
+      },
+      "unused_model_calls": 0,
+      "model_outcomes": {},
+      "model_circuit_open": false,
+      "model_acceptance_rate": null,
+      "decision_counts": {
+        "local": {
+          "accepted": 717,
+          "rejected": 0
+        },
+        "model": {
+          "accepted": 0,
+          "rejected": 0
+        },
+        "player": {
+          "accepted": 0,
+          "rejected": 0
+        },
+        "external": {
+          "accepted": 0,
+          "rejected": 0
+        }
+      },
+      "accepted_model_actions": 0,
+      "mean_model_latency_ms": null,
+      "memory_available": false,
+      "decision_log": "decisions.jsonl",
+      "log_dropped_records": 0,
+      "model_evidence": "not_requested",
+      "condition": "scripted",
+      "case": "wood-pressure",
+      "repair_hp": 244.00000000000003,
+      "repair_wood": 22.0,
+      "repair_hp_per_wood": 11.090909090909092
+    },
+    {
+      "seed": 461,
+      "timing_policy": "measured_delay",
+      "mode": "hybrid",
+      "control": "cooperative",
+      "scenario_name": "wood-pressure",
+      "blocked_actions": {},
+      "coordination_mode": "requests",
+      "coordination": {
+        "mode": "requests",
+        "counts": {
+          "requested": 39,
+          "accepted": 53,
+          "progress": 33,
+          "completed": 19,
+          "repair_plans": 3,
+          "offered": 15,
+          "expired": 14,
+          "released": 15,
+          "resolved": 1
+        },
+        "active": 5,
+        "mean_response_seconds": 16.346584977361978,
+        "mean_productive_response_seconds": 24.729781327276847,
+        "latency_sample_limit": 100,
+        "mean_completion_seconds": 20.479672631581433
+      },
+      "uncovered_threat_gate_seconds": 346.923894,
+      "threat_gate_seconds": 496.751788,
+      "uncovered_threat_fraction": 0.6983847918819348,
+      "stop_reason": "village_destroyed",
+      "failed": true,
+      "completed_horizon": false,
+      "censored": false,
+      "simulated_seconds": 530.484335,
+      "wall_seconds": 9.310036,
+      "village_health": 0,
+      "villagers_lost": 0,
+      "food_shortage_seconds": 0.0,
+      "starvation_villager_seconds": 0.0,
+      "gate_breaches": 7,
+      "waves": 8,
+      "final_store": {
+        "food": 154,
+        "wood": 0
+      },
+      "contributions": {
+        "Mira": {
+          "planted": 9,
+          "harvested": 72,
+          "deposited_food": 71,
+          "deposited_wood": 2,
+          "repairs": 6,
+          "kills": 1,
+          "rallies": 0
+        },
+        "Bram": {
+          "planted": 0,
+          "harvested": 0,
+          "deposited_food": 0,
+          "deposited_wood": 17,
+          "repairs": 2,
+          "kills": 0,
+          "rallies": 0
+        },
+        "Iris": {
+          "planted": 10,
+          "harvested": 78,
+          "deposited_food": 77,
+          "deposited_wood": 3,
+          "repairs": 1,
+          "kills": 0,
+          "rallies": 0
+        },
+        "Otto": {
+          "planted": 0,
+          "harvested": 0,
+          "deposited_food": 0,
+          "deposited_wood": 0,
+          "repairs": 2,
+          "kills": 10,
+          "rallies": 0
+        },
+        "Nell": {
+          "planted": 0,
+          "harvested": 0,
+          "deposited_food": 0,
+          "deposited_wood": 0,
+          "repairs": 0,
+          "kills": 10,
+          "rallies": 0
+        },
+        "Edda": {
+          "planted": 16,
+          "harvested": 40,
+          "deposited_food": 39,
+          "deposited_wood": 0,
+          "repairs": 11,
+          "kills": 0,
+          "rallies": 14
+        }
+      },
+      "local_actions": 753,
+      "model_requests": 3,
+      "inference_records": [
+        {
+          "sent_at": 67.30000000000045,
+          "response_at": 67.5858861999998,
+          "simulated_delay_seconds": 0.2858861999993678,
+          "controller": "scripted",
+          "role": "soldier",
+          "actor": "Otto",
+          "request_id": "checkpoint-1",
+          "status": "ok",
+          "outcome": "accepted",
+          "latency_ms": 285.8861999993678,
+          "inference": {
+            "controller": "scripted_priority",
+            "provider_called": false
+          }
+        },
+        {
+          "sent_at": 270.0858861999923,
+          "response_at": 270.34983309999103,
+          "simulated_delay_seconds": 0.26394689999870025,
+          "controller": "scripted",
+          "role": "worker",
+          "actor": "Bram",
+          "request_id": "checkpoint-2",
+          "status": "ok",
+          "outcome": "accepted",
+          "latency_ms": 263.94689999870025,
+          "inference": {
+            "controller": "scripted_priority",
+            "provider_called": false
+          }
+        },
+        {
+          "sent_at": 480.3498331000388,
+          "response_at": 480.5843350000447,
+          "simulated_delay_seconds": 0.2345019000058528,
+          "controller": "scripted",
+          "role": "farmer",
+          "actor": "Mira",
+          "request_id": "checkpoint-3",
+          "status": "ok",
+          "outcome": "accepted",
+          "latency_ms": 234.5019000058528,
+          "inference": {
+            "controller": "scripted_priority",
+            "provider_called": false
+          }
+        }
+      ],
+      "model_allocations": [],
+      "productive_model_allocations": 0,
+      "repair_priority_plans": [
+        {
+          "gate": "east_gate",
+          "proposed_by": "Otto",
+          "created_at": 67.5858861999998,
+          "expires_at": 127.5858861999998,
+          "request_id": "checkpoint-1",
+          "repair_actions_during_plan": 3
+        },
+        {
+          "gate": "west_gate",
+          "proposed_by": "Bram",
+          "created_at": 270.34983309999103,
+          "expires_at": 330.34983309999103,
+          "request_id": "checkpoint-2",
+          "repair_actions_during_plan": 0
+        },
+        {
+          "gate": "east_gate",
+          "proposed_by": "Mira",
+          "created_at": 480.5843350000447,
+          "expires_at": 540.5843350000447,
+          "request_id": "checkpoint-3",
+          "repair_actions_during_plan": 0
+        }
+      ],
+      "productive_priority_plans": 1,
+      "model_deferrals": 0,
+      "travel_villager_seconds": 2078.223226,
+      "store_travel_villager_seconds": 551.584335,
+      "urgent_partial_deliveries": 11,
+      "checkpoint_strategy": "threats",
+      "model_coverage": {
+        "roles_expected": [
+          "elder",
+          "farmer",
+          "soldier",
+          "worker"
+        ],
+        "roles_requested": [
+          "farmer",
+          "soldier",
+          "worker"
+        ],
+        "actors_requested": [
+          "Bram",
+          "Mira",
+          "Otto"
+        ],
+        "requests_by_role": {
+          "soldier": 1,
+          "worker": 1,
+          "farmer": 1
+        },
+        "active_threat_requests": 3,
+        "quiet_requests": 0,
+        "planned_times": [
+          60.0,
+          270.0,
+          480.0,
+          690.0
+        ],
+        "history": [
+          {
+            "checkpoint_strategy": "threats",
+            "planned_time": 60.0,
+            "sim_time": 67.30000000000045,
+            "actor": "Otto",
+            "role": "soldier",
+            "wave": 1,
+            "active_threats": {
+              "east_gate": 1
+            }
+          },
+          {
+            "checkpoint_strategy": "threats",
+            "planned_time": 270.0,
+            "sim_time": 270.0858861999923,
+            "actor": "Bram",
+            "role": "worker",
+            "wave": 4,
+            "active_threats": {
+              "east_gate": 1,
+              "west_gate": 1
+            }
+          },
+          {
+            "checkpoint_strategy": "threats",
+            "planned_time": 480.0,
+            "sim_time": 480.3498331000388,
+            "actor": "Mira",
+            "role": "farmer",
+            "wave": 8,
+            "active_threats": {
+              "north_gate": 1,
+              "south_gate": 1,
+              "east_gate": 1,
+              "west_gate": 1
+            }
+          }
+        ]
+      },
+      "unused_model_calls": 1,
+      "model_outcomes": {
+        "accepted": 3
+      },
+      "model_circuit_open": false,
+      "model_acceptance_rate": 1.0,
+      "decision_counts": {
+        "local": {
+          "accepted": 693,
+          "rejected": 0
+        },
+        "model": {
+          "accepted": 3,
+          "rejected": 0
+        },
+        "player": {
+          "accepted": 0,
+          "rejected": 0
+        },
+        "external": {
+          "accepted": 0,
+          "rejected": 0
+        }
+      },
+      "accepted_model_actions": 3,
+      "mean_model_latency_ms": 261.445,
+      "memory_available": false,
+      "decision_log": "decisions.jsonl",
+      "log_dropped_records": 0,
+      "model_evidence": "accepted_decisions",
+      "condition": "scripted-priority",
+      "case": "wood-pressure",
+      "repair_hp": 236.0,
+      "repair_wood": 22.0,
+      "repair_hp_per_wood": 10.727272727272727
+    },
+    {
+      "seed": 461,
+      "timing_policy": "measured_delay",
+      "mode": "hybrid",
+      "control": "cooperative",
+      "scenario_name": "wood-pressure",
+      "blocked_actions": {},
+      "coordination_mode": "requests",
+      "coordination": {
+        "mode": "requests",
+        "counts": {
+          "requested": 45,
+          "accepted": 61,
+          "progress": 36,
+          "completed": 20,
+          "offered": 19,
+          "repair_plans": 3,
+          "expired": 16,
+          "released": 18,
+          "resolved": 3
+        },
+        "active": 6,
+        "mean_response_seconds": 16.36316822787177,
+        "mean_productive_response_seconds": 24.890617363892343,
+        "latency_sample_limit": 100,
+        "mean_completion_seconds": 22.241108070003136
+      },
+      "uncovered_threat_gate_seconds": 388.952351,
+      "threat_gate_seconds": 550.552351,
+      "uncovered_threat_fraction": 0.7064765963712978,
+      "stop_reason": "village_destroyed",
+      "failed": true,
+      "completed_horizon": false,
+      "censored": false,
+      "simulated_seconds": 581.664294,
+      "wall_seconds": 26.362072,
+      "village_health": 0,
+      "villagers_lost": 0,
+      "food_shortage_seconds": 0.0,
+      "starvation_villager_seconds": 0.0,
+      "gate_breaches": 7,
+      "waves": 9,
+      "final_store": {
+        "food": 181,
+        "wood": 0
+      },
+      "contributions": {
+        "Mira": {
+          "planted": 14,
+          "harvested": 78,
+          "deposited_food": 70,
+          "deposited_wood": 2,
+          "repairs": 8,
+          "kills": 0,
+          "rallies": 0
+        },
+        "Bram": {
+          "planted": 0,
+          "harvested": 0,
+          "deposited_food": 0,
+          "deposited_wood": 19,
+          "repairs": 1,
+          "kills": 0,
+          "rallies": 0
+        },
+        "Iris": {
+          "planted": 12,
+          "harvested": 108,
+          "deposited_food": 107,
+          "deposited_wood": 2,
+          "repairs": 6,
+          "kills": 0,
+          "rallies": 0
+        },
+        "Otto": {
+          "planted": 0,
+          "harvested": 0,
+          "deposited_food": 0,
+          "deposited_wood": 1,
+          "repairs": 0,
+          "kills": 13,
+          "rallies": 0
+        },
+        "Nell": {
+          "planted": 0,
+          "harvested": 0,
+          "deposited_food": 0,
+          "deposited_wood": 0,
+          "repairs": 0,
+          "kills": 11,
+          "rallies": 0
+        },
+        "Edda": {
+          "planted": 16,
+          "harvested": 44,
+          "deposited_food": 39,
+          "deposited_wood": 0,
+          "repairs": 9,
+          "kills": 1,
+          "rallies": 17
+        }
+      },
+      "local_actions": 825,
+      "model_requests": 3,
+      "inference_records": [
+        {
+          "sent_at": 67.30000000000045,
+          "response_at": 71.13065720000037,
+          "simulated_delay_seconds": 3.8306572000001324,
+          "controller": "model",
+          "role": "soldier",
+          "actor": "Otto",
+          "request_id": "checkpoint-1",
+          "status": "ok",
+          "outcome": "accepted",
+          "latency_ms": 3830.6572000001324,
+          "inference": {
+            "http_ms": 3612.1894999960205,
+            "request_bytes": 871,
+            "server_total_ms": 1560.422798,
+            "load_ms": 0.905215,
+            "prompt_ms": 1145.078,
+            "generation_ms": 402.113,
+            "prompt_tokens": 147,
+            "generated_tokens": 7
+          }
+        },
+        {
+          "sent_at": 270.0306571999931,
+          "response_at": 274.83387059998915,
+          "simulated_delay_seconds": 4.803213399995002,
+          "controller": "model",
+          "role": "worker",
+          "actor": "Bram",
+          "request_id": "checkpoint-2",
+          "status": "ok",
+          "outcome": "accepted",
+          "latency_ms": 4803.213399995002,
+          "inference": {
+            "http_ms": 4573.899900002289,
+            "request_bytes": 1031,
+            "server_total_ms": 2489.923041,
+            "load_ms": 0.939839,
+            "prompt_ms": 2100.799,
+            "generation_ms": 383.191,
+            "prompt_tokens": 210,
+            "generated_tokens": 7
+          }
+        },
+        {
+          "sent_at": 480.0338706000358,
+          "response_at": 486.16429410003605,
+          "simulated_delay_seconds": 6.130423499998869,
+          "controller": "model",
+          "role": "farmer",
+          "actor": "Mira",
+          "request_id": "checkpoint-3",
+          "status": "ok",
+          "outcome": "accepted",
+          "latency_ms": 6130.423499998869,
+          "inference": {
+            "http_ms": 5866.769300002488,
+            "request_bytes": 1293,
+            "server_total_ms": 3796.195159,
+            "load_ms": 2.062712,
+            "prompt_ms": 3416.794,
+            "generation_ms": 365.749,
+            "prompt_tokens": 268,
+            "generated_tokens": 7
+          }
+        }
+      ],
+      "model_allocations": [],
+      "productive_model_allocations": 0,
+      "repair_priority_plans": [
+        {
+          "gate": "east_gate",
+          "proposed_by": "Otto",
+          "created_at": 71.13065720000037,
+          "expires_at": 131.13065720000037,
+          "request_id": "checkpoint-1",
+          "repair_actions_during_plan": 3
+        },
+        {
+          "gate": "west_gate",
+          "proposed_by": "Bram",
+          "created_at": 274.83387059998915,
+          "expires_at": 334.83387059998915,
+          "request_id": "checkpoint-2",
+          "repair_actions_during_plan": 0
+        },
+        {
+          "gate": "east_gate",
+          "proposed_by": "Mira",
+          "created_at": 486.16429410003605,
+          "expires_at": 546.164294100036,
+          "request_id": "checkpoint-3",
+          "repair_actions_during_plan": 2
+        }
+      ],
+      "productive_priority_plans": 2,
+      "model_deferrals": 0,
+      "travel_villager_seconds": 2314.653729,
+      "store_travel_villager_seconds": 614.452118,
+      "urgent_partial_deliveries": 13,
+      "checkpoint_strategy": "threats",
+      "model_coverage": {
+        "roles_expected": [
+          "elder",
+          "farmer",
+          "soldier",
+          "worker"
+        ],
+        "roles_requested": [
+          "farmer",
+          "soldier",
+          "worker"
+        ],
+        "actors_requested": [
+          "Bram",
+          "Mira",
+          "Otto"
+        ],
+        "requests_by_role": {
+          "soldier": 1,
+          "worker": 1,
+          "farmer": 1
+        },
+        "active_threat_requests": 3,
+        "quiet_requests": 0,
+        "planned_times": [
+          60.0,
+          270.0,
+          480.0,
+          690.0
+        ],
+        "history": [
+          {
+            "checkpoint_strategy": "threats",
+            "planned_time": 60.0,
+            "sim_time": 67.30000000000045,
+            "actor": "Otto",
+            "role": "soldier",
+            "wave": 1,
+            "active_threats": {
+              "east_gate": 1
+            }
+          },
+          {
+            "checkpoint_strategy": "threats",
+            "planned_time": 270.0,
+            "sim_time": 270.0306571999931,
+            "actor": "Bram",
+            "role": "worker",
+            "wave": 4,
+            "active_threats": {
+              "east_gate": 1,
+              "west_gate": 1
+            }
+          },
+          {
+            "checkpoint_strategy": "threats",
+            "planned_time": 480.0,
+            "sim_time": 480.0338706000358,
+            "actor": "Mira",
+            "role": "farmer",
+            "wave": 7,
+            "active_threats": {
+              "east_gate": 1
+            }
+          }
+        ]
+      },
+      "unused_model_calls": 1,
+      "model_outcomes": {
+        "accepted": 3
+      },
+      "model_circuit_open": false,
+      "model_acceptance_rate": 1.0,
+      "decision_counts": {
+        "local": {
+          "accepted": 759,
+          "rejected": 0
+        },
+        "model": {
+          "accepted": 3,
+          "rejected": 0
+        },
+        "player": {
+          "accepted": 0,
+          "rejected": 0
+        },
+        "external": {
+          "accepted": 0,
+          "rejected": 0
+        }
+      },
+      "accepted_model_actions": 3,
+      "mean_model_latency_ms": 4921.431,
+      "memory_available": false,
+      "decision_log": "decisions.jsonl",
+      "log_dropped_records": 0,
+      "model_evidence": "accepted_decisions",
+      "condition": "model",
+      "case": "wood-pressure",
+      "repair_hp": 248.0,
+      "repair_wood": 24.0,
+      "repair_hp_per_wood": 10.333333333333334
+    },
+    {
+      "seed": 463,
+      "timing_policy": "measured_delay",
+      "mode": "scripted",
+      "control": "cooperative",
+      "scenario_name": "wood-pressure",
+      "blocked_actions": {},
+      "coordination_mode": "requests",
+      "coordination": {
+        "mode": "requests",
+        "counts": {
+          "requested": 44,
+          "accepted": 57,
+          "progress": 39,
+          "completed": 21,
+          "expired": 17,
+          "offered": 13,
+          "released": 13
+        },
+        "active": 6,
+        "mean_response_seconds": 12.754385964915087,
+        "mean_productive_response_seconds": 30.576923076928104,
+        "latency_sample_limit": 100,
+        "mean_completion_seconds": 18.666666666669695
+      },
+      "uncovered_threat_gate_seconds": 342.7,
+      "threat_gate_seconds": 550.0,
+      "uncovered_threat_fraction": 0.6230909090909147,
+      "stop_reason": "village_destroyed",
+      "failed": true,
+      "completed_horizon": false,
+      "censored": false,
+      "simulated_seconds": 576.3,
+      "wall_seconds": 9.687848,
+      "village_health": 0,
+      "villagers_lost": 0,
+      "food_shortage_seconds": 0.0,
+      "starvation_villager_seconds": 0.0,
+      "gate_breaches": 7,
+      "waves": 9,
+      "final_store": {
+        "food": 196,
+        "wood": 0
+      },
+      "contributions": {
+        "Mira": {
+          "planted": 12,
+          "harvested": 90,
+          "deposited_food": 89,
+          "deposited_wood": 1,
+          "repairs": 6,
+          "kills": 0,
+          "rallies": 0
+        },
+        "Bram": {
+          "planted": 0,
+          "harvested": 0,
+          "deposited_food": 0,
+          "deposited_wood": 19,
+          "repairs": 4,
+          "kills": 0,
+          "rallies": 0
+        },
+        "Iris": {
+          "planted": 13,
+          "harvested": 84,
+          "deposited_food": 84,
+          "deposited_wood": 1,
+          "repairs": 1,
+          "kills": 3,
+          "rallies": 0
+        },
+        "Otto": {
+          "planted": 0,
+          "harvested": 0,
+          "deposited_food": 0,
+          "deposited_wood": 2,
+          "repairs": 1,
+          "kills": 8,
+          "rallies": 0
+        },
+        "Nell": {
+          "planted": 0,
+          "harvested": 0,
+          "deposited_food": 0,
+          "deposited_wood": 1,
+          "repairs": 0,
+          "kills": 12,
+          "rallies": 0
+        },
+        "Edda": {
+          "planted": 17,
+          "harvested": 56,
+          "deposited_food": 54,
+          "deposited_wood": 0,
+          "repairs": 12,
+          "kills": 1,
+          "rallies": 12
+        }
+      },
+      "local_actions": 853,
+      "model_requests": 0,
+      "inference_records": [],
+      "model_allocations": [],
+      "productive_model_allocations": 0,
+      "repair_priority_plans": [],
+      "productive_priority_plans": 0,
+      "model_deferrals": 0,
+      "travel_villager_seconds": 2083.2,
+      "store_travel_villager_seconds": 600.1,
+      "urgent_partial_deliveries": 11,
+      "checkpoint_strategy": "threats",
+      "model_coverage": {
+        "roles_expected": [
+          "elder",
+          "farmer",
+          "soldier",
+          "worker"
+        ],
+        "roles_requested": [],
+        "actors_requested": [],
+        "requests_by_role": {},
+        "active_threat_requests": 0,
+        "quiet_requests": 0,
+        "planned_times": [
+          60.0,
+          270.0,
+          480.0,
+          690.0
+        ],
+        "history": []
+      },
+      "unused_model_calls": 0,
+      "model_outcomes": {},
+      "model_circuit_open": false,
+      "model_acceptance_rate": null,
+      "decision_counts": {
+        "local": {
+          "accepted": 773,
+          "rejected": 0
+        },
+        "model": {
+          "accepted": 0,
+          "rejected": 0
+        },
+        "player": {
+          "accepted": 0,
+          "rejected": 0
+        },
+        "external": {
+          "accepted": 0,
+          "rejected": 0
+        }
+      },
+      "accepted_model_actions": 0,
+      "mean_model_latency_ms": null,
+      "memory_available": false,
+      "decision_log": "decisions.jsonl",
+      "log_dropped_records": 0,
+      "model_evidence": "not_requested",
+      "condition": "scripted",
+      "case": "wood-pressure",
+      "repair_hp": 272.0,
+      "repair_wood": 24.0,
+      "repair_hp_per_wood": 11.333333333333334
+    },
+    {
+      "seed": 463,
+      "timing_policy": "measured_delay",
+      "mode": "hybrid",
+      "control": "cooperative",
+      "scenario_name": "wood-pressure",
+      "blocked_actions": {},
+      "coordination_mode": "requests",
+      "coordination": {
+        "mode": "requests",
+        "counts": {
+          "requested": 47,
+          "accepted": 59,
+          "progress": 36,
+          "completed": 21,
+          "expired": 17,
+          "repair_plans": 3,
+          "offered": 16,
+          "released": 15,
+          "resolved": 1
+        },
+        "active": 8,
+        "mean_response_seconds": 17.39475171356345,
+        "mean_productive_response_seconds": 21.707870500002443,
+        "latency_sample_limit": 100,
+        "mean_completion_seconds": 16.758254614287893
+      },
+      "uncovered_threat_gate_seconds": 316.821006,
+      "threat_gate_seconds": 500.028313,
+      "uncovered_threat_fraction": 0.6336061323657071,
+      "stop_reason": "village_destroyed",
+      "failed": true,
+      "completed_horizon": false,
+      "censored": false,
+      "simulated_seconds": 607.891669,
+      "wall_seconds": 12.91932,
+      "village_health": 0,
+      "villagers_lost": 0,
+      "food_shortage_seconds": 0.0,
+      "starvation_villager_seconds": 0.0,
+      "gate_breaches": 7,
+      "waves": 10,
+      "final_store": {
+        "food": 197,
+        "wood": 1
+      },
+      "contributions": {
+        "Mira": {
+          "planted": 13,
+          "harvested": 102,
+          "deposited_food": 101,
+          "deposited_wood": 1,
+          "repairs": 3,
+          "kills": 1,
+          "rallies": 0
+        },
+        "Bram": {
+          "planted": 0,
+          "harvested": 0,
+          "deposited_food": 0,
+          "deposited_wood": 21,
+          "repairs": 0,
+          "kills": 0,
+          "rallies": 0
+        },
+        "Iris": {
+          "planted": 14,
+          "harvested": 90,
+          "deposited_food": 90,
+          "deposited_wood": 0,
+          "repairs": 8,
+          "kills": 1,
+          "rallies": 0
+        },
+        "Otto": {
+          "planted": 0,
+          "harvested": 0,
+          "deposited_food": 0,
+          "deposited_wood": 2,
+          "repairs": 0,
+          "kills": 8,
+          "rallies": 0
+        },
+        "Nell": {
+          "planted": 0,
+          "harvested": 0,
+          "deposited_food": 0,
+          "deposited_wood": 0,
+          "repairs": 1,
+          "kills": 13,
+          "rallies": 0
+        },
+        "Edda": {
+          "planted": 17,
+          "harvested": 52,
+          "deposited_food": 42,
+          "deposited_wood": 1,
+          "repairs": 12,
+          "kills": 2,
+          "rallies": 15
+        }
+      },
+      "local_actions": 926,
+      "model_requests": 3,
+      "inference_records": [
+        {
+          "sent_at": 127.39999999999704,
+          "response_at": 127.62334689998818,
+          "simulated_delay_seconds": 0.22334689999115653,
+          "controller": "scripted",
+          "role": "farmer",
+          "actor": "Mira",
+          "request_id": "checkpoint-1",
+          "status": "ok",
+          "outcome": "accepted",
+          "latency_ms": 223.34689999115653,
+          "inference": {
+            "controller": "scripted_priority",
+            "provider_called": false
+          }
+        },
+        {
+          "sent_at": 300.22334689999093,
+          "response_at": 300.4306544999852,
+          "simulated_delay_seconds": 0.20730759999423753,
+          "controller": "scripted",
+          "role": "elder",
+          "actor": "Edda",
+          "request_id": "checkpoint-2",
+          "status": "ok",
+          "outcome": "accepted",
+          "latency_ms": 207.30759999423753,
+          "inference": {
+            "controller": "scripted_priority",
+            "provider_called": false
+          }
+        },
+        {
+          "sent_at": 480.2306545000261,
+          "response_at": 480.4916690000333,
+          "simulated_delay_seconds": 0.26101450000714976,
+          "controller": "scripted",
+          "role": "soldier",
+          "actor": "Otto",
+          "request_id": "checkpoint-3",
+          "status": "ok",
+          "outcome": "accepted",
+          "latency_ms": 261.01450000714976,
+          "inference": {
+            "controller": "scripted_priority",
+            "provider_called": false
+          }
+        }
+      ],
+      "model_allocations": [],
+      "productive_model_allocations": 0,
+      "repair_priority_plans": [
+        {
+          "gate": "west_gate",
+          "proposed_by": "Mira",
+          "created_at": 127.62334689998818,
+          "expires_at": 187.62334689998818,
+          "request_id": "checkpoint-1",
+          "repair_actions_during_plan": 6
+        },
+        {
+          "gate": "south_gate",
+          "proposed_by": "Edda",
+          "created_at": 300.4306544999852,
+          "expires_at": 360.4306544999852,
+          "request_id": "checkpoint-2",
+          "repair_actions_during_plan": 0
+        },
+        {
+          "gate": "south_gate",
+          "proposed_by": "Otto",
+          "created_at": 480.4916690000333,
+          "expires_at": 540.4916690000333,
+          "request_id": "checkpoint-3",
+          "repair_actions_during_plan": 0
+        }
+      ],
+      "productive_priority_plans": 1,
+      "model_deferrals": 0,
+      "travel_villager_seconds": 2273.504344,
+      "store_travel_villager_seconds": 634.583044,
+      "urgent_partial_deliveries": 13,
+      "checkpoint_strategy": "threats",
+      "model_coverage": {
+        "roles_expected": [
+          "elder",
+          "farmer",
+          "soldier",
+          "worker"
+        ],
+        "roles_requested": [
+          "elder",
+          "farmer",
+          "soldier"
+        ],
+        "actors_requested": [
+          "Edda",
+          "Mira",
+          "Otto"
+        ],
+        "requests_by_role": {
+          "farmer": 1,
+          "elder": 1,
+          "soldier": 1
+        },
+        "active_threat_requests": 3,
+        "quiet_requests": 0,
+        "planned_times": [
+          60.0,
+          270.0,
+          480.0,
+          690.0
+        ],
+        "history": [
+          {
+            "checkpoint_strategy": "threats",
+            "planned_time": 60.0,
+            "sim_time": 127.39999999999704,
+            "actor": "Mira",
+            "role": "farmer",
+            "wave": 2,
+            "active_threats": {
+              "west_gate": 1
+            }
+          },
+          {
+            "checkpoint_strategy": "threats",
+            "planned_time": 270.0,
+            "sim_time": 300.22334689999093,
+            "actor": "Edda",
+            "role": "elder",
+            "wave": 5,
+            "active_threats": {
+              "south_gate": 1,
+              "east_gate": 1,
+              "west_gate": 1
+            }
+          },
+          {
+            "checkpoint_strategy": "threats",
+            "planned_time": 480.0,
+            "sim_time": 480.2306545000261,
+            "actor": "Otto",
+            "role": "soldier",
+            "wave": 8,
+            "active_threats": {
+              "south_gate": 2,
+              "east_gate": 1,
+              "west_gate": 1
+            }
+          }
+        ]
+      },
+      "unused_model_calls": 1,
+      "model_outcomes": {
+        "accepted": 3
+      },
+      "model_circuit_open": false,
+      "model_acceptance_rate": 1.0,
+      "decision_counts": {
+        "local": {
+          "accepted": 834,
+          "rejected": 0
+        },
+        "model": {
+          "accepted": 3,
+          "rejected": 0
+        },
+        "player": {
+          "accepted": 0,
+          "rejected": 0
+        },
+        "external": {
+          "accepted": 0,
+          "rejected": 0
+        }
+      },
+      "accepted_model_actions": 3,
+      "mean_model_latency_ms": 230.556,
+      "memory_available": false,
+      "decision_log": "decisions.jsonl",
+      "log_dropped_records": 0,
+      "model_evidence": "accepted_decisions",
+      "condition": "scripted-priority",
+      "case": "wood-pressure",
+      "repair_hp": 240.0,
+      "repair_wood": 24.0,
+      "repair_hp_per_wood": 10.0
+    },
+    {
+      "seed": 463,
+      "timing_policy": "measured_delay",
+      "mode": "hybrid",
+      "control": "cooperative",
+      "scenario_name": "wood-pressure",
+      "blocked_actions": {},
+      "coordination_mode": "requests",
+      "coordination": {
+        "mode": "requests",
+        "counts": {
+          "requested": 36,
+          "accepted": 47,
+          "progress": 31,
+          "completed": 18,
+          "expired": 13,
+          "repair_plans": 2,
+          "offered": 14,
+          "released": 13
+        },
+        "active": 5,
+        "mean_response_seconds": 12.917883651066228,
+        "mean_productive_response_seconds": 26.743510161293578,
+        "latency_sample_limit": 100,
+        "mean_completion_seconds": 17.11231830555776
+      },
+      "uncovered_threat_gate_seconds": 220.475842,
+      "threat_gate_seconds": 421.227276,
+      "uncovered_threat_fraction": 0.5234130226243221,
+      "stop_reason": "village_destroyed",
+      "failed": true,
+      "completed_horizon": false,
+      "censored": false,
+      "simulated_seconds": 517.17852,
+      "wall_seconds": 26.353575,
+      "village_health": 0,
+      "villagers_lost": 0,
+      "food_shortage_seconds": 0.0,
+      "starvation_villager_seconds": 0.0,
+      "gate_breaches": 4,
+      "waves": 8,
+      "final_store": {
+        "food": 167,
+        "wood": 0
+      },
+      "contributions": {
+        "Mira": {
+          "planted": 10,
+          "harvested": 90,
+          "deposited_food": 84,
+          "deposited_wood": 1,
+          "repairs": 5,
+          "kills": 0,
+          "rallies": 0
+        },
+        "Bram": {
+          "planted": 0,
+          "harvested": 0,
+          "deposited_food": 0,
+          "deposited_wood": 18,
+          "repairs": 3,
+          "kills": 0,
+          "rallies": 0
+        },
+        "Iris": {
+          "planted": 14,
+          "harvested": 96,
+          "deposited_food": 89,
+          "deposited_wood": 0,
+          "repairs": 0,
+          "kills": 2,
+          "rallies": 0
+        },
+        "Otto": {
+          "planted": 0,
+          "harvested": 0,
+          "deposited_food": 0,
+          "deposited_wood": 0,
+          "repairs": 0,
+          "kills": 8,
+          "rallies": 0
+        },
+        "Nell": {
+          "planted": 0,
+          "harvested": 0,
+          "deposited_food": 0,
+          "deposited_wood": 0,
+          "repairs": 1,
+          "kills": 10,
+          "rallies": 0
+        },
+        "Edda": {
+          "planted": 13,
+          "harvested": 28,
+          "deposited_food": 22,
+          "deposited_wood": 2,
+          "repairs": 12,
+          "kills": 1,
+          "rallies": 11
+        }
+      },
+      "local_actions": 748,
+      "model_requests": 3,
+      "inference_records": [
+        {
+          "sent_at": 127.39999999999704,
+          "response_at": 131.5811978999872,
+          "simulated_delay_seconds": 4.181197899990366,
+          "controller": "model",
+          "role": "farmer",
+          "actor": "Mira",
+          "request_id": "checkpoint-1",
+          "status": "ok",
+          "outcome": "accepted",
+          "latency_ms": 4181.197899990366,
+          "inference": {
+            "http_ms": 3908.5763999901246,
+            "request_bytes": 870,
+            "server_total_ms": 1842.520443,
+            "load_ms": 1.085057,
+            "prompt_ms": 1464.355,
+            "generation_ms": 367.355,
+            "prompt_tokens": 147,
+            "generated_tokens": 7
+          }
+        },
+        {
+          "sent_at": 300.28119789999016,
+          "response_at": 305.52708549999323,
+          "simulated_delay_seconds": 5.245887600001879,
+          "controller": "model",
+          "role": "elder",
+          "actor": "Edda",
+          "request_id": "checkpoint-2",
+          "status": "ok",
+          "outcome": "accepted",
+          "latency_ms": 5245.887600001879,
+          "inference": {
+            "http_ms": 4984.8065999976825,
+            "request_bytes": 1033,
+            "server_total_ms": 2908.755085,
+            "load_ms": 1.432844,
+            "prompt_ms": 2500.241,
+            "generation_ms": 399.448,
+            "prompt_tokens": 212,
+            "generated_tokens": 6
+          }
+        },
+        {
+          "sent_at": 480.0270855000329,
+          "response_at": 486.878519900034,
+          "simulated_delay_seconds": 6.851434399999562,
+          "controller": "model",
+          "role": "soldier",
+          "actor": "Otto",
+          "request_id": "checkpoint-3",
+          "status": "ok",
+          "outcome": "accepted",
+          "latency_ms": 6851.434399999562,
+          "inference": {
+            "http_ms": 6645.997700004955,
+            "request_bytes": 1318,
+            "server_total_ms": 4604.650161,
+            "load_ms": 0.900414,
+            "prompt_ms": 4155.069,
+            "generation_ms": 439.524,
+            "prompt_tokens": 295,
+            "generated_tokens": 7
+          }
+        }
+      ],
+      "model_allocations": [],
+      "productive_model_allocations": 0,
+      "repair_priority_plans": [
+        {
+          "gate": "west_gate",
+          "proposed_by": "Mira",
+          "created_at": 131.5811978999872,
+          "expires_at": 191.5811978999872,
+          "request_id": "checkpoint-1",
+          "repair_actions_during_plan": 6
+        },
+        {
+          "gate": "west_gate",
+          "proposed_by": "Otto",
+          "created_at": 486.878519900034,
+          "expires_at": 546.878519900034,
+          "request_id": "checkpoint-3",
+          "repair_actions_during_plan": 0
+        }
+      ],
+      "productive_priority_plans": 1,
+      "model_deferrals": 1,
+      "travel_villager_seconds": 1872.359967,
+      "store_travel_villager_seconds": 500.281389,
+      "urgent_partial_deliveries": 9,
+      "checkpoint_strategy": "threats",
+      "model_coverage": {
+        "roles_expected": [
+          "elder",
+          "farmer",
+          "soldier",
+          "worker"
+        ],
+        "roles_requested": [
+          "elder",
+          "farmer",
+          "soldier"
+        ],
+        "actors_requested": [
+          "Edda",
+          "Mira",
+          "Otto"
+        ],
+        "requests_by_role": {
+          "farmer": 1,
+          "elder": 1,
+          "soldier": 1
+        },
+        "active_threat_requests": 3,
+        "quiet_requests": 0,
+        "planned_times": [
+          60.0,
+          270.0,
+          480.0,
+          690.0
+        ],
+        "history": [
+          {
+            "checkpoint_strategy": "threats",
+            "planned_time": 60.0,
+            "sim_time": 127.39999999999704,
+            "actor": "Mira",
+            "role": "farmer",
+            "wave": 2,
+            "active_threats": {
+              "west_gate": 1
+            }
+          },
+          {
+            "checkpoint_strategy": "threats",
+            "planned_time": 270.0,
+            "sim_time": 300.28119789999016,
+            "actor": "Edda",
+            "role": "elder",
+            "wave": 5,
+            "active_threats": {
+              "south_gate": 1,
+              "east_gate": 1,
+              "west_gate": 1
+            }
+          },
+          {
+            "checkpoint_strategy": "threats",
+            "planned_time": 480.0,
+            "sim_time": 480.0270855000329,
+            "actor": "Otto",
+            "role": "soldier",
+            "wave": 7,
+            "active_threats": {
+              "south_gate": 1,
+              "west_gate": 1
+            }
+          }
+        ]
+      },
+      "unused_model_calls": 1,
+      "model_outcomes": {
+        "accepted": 3
+      },
+      "model_circuit_open": false,
+      "model_acceptance_rate": 1.0,
+      "decision_counts": {
+        "local": {
+          "accepted": 682,
+          "rejected": 0
+        },
+        "model": {
+          "accepted": 3,
+          "rejected": 0
+        },
+        "player": {
+          "accepted": 0,
+          "rejected": 0
+        },
+        "external": {
+          "accepted": 0,
+          "rejected": 0
+        }
+      },
+      "accepted_model_actions": 3,
+      "mean_model_latency_ms": 5426.173,
+      "memory_available": false,
+      "decision_log": "decisions.jsonl",
+      "log_dropped_records": 0,
+      "model_evidence": "accepted_decisions",
+      "condition": "model",
+      "case": "wood-pressure",
+      "repair_hp": 234.00000000000003,
+      "repair_wood": 21.0,
+      "repair_hp_per_wood": 11.142857142857144
+    }
+  ],
+  "failures": [],
+  "paired_model_vs_scripted": [
+    {
+      "case": "siege",
+      "seed": 461,
+      "baseline": "scripted",
+      "eligible": true,
+      "health_delta": 78.20000000000339,
+      "survival_gain": true,
+      "survival_regression": false
+    },
+    {
+      "case": "siege",
+      "seed": 463,
+      "baseline": "scripted",
+      "eligible": true,
+      "health_delta": 0,
+      "survival_gain": false,
+      "survival_regression": false
+    },
+    {
+      "case": "wood-pressure",
+      "seed": 461,
+      "baseline": "scripted",
+      "eligible": true,
+      "health_delta": 0,
+      "survival_gain": false,
+      "survival_regression": false
+    },
+    {
+      "case": "wood-pressure",
+      "seed": 463,
+      "baseline": "scripted",
+      "eligible": true,
+      "health_delta": 0,
+      "survival_gain": false,
+      "survival_regression": false
+    }
+  ],
+  "paired_model_vs_scripted_priority": [
+    {
+      "case": "siege",
+      "seed": 461,
+      "baseline": "scripted-priority",
+      "eligible": true,
+      "health_delta": 78.20000000000339,
+      "survival_gain": true,
+      "survival_regression": false
+    },
+    {
+      "case": "siege",
+      "seed": 463,
+      "baseline": "scripted-priority",
+      "eligible": true,
+      "health_delta": 0,
+      "survival_gain": false,
+      "survival_regression": false
+    },
+    {
+      "case": "wood-pressure",
+      "seed": 461,
+      "baseline": "scripted-priority",
+      "eligible": true,
+      "health_delta": 0,
+      "survival_gain": false,
+      "survival_regression": false
+    },
+    {
+      "case": "wood-pressure",
+      "seed": 463,
+      "baseline": "scripted-priority",
+      "eligible": true,
+      "health_delta": 0,
+      "survival_gain": false,
+      "survival_regression": false
+    }
+  ]
+}

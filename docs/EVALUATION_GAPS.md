@@ -170,3 +170,26 @@ transport modules and network defaults were added. Recorded hashes identify that
 snapshot; the following server/client implementation adds code that is not used
 by the headless scenarios. All 72 completed rows are retained separately from the
 failed attempt and historical v1/v2 results.
+
+
+## Repair priorities and the timing-grid correction (v4)
+
+[Temporary repair plans and full v4 evidence](REPAIR_PRIORITY_PLANS.md) add a
+scripted planner comparator and audit local decisions rather than treating
+associated repairs as proof of benefit. The initial fixed-delay study had no
+behavioral or survival improvement in any matched pair.
+
+A new no-plan replay exposed a confirmed confound in measured-delay evaluation:
+fractional replay steps shifted the later simulation grid. An apparent survivor
+was reproduced with every repair plan deferred. The evaluator now applies
+responses at the next normal simulation tick, with recorded quantization overhead
+and a regression that fails against the previous implementation. Historical v3
+measured-delay comparisons also carry this limitation; their files are retained.
+Only the corrected retest should inform the new measured-delay comparison.
+
+
+The corrected v4 study completed 12/12 runs and the valid fixed study 12/12.
+All 24 real model responses were valid within deadline, but every non-planner
+action and accepted task owner matched the baseline exactly. All villages failed.
+This separates reliable inference from absent strategic benefit; new benchmark
+contention is required before increasing the model-call budget.

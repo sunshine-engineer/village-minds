@@ -145,7 +145,7 @@ interpreting model results.
 | --- | --- | --- |
 | `coordination.resource_aware` | `enabled`, `scarce_wood_below`, `scarcity_multiplier`, `resource_weight`, `travel_weight`, `guard_opportunity_cost`, `late_arrival_penalty`, `handoff_gate_health` | Rank repair assignees and bound urgent supply handoffs |
 | `logistics` | `enabled`, `urgent_wood_below`, `urgent_food_below` | Permit useful partial-load deliveries during shortages |
-| `ai.repair_strategy` | `enabled`, `max_choices`, `max_lessons`, `prompt`, `lease_seconds` | Compact strategic choices, bounded memory/prompt and assignment lease |
+| `ai.repair_strategy` | `enabled`, `max_choices`, `max_lessons`, `prompt`, `lease_seconds`, `mode`, `controller`, `plan_seconds`, `priority_prompt` | Compact strategic choices, bounded memory/prompt and assignment lease |
 | `inference_probe` | `roles`, `rounds`, `request_seconds`, `suite_seconds`, `seed`, `gate_health` | Controlled per-role reliability diagnostics |
 
 Repair prompt paths follow the existing prompt convention: an explicitly overridden
@@ -171,3 +171,6 @@ queues and the separate server save slot. See [all settings and launch commands]
 `network.interpolation` controls presentation smoothing: enabled state, delay, buffer
 capacity, reset gap, snap distance and bounded catch-up. It does not alter physics
 or save compatibility. See [defaults, tradeoffs and checks](CLIENT_SMOOTHING.md).
+
+Gate-level strategy, expiry and the scripted comparator are described in
+[temporary repair priorities](REPAIR_PRIORITY_PLANS.md).

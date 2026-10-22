@@ -1,0 +1,106 @@
+{
+  "server_simulated_seconds": 21.850000000000176,
+  "requests": 4,
+  "repair_plan": {
+    "gate": "north_gate",
+    "proposed_by": "Iris",
+    "created_at": 16.750000000000103,
+    "expires_at": 76.7500000000001
+  },
+  "responses": [
+    {
+      "schema_version": 1,
+      "run_id": "ca36a642f5314a7692ee8397585bcff8",
+      "sequence": 36,
+      "event": "model_response",
+      "sim_time": 5.15,
+      "wall_seconds": 5.893284,
+      "source": "model",
+      "actor": "Mira",
+      "outcome": "accepted",
+      "reason": "",
+      "request_id": "model-1",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "east_gate",
+        "dialogue": ""
+      },
+      "latency_ms": 5058.443700007047,
+      "inference": {
+        "http_ms": 4588.222400008817,
+        "request_bytes": 1298,
+        "server_total_ms": 2467.165022,
+        "load_ms": 1.975942,
+        "prompt_ms": 2159.904,
+        "generation_ms": 286.247,
+        "prompt_tokens": 270,
+        "generated_tokens": 7
+      },
+      "model": "qwen2.5:1.5b",
+      "backend": "ollama"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "ca36a642f5314a7692ee8397585bcff8",
+      "sequence": 63,
+      "event": "model_response",
+      "sim_time": 11.2,
+      "wall_seconds": 11.963075,
+      "source": "model",
+      "actor": "Bram",
+      "outcome": "accepted",
+      "reason": "",
+      "request_id": "model-2",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "east_gate",
+        "dialogue": ""
+      },
+      "latency_ms": 5161.322300002212,
+      "inference": {
+        "http_ms": 4696.409999989555,
+        "request_bytes": 1299,
+        "server_total_ms": 2578.814756,
+        "load_ms": 1.448507,
+        "prompt_ms": 2272.763,
+        "generation_ms": 280.137,
+        "prompt_tokens": 270,
+        "generated_tokens": 7
+      },
+      "model": "qwen2.5:1.5b",
+      "backend": "ollama"
+    },
+    {
+      "schema_version": 1,
+      "run_id": "ca36a642f5314a7692ee8397585bcff8",
+      "sequence": 73,
+      "event": "model_response",
+      "sim_time": 16.75,
+      "wall_seconds": 17.790231,
+      "source": "model",
+      "actor": "Iris",
+      "outcome": "accepted",
+      "reason": "",
+      "request_id": "model-3",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "latency_ms": 5230.855200003134,
+      "inference": {
+        "http_ms": 4799.448200006736,
+        "request_bytes": 1302,
+        "server_total_ms": 2722.894223,
+        "load_ms": 2.365244,
+        "prompt_ms": 2413.254,
+        "generation_ms": 290.96,
+        "prompt_tokens": 274,
+        "generated_tokens": 7
+      },
+      "model": "qwen2.5:1.5b",
+      "backend": "ollama"
+    }
+  ],
+  "stdout": "{\"ready\": true, \"host\": \"127.0.0.1\", \"port\": 61439, \"save\": \"C:\\\\Users\\\\sunny\\\\AppData\\\\Local\\\\Temp\\\\tmpxqawssai\\\\server.json\", \"simulated_seconds\": 0.0}\n"
+}

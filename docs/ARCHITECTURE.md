@@ -115,3 +115,8 @@ and `display_time` hooks keep interpolated transforms/animation separate from th
 authoritative World; the default hooks preserve single-process behavior. The
 controlled actor and camera share a pose, and monster nodes use the same sampler.
 See [smoothing design](CLIENT_SMOOTHING.md) for reset/underrun behavior and limits.
+
+Repair strategy supports actor-specific offers and opt-in gate-level priority plans.
+`allocation.py` computes candidates, `models.py` maps compact choice IDs to intents,
+and `TaskBoard` owns persisted plan expiry and local task ranking. Gate plans do not
+reserve helpers. See [repair priority planning](REPAIR_PRIORITY_PLANS.md).

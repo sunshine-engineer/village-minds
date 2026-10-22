@@ -1,0 +1,13 @@
+case,seed,condition,stop_reason,completed_horizon,failed,simulated_seconds,village_health,repair_hp_per_wood,repair_hp,repair_wood,travel_villager_seconds,store_travel_villager_seconds,uncovered_threat_gate_seconds,uncovered_threat_fraction,urgent_partial_deliveries,model_requests,productive_model_allocations,productive_priority_plans,model_deferrals,wall_seconds,log_dropped_records
+siege,461,scripted,village_destroyed,False,True,636.3,0,13.378873239436642,949.9000000000016,71.0,2512.4,671.2,440.1,0.6916548797737024,5,0,0,0,0,9.281401,0
+siege,461,scripted-priority,village_destroyed,False,True,636.3,0,13.378873239436642,949.9000000000016,71.0,2512.4,671.2,440.1,0.6916548797737024,5,3,0,3,0,10.706487,0
+siege,461,model,village_destroyed,False,True,636.3,0,13.378873239436642,949.9000000000016,71.0,2512.4,671.2,440.1,0.6916548797737024,5,3,0,2,1,22.986784,0
+siege,463,scripted,village_destroyed,False,True,672.0,0,11.635365853658561,954.100000000002,82.0,2647.7,726.5,387.8,0.6562870198002981,9,0,0,0,0,10.206413,0
+siege,463,scripted-priority,village_destroyed,False,True,672.0,0,11.635365853658561,954.100000000002,82.0,2647.7,726.5,387.8,0.6562870198002981,9,3,0,3,0,12.855632,0
+siege,463,model,village_destroyed,False,True,672.0,0,11.635365853658561,954.100000000002,82.0,2647.7,726.5,387.8,0.6562870198002981,9,3,0,3,0,23.623885,0
+wood-pressure,461,scripted,village_destroyed,False,True,537.2,0,11.090909090909092,244.00000000000003,22.0,2080.0,573.6,359.2,0.6937041328698287,11,0,0,0,0,7.862622,0
+wood-pressure,461,scripted-priority,village_destroyed,False,True,537.2,0,11.090909090909092,244.00000000000003,22.0,2080.0,573.6,359.2,0.6937041328698287,11,3,0,1,0,8.538404,0
+wood-pressure,461,model,village_destroyed,False,True,537.2,0,11.090909090909092,244.00000000000003,22.0,2080.0,573.6,359.2,0.6937041328698287,11,3,0,1,0,23.33273,0
+wood-pressure,463,scripted,village_destroyed,False,True,576.3,0,11.333333333333334,272.0,24.0,2083.2,600.1,342.7,0.6230909090909147,11,0,0,0,0,9.098781,0
+wood-pressure,463,scripted-priority,village_destroyed,False,True,576.3,0,11.333333333333334,272.0,24.0,2083.2,600.1,342.7,0.6230909090909147,11,3,0,3,0,11.149025,0
+wood-pressure,463,model,village_destroyed,False,True,576.3,0,11.333333333333334,272.0,24.0,2083.2,600.1,342.7,0.6230909090909147,11,3,0,3,0,26.476579,0

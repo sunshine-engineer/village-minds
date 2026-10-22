@@ -345,3 +345,7 @@ Network clients now use [configurable movement smoothing](docs/CLIENT_SMOOTHING.
 for villagers, monsters and the follow camera, with continuous walking animation.
 The default 200 ms presentation buffer trades some display latency for smoother
 motion; server movement and collisions stay authoritative.
+
+An opt-in [temporary repair-priority planner](docs/REPAIR_PRIORITY_PLANS.md) lets
+the model choose a gate while local volunteers select helpers and validate resources.
+The matched experiment includes a scripted planner to measure the benefit of inference.

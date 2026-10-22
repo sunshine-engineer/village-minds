@@ -1,0 +1,171 @@
+{
+  "method": "ordered sim_time/actor/source/outcome/decision/before/after; ordered accepted task records; wall timings and planner decisions excluded",
+  "rows": [
+    {
+      "case": "siege",
+      "seed": 461,
+      "condition": "scripted",
+      "decision_count": 725,
+      "decision_sha256": "ae0d9c58515db650d21d4cd5faf52d6a53108c5d5bc9a2d7d7575c82de2fb249",
+      "ownership_count": 71,
+      "ownership_sha256": "ebed92d389ce40f32ed4410864c486349a973f9beddd395062e1f07a31443306"
+    },
+    {
+      "case": "siege",
+      "seed": 461,
+      "condition": "scripted-priority",
+      "decision_count": 725,
+      "decision_sha256": "ae0d9c58515db650d21d4cd5faf52d6a53108c5d5bc9a2d7d7575c82de2fb249",
+      "ownership_count": 71,
+      "ownership_sha256": "ebed92d389ce40f32ed4410864c486349a973f9beddd395062e1f07a31443306"
+    },
+    {
+      "case": "siege",
+      "seed": 461,
+      "condition": "model",
+      "decision_count": 725,
+      "decision_sha256": "ae0d9c58515db650d21d4cd5faf52d6a53108c5d5bc9a2d7d7575c82de2fb249",
+      "ownership_count": 71,
+      "ownership_sha256": "ebed92d389ce40f32ed4410864c486349a973f9beddd395062e1f07a31443306"
+    },
+    {
+      "case": "siege",
+      "seed": 463,
+      "condition": "scripted",
+      "decision_count": 805,
+      "decision_sha256": "af746ae18d3d90512b14132cb5f46077429d1c541931d8d7c619e94e3964610c",
+      "ownership_count": 81,
+      "ownership_sha256": "2f18d6bfcd4c95fefeae8d9eaa7066b2e59ad4faceec70c0e3a24a35a892ddf4"
+    },
+    {
+      "case": "siege",
+      "seed": 463,
+      "condition": "scripted-priority",
+      "decision_count": 805,
+      "decision_sha256": "af746ae18d3d90512b14132cb5f46077429d1c541931d8d7c619e94e3964610c",
+      "ownership_count": 81,
+      "ownership_sha256": "2f18d6bfcd4c95fefeae8d9eaa7066b2e59ad4faceec70c0e3a24a35a892ddf4"
+    },
+    {
+      "case": "siege",
+      "seed": 463,
+      "condition": "model",
+      "decision_count": 805,
+      "decision_sha256": "af746ae18d3d90512b14132cb5f46077429d1c541931d8d7c619e94e3964610c",
+      "ownership_count": 81,
+      "ownership_sha256": "2f18d6bfcd4c95fefeae8d9eaa7066b2e59ad4faceec70c0e3a24a35a892ddf4"
+    },
+    {
+      "case": "wood-pressure",
+      "seed": 461,
+      "condition": "scripted",
+      "decision_count": 758,
+      "decision_sha256": "5b6868bc2bf944226cb55bd8eb3ae5c3c603361f391b77ba113cc2d4159ca740",
+      "ownership_count": 56,
+      "ownership_sha256": "673e3fd2ee9fca3fb5cab3877ae01ec44fc830360e82874181b420f38ca5206c"
+    },
+    {
+      "case": "wood-pressure",
+      "seed": 461,
+      "condition": "scripted-priority",
+      "decision_count": 758,
+      "decision_sha256": "5b6868bc2bf944226cb55bd8eb3ae5c3c603361f391b77ba113cc2d4159ca740",
+      "ownership_count": 56,
+      "ownership_sha256": "673e3fd2ee9fca3fb5cab3877ae01ec44fc830360e82874181b420f38ca5206c"
+    },
+    {
+      "case": "wood-pressure",
+      "seed": 461,
+      "condition": "model",
+      "decision_count": 758,
+      "decision_sha256": "5b6868bc2bf944226cb55bd8eb3ae5c3c603361f391b77ba113cc2d4159ca740",
+      "ownership_count": 56,
+      "ownership_sha256": "673e3fd2ee9fca3fb5cab3877ae01ec44fc830360e82874181b420f38ca5206c"
+    },
+    {
+      "case": "wood-pressure",
+      "seed": 463,
+      "condition": "scripted",
+      "decision_count": 817,
+      "decision_sha256": "e2c8b1a20e417bf79f20782bfb0e7614c5667d2d9c35ac0eded8380b54adb577",
+      "ownership_count": 57,
+      "ownership_sha256": "d0de533acb935501f8dcc1c8662502b1135acf96e1792fe4c3174809595c03b9"
+    },
+    {
+      "case": "wood-pressure",
+      "seed": 463,
+      "condition": "scripted-priority",
+      "decision_count": 817,
+      "decision_sha256": "e2c8b1a20e417bf79f20782bfb0e7614c5667d2d9c35ac0eded8380b54adb577",
+      "ownership_count": 57,
+      "ownership_sha256": "d0de533acb935501f8dcc1c8662502b1135acf96e1792fe4c3174809595c03b9"
+    },
+    {
+      "case": "wood-pressure",
+      "seed": 463,
+      "condition": "model",
+      "decision_count": 817,
+      "decision_sha256": "e2c8b1a20e417bf79f20782bfb0e7614c5667d2d9c35ac0eded8380b54adb577",
+      "ownership_count": 57,
+      "ownership_sha256": "d0de533acb935501f8dcc1c8662502b1135acf96e1792fe4c3174809595c03b9"
+    }
+  ],
+  "comparisons": [
+    {
+      "case": "siege",
+      "seed": 461,
+      "condition": "scripted-priority",
+      "same_non_planner_decisions": true,
+      "same_accepted_task_ownership": true
+    },
+    {
+      "case": "siege",
+      "seed": 461,
+      "condition": "model",
+      "same_non_planner_decisions": true,
+      "same_accepted_task_ownership": true
+    },
+    {
+      "case": "siege",
+      "seed": 463,
+      "condition": "scripted-priority",
+      "same_non_planner_decisions": true,
+      "same_accepted_task_ownership": true
+    },
+    {
+      "case": "siege",
+      "seed": 463,
+      "condition": "model",
+      "same_non_planner_decisions": true,
+      "same_accepted_task_ownership": true
+    },
+    {
+      "case": "wood-pressure",
+      "seed": 461,
+      "condition": "scripted-priority",
+      "same_non_planner_decisions": true,
+      "same_accepted_task_ownership": true
+    },
+    {
+      "case": "wood-pressure",
+      "seed": 461,
+      "condition": "model",
+      "same_non_planner_decisions": true,
+      "same_accepted_task_ownership": true
+    },
+    {
+      "case": "wood-pressure",
+      "seed": 463,
+      "condition": "scripted-priority",
+      "same_non_planner_decisions": true,
+      "same_accepted_task_ownership": true
+    },
+    {
+      "case": "wood-pressure",
+      "seed": 463,
+      "condition": "model",
+      "same_non_planner_decisions": true,
+      "same_accepted_task_ownership": true
+    }
+  ]
+}

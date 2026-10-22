@@ -105,3 +105,56 @@ The real Windows client/server smoke check also accepted movement and dialogue,
 released possession, reconnected to the same running village and preserved its save.
 The original single-process Windows render check passed as well. These checks use
 internal input dispatch rather than OS keyboard automation.
+
+
+## Measured input responsiveness — 22 October 2026
+
+The [real loopback trace](results/client-responsiveness-v1.json) measures input
+onset through the actual HTTP worker, authoritative snapshots and offscreen
+Panda3D `renderFrame()` calls. Inference and regression suites were idle. Eight
+samples per setting alternate order; the server uses its normal 50 ms tick and
+100 ms client poll interval. This is wall-clock measurement, unlike the earlier
+synthetic interpolation timeline.
+
+| Input-to-stage latency | Direct snapshots median / max | Interpolation median / max |
+| --- | ---: | ---: |
+| First matching movement request sent | 127.9 / 156.2 ms | 167.4 / 217.9 ms |
+| Command acknowledgement received | 192.7 / 216.5 ms | 235.6 / 272.0 ms |
+| First observed authoritative displacement | 257.7 / 292.0 ms | 303.4 / 333.8 ms |
+| First rendered displacement | 278.3 / 306.5 ms | 323.7 / 362.9 ms |
+
+The start time is the fixture's internal key-state update. Snapshot/render onset
+requires more than 0.01 world units in the requested direction. Acknowledgement
+means the server accepted the intent; it is not proof that physics moved the bot.
+The snapshot and rendered measurements confirm movement separately.
+
+This measures first visible motion in an open-area fixture, not sustained tracking
+lag, GPU FPS, OS keyboard latency or human perception. Interpolation can start
+showing part of a newly confirmed segment before the entire segment has played;
+its configured 200 ms buffer is not a fixed extra 200 ms on this onset metric.
+Poll/tick phase differs between samples, so subtracting the two group medians is
+not a causal estimate of the buffer cost. Small host-specific samples do not
+establish an internet/network performance target.
+
+A substantial part of the measured onset delay occurs before a matching request
+is sent or a state is returned. The worker currently serializes movement POST,
+state GET and a poll wait. The next transport experiment should reduce those
+waits and repeat this trace before adding prediction/reconciliation. This keeps
+prediction complexity tied to a measured need. The buffer remains configurable.
+
+Windows reproduction, with no separately running server required:
+
+```powershell
+.\.venv-win\Scripts\python.exe scripts/check_client_responsiveness.py --samples 8
+```
+
+Linux uses `.venv/bin/python` with Panda3D and a working graphics backend. The
+fixture starts a loopback server on an ephemeral port, uses temporary in-memory
+world state and writes `artifacts/server-client/responsiveness.json`; it does not
+read or write campaign saves. Missing stages or server errors fail the check.
+
+A human playtest remains outstanding: use normal server/client windows, take over
+a bot, walk/stop/reverse near a wall, then release and reacquire it. Compare a
+config override with `network.interpolation.enabled=false` against the default;
+record responsiveness, snapping and collision corrections. This manual check is
+separate from the verified internal-input rendering fixture.
