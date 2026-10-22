@@ -93,3 +93,18 @@ remain dictionaries, with optional provider timing metadata on `InferenceDecisio
 `evaluation.py` records productive model assignments separately from accepted
 choices, travel time, coverage and urgent deliveries. See
 [repair experiments](STRATEGY_EXPERIMENT.md) for metrics and interpretation limits.
+
+`server.py` owns the authoritative world and persistence on its simulation thread.
+HTTP handlers enqueue bounded envelopes; they never mutate game state directly.
+The single active session has exclusive possession, sequenced commands and expiry.
+
+`network.py` owns bounded HTTP requests and a background client worker. `client.py`
+reuses the Panda3D scene/HUD through the `VillageGame.advance_world` boundary; it
+replaces snapshots and sends commands rather than advancing physics or inference.
+Both startup configuration and protocol/save fingerprints are checked locally.
+See [server/client design and limits](SERVER_CLIENT.md).
+
+Evaluation can replay fixed or measured inference delay with local routines active
+and apply an intent using its original actor revision/time. Component switches and
+fresh protocols isolate repair scoring, handoffs and deliveries. The completed
+[gap experiments](EVALUATION_GAPS.md) remain separate from the earlier datasets.

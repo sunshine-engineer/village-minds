@@ -154,3 +154,16 @@ The live model profile's `timeout` is a hard request wall deadline. The probe an
 experiment have additional explicit request and suite budgets. Profile context size,
 output budget, temperature, endpoint and model remain configurable as before.
 Experiment plans fix scenario config paths, fresh/excluded seeds, horizon and budgets.
+
+`coordination.repair_handoffs` now controls automatic repair reallocation and supply
+preemption separately from `resource_aware.enabled` scoring. It defaults to false.
+The v2 combined preset sets it explicitly. The factorial plans under
+`configs/strategy-v3/` vary scoring, handoffs and deliveries independently.
+
+`evaluation.timing_policy` accepts `paused_checkpoints`, `fixed_delay` and
+`measured_delay`. Fixed delay uses `evaluation.inference_delay_seconds`; measured
+delay replays the returned client wall interval with ordinary physics/local routines
+before applying the response. Both retain original request time/revision.
+
+The new `network` section configures server/client transport, deadlines, leases,
+queues and the separate server save slot. See [all settings and launch commands](SERVER_CLIENT.md).

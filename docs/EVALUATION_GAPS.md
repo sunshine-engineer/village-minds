@@ -164,6 +164,7 @@ Complete evidence:
 - [Fixed-delay rows](results/repair-fixed-delay-v3.csv) and [full JSON](results/repair-fixed-delay-v3.json).
 - [Measured-delay rows](results/repair-measured-delay-v3.csv) and [full JSON](results/repair-measured-delay-v3.json).
 
+The recorded source tree exactly matches evaluation-stage commit `37d2d0b`.
 These evaluations used the frozen evaluation/controller snapshot before the
 transport modules and network defaults were added. Recorded hashes identify that
 snapshot; the following server/client implementation adds code that is not used

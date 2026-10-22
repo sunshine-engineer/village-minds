@@ -674,5 +674,20 @@
     "suite_seconds": 110.0,
     "seed": 301,
     "gate_health": 20.0
+  },
+  "network": {
+    "host": "127.0.0.1",
+    "port": 8765,
+    "save_path": "saves/server-village.json",
+    "tick_seconds": 0.05,
+    "poll_seconds": 0.1,
+    "request_seconds": 2.0,
+    "lease_seconds": 5.0,
+    "input_seconds": 0.4,
+    "reconnect_seconds": 1.0,
+    "queue_capacity": 64,
+    "max_commands_per_tick": 8,
+    "max_body_bytes": 65536,
+    "max_state_bytes": 5000000
   }
 }

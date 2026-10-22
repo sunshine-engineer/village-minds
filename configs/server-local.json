@@ -1,0 +1,24 @@
+{
+  "network": {
+    "save_path": "../saves/server-local.json"
+  },
+  "ai": {
+    "repair_strategy": {
+      "enabled": true
+    },
+    "profiles": {
+      "local_qwen": {
+        "context_size": 2048,
+        "max_tokens": 24,
+        "temperature": 0.0,
+        "timeout": 15.0
+      }
+    }
+  },
+  "coordination": {
+    "mode": "requests"
+  },
+  "telemetry": {
+    "decision_log": "../artifacts/server/decisions.jsonl"
+  }
+}

@@ -53,3 +53,12 @@ For evaluation or timing changes, run the unit suite, a scripted headless scenar
 `python scripts/check_speed.py` with a graphics backend. The [evaluation guide](docs/EVALUATION.md)
 explains the checkpoint policy, budget semantics, metrics and logs. AI integration
 checks require a real model; mocked response tests alone do not verify server behavior.
+
+For server/client changes, keep world mutations and persistence on the server's
+simulation thread. HTTP handlers enqueue bounded requests; the rendering client
+sends commands and consumes snapshots. Extend the protocol with explicit validation
+and lifecycle tests rather than letting clients upload world state. Run
+`python -m unittest discover -s tests` in an environment that permits loopback
+sockets. The [server/client guide](docs/SERVER_CLIENT.md) describes the current
+single-session boundary. Preserve frozen experiment data and use separate named
+plans/seeds for new policy experiments; see [evaluation gaps](docs/EVALUATION_GAPS.md).

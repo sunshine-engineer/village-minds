@@ -166,6 +166,32 @@ def validate(config, reference):
             raise ValueError("Inference deadlines and leases must be positive")
     if probe["gate_health"] > config["rules"]["gate_health"]:
         raise ValueError("Probe gate health exceeds maximum")
+    network = config["network"]
+    if network["host"] not in ("127.0.0.1", "localhost"):
+        raise ValueError("Prototype network host must be loopback")
+    if not 0 <= network["port"] <= 65535:
+        raise ValueError("Invalid network port")
+    for key in (
+        "tick_seconds",
+        "poll_seconds",
+        "request_seconds",
+        "lease_seconds",
+        "input_seconds",
+        "reconnect_seconds",
+        "queue_capacity",
+        "max_commands_per_tick",
+        "max_body_bytes",
+        "max_state_bytes",
+    ):
+        if network[key] <= 0:
+            raise ValueError(f"network.{key} must be positive")
+    if network["tick_seconds"] > config["runtime"]["max_step_seconds"]:
+        raise ValueError("Network tick exceeds safe physics step")
+    if (
+        network["lease_seconds"] <= network["poll_seconds"]
+        or network["input_seconds"] <= network["poll_seconds"]
+    ):
+        raise ValueError("Network leases must exceed polling interval")
     coordination = config["coordination"]
     if coordination["mode"] not in ("independent", "requests", "assigned"):
         raise ValueError("Unknown coordination mode")
@@ -424,6 +450,12 @@ def load_config(path=None):
     )
     if not Path(result["ai"]["repair_strategy"]["prompt"]).is_file():
         raise ValueError("Missing repair strategy prompt")
+    network_base = (
+        path.parent if path and "save_path" in override.get("network", {}) else PROJECT
+    )
+    result["network"]["save_path"] = str(
+        (network_base / result["network"]["save_path"]).resolve()
+    )
     save_base = (
         path.parent if path and "save_path" in override.get("runtime", {}) else PROJECT
     )
