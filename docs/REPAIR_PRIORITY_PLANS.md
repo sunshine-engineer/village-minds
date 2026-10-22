@@ -1,5 +1,9 @@
 # Temporary repair priorities
 
+> Scope: v4 priority study and current planner interface. Results describe the frozen source identified below,
+> not a new test of the latest checkout. For current evidence and study order, use
+> the [documentation index](INDEX.md) and [handover runbook](HANDOVER.md).
+
 The opt-in `priority_plan` mode gives inference a gate-level decision that can
 remain useful while villagers move, eat or finish another job. It replaces a
 specific helper reservation with a temporary preference among repair requests.
@@ -191,10 +195,10 @@ runs. Accepted plans and associated repairs must not be advertised as benefit.
 The current scenarios do not provide useful contention between open repair jobs
 and free helpers at plan application. An isolated ownership regression proves a
 plan can change which repair a free worker claims without preempting an existing
-owner; that behavior did not occur in these full scenarios. The next evaluation
-fixture should first demonstrate competing damaged gates and a consequential
-choice for a free worker under scarce wood, with an explicit counterfactual.
-More provider calls on these scenarios would add little evidence.
+owner; that behavior did not occur in these full scenarios. The subsequent
+[contention benchmark](CONTENTION_BENCHMARK.md) supplies competing damaged gates,
+a free worker, scarce wood and an explicit adverse counterfactual. More provider
+calls on these v4 full-village scenarios would add little evidence.
 
 The planner remains opt-in. No controller or prompt was tuned after these results.
 This prototype demonstrates bounded planning, persistent state, deadline handling

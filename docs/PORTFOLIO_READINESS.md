@@ -104,8 +104,9 @@ Original failed evidence is retained, and no failed batch is counted as passing.
 ## Release evidence, 2026-10-22
 
 All 176 regression tests passed locally on Linux and native Windows. The
-[CI run](https://github.com/sunshine-engineer/village-minds/actions/runs/39778676003)
-passed Ubuntu/Windows on Python 3.11/3.14 at source `e1cc748`.
+[CI run](https://github.com/sunshine-engineer/village-minds/actions/runs/39779302815)
+passed Ubuntu/Windows on Python 3.11/3.14 at final evidence commit `28d766a`
+(production source `e1cc748`).
 [Release manifest](results/portfolio-release-v1.json) records the built wheel hash
 and evidence boundaries. Both fresh installs loaded the package from their new
 virtual environment outside the checkout, exercised the extension examples and

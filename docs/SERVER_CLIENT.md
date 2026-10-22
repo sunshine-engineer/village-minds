@@ -71,7 +71,7 @@ inference or campaign saves. The original `python -m village` remains available.
 
 ## Controls and reconnect
 
-The existing number keys/Tab select a bot, O releases control, movement keys walk,
+The existing number keys/Tab select a bot, **0 (zero)** releases control, movement keys walk,
 action keys perform work and Enter sends dialogue. Actions and possession become
 visible after acknowledgement in a server snapshot. Camera movement remains local.
 Pause, speed and save keys do not modify the server; its simulation keeps running
@@ -103,6 +103,8 @@ All transport settings are under `network` in the normal JSON configuration:
 | `lease_seconds`, `input_seconds` | Possession heartbeat and movement expiry |
 | `queue_capacity`, `max_commands_per_tick` | Bounded inbound/client queues and per-tick command processing |
 | `max_body_bytes`, `max_state_bytes` | Request and snapshot size limits |
+| `exchange_motion`, `wake_on_input`, `tcp_no_delay` | Default `true`; combine post-tick movement/state, wake on changed input, disable server-side Nagle buffering |
+| `interpolation` | Presentation buffer; see the smoothing guide |
 
 Explicit network save paths resolve relative to their config file. Autosave cadence
 uses `runtime.autosave_seconds`. Optional server decision logs use the normal
@@ -115,6 +117,7 @@ HTTP transport uses the Python standard library:
 - `GET /state` returns a snapshot and refreshes the session heartbeat.
 - `POST /command` sends `{sequence, command}`. Commands are `takeover`, `move`,
   `action` and `say`. Every command is validated on the simulation thread.
+- `POST /exchange` sends a sequenced movement command and returns a post-tick snapshot (protocol 2).
 - `POST /disconnect` releases possession/session ownership.
 - `GET /health` reports server identity and simulated time without private state.
 
@@ -164,7 +167,8 @@ a newer tick. Movement expiry, leases and maximum commands/tick remain enforced.
 The renderer still interpolates confirmed states and does not predict movement.
 
 `network.exchange_motion` and `network.wake_on_input` both default to `true`.
-Set both to `false` to reproduce the legacy transport for measurement. These are
+`network.tcp_no_delay` also defaults to `true`. Set all three to `false` in both
+processes to reproduce the legacy transport for measurement. These are
 transport settings and do not invalidate world saves. Client and server must use
 the same wire-protocol version; older clients/servers are rejected during handshake.
 See [responsiveness measurement](CLIENT_SMOOTHING.md) and the readiness checklist.

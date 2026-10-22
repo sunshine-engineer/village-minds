@@ -71,7 +71,8 @@ See [configuration](CONFIGURATION.md), [extension recipes](EXTENDING.md), and
 [validation evidence](../VALIDATION.md).
 
 Evaluation uses the same rules, local routines and model-result validation as gameplay,
-with a different timing policy: the simulation pauses at fixed strategic checkpoints.
+with a configurable timing policy: by default simulation pauses at strategic checkpoints;
+fixed/measured-delay modes replay ordinary simulation ticks before applying a response.
 Requests run in spawned processes so a hung adapter cannot stall the suite indefinitely.
 Compare results within that policy; see [evaluation](EVALUATION.md) for limitations.
 

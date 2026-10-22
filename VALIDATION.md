@@ -1,5 +1,31 @@
 # Validation evidence
 
+Current handover: [runbook](docs/HANDOVER.md), [document index](docs/INDEX.md).
+Historical counts below belong to their dated source snapshots.
+
+## Portfolio release checks, 2026-10-22
+
+- 176 tests passed on Linux and native Windows; production source `e1cc748`; final evidence/fixture commit `28d766a`. Four CI lanes
+  passed Ubuntu/Windows with Python 3.11/3.14, including isolated wheel installs.
+- Local fresh wheel installs passed on both platforms. Native Windows installed
+  rendering produced a checked screenshot; this is not a human playtest.
+- 80 frozen causal allocation runs completed; model matched scripted priorities.
+  All 20 adverse controls worsened breach outcomes. No LLM advantage is claimed.
+- 40/40 warm requests were valid within deadline, ten across each of four roles.
+- 1,800 simulated-second direct-authority soak passed ten possessions, three
+  reconnects and six restores. No campaign failure happened in this run.
+- Separate-process latency: 50 samples per mode/transport. Responsive default
+  interpolation measured 239 ms median and 452 ms p95, missing the 400 ms p95
+  acceptance target. All samples were saved before a Windows teardown error;
+  the fixture cleanup was corrected separately.
+
+Detailed boundaries, commands, failed attempts and raw evidence are linked in
+[portfolio readiness](docs/PORTFOLIO_READINESS.md). The human playtest, independent
+setup and recorded demo are still outstanding. Older validation above describes
+historical runs; it does not supersede these measured limits.
+
+## Historical validation record
+
 ## Gate priorities, response timing and real input latency — 22 October 2026
 
 - **167 tests passed on Linux and native Windows Python 3.14.** New tests cover gate priority affecting actual task ownership, busy-owner preservation, zero-wood planning, expiry, full-gate revalidation, possession/age/revision arbitration, save migration, disabled plans, scripted/model intent parity, invalid config and behavior-audit controls. An inert-response regression compares complete local action traces and outcomes across arbitrary latency values; it fails under the former fractional-tick implementation and passes on the fixed grid. Python 3.11 grammar and compile checks passed; no local 3.11 runtime claim.
@@ -153,7 +179,7 @@ The onscreen test uses position, resource, enemy, and energy fixtures to isolate
 - Model cooperation, consistent personalities, causal understanding, and improvement across attempts have not been established. Memories are bounded context, not training. A single move-to-farm response after a failure does not prove learning.
 - Failure records summarize observed conditions and contributions. They are not a counterfactual analysis proving which specific choice caused the loss.
 - Combat, wall/vision interactions, and monster steering are simplified. This is not a full physics or tactical AI implementation.
-- Long-running balance beyond the deterministic 900-simulation-second baseline has not been established. Stronger waves can overwhelm the village.
+- The automated authority soak covers 1,800 simulated seconds, but extended balance, sustained HTTP load and a 30-minute human playtest remain unverified. Stronger waves can overwhelm the village.
 - Sudden process/power failure can lose progress after the latest successful save. Recovery from abrupt native Windows power loss and multi-session conflicts remain untested.
 
 ## Reproduce
@@ -169,25 +195,3 @@ python3 -m unittest discover -s tests -v
 ```
 
 The explicit window-test slot is an isolated fixture; previous runs of that slot are archived. `check_restart.py` uses a temporary slot. None of these commands needs the user's normal campaign. The last three graphics/model checks need their respective desktop or Ollama services.
-
-
-## Portfolio release checks, 2026-10-22
-
-- 176 tests passed on Linux and native Windows; source `e1cc748`. Four CI lanes
-  passed Ubuntu/Windows with Python 3.11/3.14, including isolated wheel installs.
-- Local fresh wheel installs passed on both platforms. Native Windows installed
-  rendering produced a checked screenshot; this is not a human playtest.
-- 80 frozen causal allocation runs completed; model matched scripted priorities.
-  All 20 adverse controls worsened breach outcomes. No LLM advantage is claimed.
-- 40/40 warm requests were valid within deadline, ten across each of four roles.
-- 1,800 simulated-second direct-authority soak passed ten possessions, three
-  reconnects and six restores. No campaign failure happened in this run.
-- Separate-process latency: 50 samples per mode/transport. Responsive default
-  interpolation measured 239 ms median and 452 ms p95, missing the 400 ms p95
-  acceptance target. All samples were saved before a Windows teardown error;
-  the fixture cleanup was corrected separately.
-
-Detailed boundaries, commands, failed attempts and raw evidence are linked in
-[portfolio readiness](docs/PORTFOLIO_READINESS.md). The human playtest, independent
-setup and recorded demo are still outstanding. Older validation above describes
-historical runs; it does not supersede these measured limits.

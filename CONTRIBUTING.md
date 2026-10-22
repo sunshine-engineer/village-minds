@@ -62,3 +62,19 @@ and lifecycle tests rather than letting clients upload world state. Run
 sockets. The [server/client guide](docs/SERVER_CLIENT.md) describes the current
 single-session boundary. Preserve frozen experiment data and use separate named
 plans/seeds for new policy experiments; see [evaluation gaps](docs/EVALUATION_GAPS.md).
+
+## Handover and documentation changes
+
+Use the [handover runbook](docs/HANDOVER.md) and [documentation index](docs/INDEX.md)
+as the receiving developer's starting point. Keep CLI examples, configuration keys
+and defaults consistent with source. Preserve frozen experiment results; label later
+corrections and link the current evidence instead of rewriting historical outcomes.
+Run the provider-free contributor contract when changing its instructions:
+
+```bash
+python scripts/check_contributor_contracts.py
+```
+
+For releases, follow the runbook's fresh-wheel checks. A successful automated install
+is not independent human setup. Keep human acceptance, recordings and latency target
+status explicit. Never check an acceptance box merely because CI is green.

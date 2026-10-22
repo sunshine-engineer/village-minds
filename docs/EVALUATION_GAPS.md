@@ -1,5 +1,9 @@
 # Evaluation correctness and component experiments
 
+> Scope: v3 component/timing study. Results describe the frozen source identified below,
+> not a new test of the latest checkout. For current evidence and study order, use
+> the [documentation index](INDEX.md) and [handover runbook](HANDOVER.md).
+
 This follow-up fixes unavailable repair choices, separates policy components, and
 compares paused and delayed model decisions before introducing the server/client
 boundary. It preserves the published [v1 holdout](HELD_OUT_VALIDATION.md) and

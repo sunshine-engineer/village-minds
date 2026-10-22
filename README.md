@@ -2,12 +2,14 @@
 
 A Python/Panda3D village with six villagers using fast local role routines and background plans from a Docker-hosted model. Take over any villager, grow and share food, supply repairs, and defend the village from respawning monster waves. The village and its memories resume when you restart.
 
+[Handover runbook](docs/HANDOVER.md) · [Documentation index](docs/INDEX.md) ·
 [Portfolio readiness and evidence](docs/PORTFOLIO_READINESS.md) ·
 [Consequential allocation benchmark](docs/CONTENTION_BENCHMARK.md) ·
 [Three-minute walkthrough and human checks](docs/PORTFOLIO_DEMO.md)
 
-The model proposes bounded repair priorities; local policies execute and validate
-work. In the controlled benchmark it matched a scripted planner and did not
+Default model profiles propose validated strategic actions and dialogue. The
+opt-in repair planner proposes bounded gate priorities; local policies execute work.
+In the controlled benchmark the model matched a scripted planner and did not
 outperform it. Stored memories persist across restarts; model weights are not
 trained by game failures. The server/client prototype is loopback and single-client.
 
@@ -279,9 +281,9 @@ The smoke test renders offscreen and saves `artifacts/village-smoke.png`; a grap
 - **Slow AI dialogue/plans:** local role routines continue while the model thinks. Use the separate HUD counters to distinguish activity from model responses. A smaller model, supported GPU, or slower `--pace` can help; shared memory does not make inference faster.
 - **Action rejected:** verify proximity, energy, role, cooldown, plot maturity, and shared inventory. Guards attack automatically while guarding; moving or resting cancels that duty.
 - **Save not resumed:** check the printed absolute save path and omit `--no-save` / `--new-game`. Use the same save slot on each launch.
-- **Save error:** preserve the original and `.bak`. Do not delete your campaign merely to clear an error. Unsupported schema versions fail explicitly; automatic format migrations are not implemented.
+- **Save error:** preserve the original and `.bak`. Do not delete your campaign merely to clear an error. Unsupported schema versions fail explicitly. Only the documented format 1→2 upgrade is supported; there is no general migration framework.
 
-This remains a flat-grid prototype with radius combat, simplified monster steering, and procedural art. Monsters target gates and then the center; they do not use full physics/interior navigation. Villagers can overlap. There is no multiplayer, model training, sophisticated relationship system, crafting tree, or final victory objective. Failure lessons and personalities are prompts, not proof of reliable reasoning.
+This remains a flat-grid prototype with radius combat, simplified monster steering, and procedural art. Monsters target gates and then the center; they do not use full physics/interior navigation. Villagers can overlap. Networking supports one loopback client and one possessed villager; there is no multi-player hosting, model training, sophisticated relationship system, crafting tree, or final victory objective. Failure lessons and personalities are prompts, not proof of reliable reasoning.
 
 ## Source layout and references
 

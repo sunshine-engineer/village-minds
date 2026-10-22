@@ -107,7 +107,10 @@ The original single-process Windows render check passed as well. These checks us
 internal input dispatch rather than OS keyboard automation.
 
 
-## Measured input responsiveness — 22 October 2026
+## Historical eight-sample responsiveness diagnostic — 22 October 2026
+
+This earlier shared-process fixture predates responsive transport. It is not the
+current acceptance measurement; see the separate-process results below.
 
 The [real loopback trace](results/client-responsiveness-v1.json) measures input
 onset through the actual HTTP worker, authoritative snapshots and offscreen
@@ -143,10 +146,11 @@ snapshot, wakes on input changes, disables server-side Nagle buffering, and publ
 input before restoring snapshots. The default 200 ms interpolation buffer remains. This keeps
 prediction complexity tied to a measured need. The buffer remains configurable.
 
-Windows reproduction, with no separately running server required:
+Current fixture command, with no separately running server required (it does not
+reproduce the old shared-process implementation):
 
 ```powershell
-.\.venv-win\Scripts\python.exe scripts/check_client_responsiveness.py --samples 8
+.\.venv-win\Scripts\python.exe scripts/check_client_responsiveness.py --samples 50 --transport responsive
 ```
 
 Linux uses `.venv/bin/python` with Panda3D and a working graphics backend. The

@@ -63,7 +63,8 @@ The full scripted routines still run underneath model decisions. Surviving with 
 .\.venv-win\Scripts\python.exe -m village --config configs/cooperation-siege.json --demo
 ```
 
-On Linux, use `.venv/bin/python`. Remove `--demo` to enable the configured model. This preset has its own save slot, `saves/cooperation-siege.json`; it does not load the standard village campaign. Later edits to gameplay rules require a compatible save or an explicit `--new-game`.
+On Linux, use `.venv/bin/python`. Remove `--demo` to enable the configured model. This preset has its own save slot, `saves/cooperation-siege.json`; it does not load the standard village campaign. Later edits to fingerprinted gameplay rules require a separate save path.
+`--new-game` retains lessons and still requires compatible configuration; it does not bypass a fingerprint mismatch.
 
 ## Legacy mechanics diagnostics
 
