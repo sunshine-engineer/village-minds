@@ -5,6 +5,18 @@ from .config import get_settings
 
 def decision_schema(observation):
     """Constrain choices at request time; Python rechecks them on arrival."""
+    if observation.get("decision_layer") == "repair_allocation":
+        return {
+            "type": "object",
+            "properties": {
+                "choice": {
+                    "type": "string",
+                    "enum": [c["id"] for c in observation["choices"]] + ["defer"],
+                }
+            },
+            "required": ["choice"],
+            "additionalProperties": False,
+        }
     branches = []
 
     def add(action, targets=None, speaking=False):

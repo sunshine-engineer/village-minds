@@ -18,92 +18,9 @@ import uuid
 from .config import configure, get_settings, fingerprint
 from .evaluation_schedule import CheckpointSchedule
 
+from .inference import bounded_decision, model_worker, send_result
+
 MODES = ("scripted", "hybrid", "hybrid-memory")
-
-
-def send_result(connection, result):
-    try:
-        connection.send(result)
-    except (BrokenPipeError, EOFError, OSError):
-        pass  # Parent may already have reached its deadline or been interrupted.
-
-
-def model_worker(connection, config_path, profile, observation, timeout):
-    """Spawned request process: initialization cannot mutate the parent's world."""
-    try:
-        configure(config_path)
-        from .extensions import load_extensions
-        from .models import request_decision
-
-        load_extensions()
-        decision = request_decision(
-            profile["url"],
-            profile["model"],
-            observation,
-            timeout=timeout,
-            profile=profile,
-        )
-        send_result(connection, {"status": "ok", "decision": decision})
-    except Exception as exc:
-        send_result(
-            connection,
-            {"status": "error", "error": f"{type(exc).__name__}: {str(exc)[:180]}"},
-        )
-    finally:
-        connection.close()
-
-
-def bounded_decision(profile, observation, config_path, timeout, *, worker=None):
-    """Enforce a wall deadline even when a custom transport ignores its timeout."""
-    if not math.isfinite(timeout) or timeout <= 0:
-        return {
-            "status": "timeout",
-            "error": "No model time budget remains",
-            "latency_ms": 0.0,
-        }
-    context = multiprocessing.get_context("spawn")
-    parent, child = context.Pipe(duplex=False)
-    process = context.Process(
-        target=worker or model_worker,
-        args=(child, str(config_path), profile, observation, timeout),
-        daemon=True,
-    )
-    started = time.monotonic()
-    try:
-        process.start()
-        child.close()
-        remaining = max(0, timeout - (time.monotonic() - started))
-        if parent.poll(remaining):
-            try:
-                result = parent.recv()
-            except EOFError:
-                result = {
-                    "status": "error",
-                    "error": "Model process exited without a response",
-                }
-        else:
-            result = {
-                "status": "timeout",
-                "error": "Model checkpoint wall-time limit exceeded",
-            }
-    except (OSError, ValueError) as exc:
-        result = {"status": "error", "error": f"{type(exc).__name__}: {exc}"}
-    finally:
-        child.close()
-        parent.close()
-        if process.pid is not None:
-            # Never leave model workers running into subsequent seed/mode runs.
-            process.join(timeout=0)
-            if process.is_alive():
-                process.terminate()
-                process.join(timeout=0.2)
-            if process.is_alive():
-                process.kill()
-                process.join(timeout=0.2)
-            if not process.is_alive():
-                process.close()
-    result["latency_ms"] = (time.monotonic() - started) * 1000
-    return result
 
 
 def generate_lessons(seed, seconds, step, deadline):
@@ -134,6 +51,8 @@ class Metrics:
         self.previous_gates = world.gates.copy()
         self.uncovered_threat_gate_seconds = 0.0
         self.threat_gate_seconds = 0.0
+        self.travel_villager_seconds = 0.0
+        self.store_travel_villager_seconds = 0.0
 
     def step(self, world, dt):
         # Intervals use the state at the start of a substep.
@@ -141,6 +60,13 @@ class Metrics:
         from .navigation import distance
 
         rules = get_settings()["rules"]
+        self.travel_villager_seconds += dt * sum(
+            v.alive and bool(v.path) for v in world.villagers
+        )
+        self.store_travel_villager_seconds += dt * sum(
+            v.alive and bool(v.path) and v.action == "walking to storehouse"
+            for v in world.villagers
+        )
         self.threat_gate_seconds += dt * len(world.gate_threats())
         self.uncovered_threat_gate_seconds += dt * sum(
             not any(
@@ -178,6 +104,7 @@ def run_scenario(
     suite_deadline=math.inf,
     request=bounded_decision,
 ):
+    from .allocation import repair_candidates
     from .evaluation_controls import EvaluationWorld
     from .brains import BrainScheduler
     from .telemetry import DecisionLog
@@ -225,6 +152,8 @@ def run_scenario(
     latencies = []
     outcomes = Counter()
     circuit_open = False
+    inference_records = []
+    allocations = []
     memory = (
         (lesson_fixture or {}).get("lessons", {}) if mode == "hybrid-memory" else {}
     )
@@ -259,16 +188,27 @@ def run_scenario(
                 and schedule.ready(world)
                 and requests < options["max_model_calls"]
                 and not circuit_open
+                and (
+                    not get_settings()["ai"]["repair_strategy"]["enabled"]
+                    or repair_candidates(world.task_board)
+                )
             ):
                 selection = schedule.take(world)
                 if selection is not None:
                     index, checkpoint_context = selection
                     bot = world.villagers[index]
-                    observation = world.observe(bot)
-                    observation["decision_layer"] = "strategic"
-                    observation["lessons_from_previous_failures"] = list(
-                        memory.get(bot.name, [])
-                    )
+                    if get_settings()["ai"]["repair_strategy"]["enabled"]:
+                        from .allocation import strategy_observation
+
+                        observation = strategy_observation(
+                            world, bot, memory.get(bot.name, [])
+                        )
+                    else:
+                        observation = world.observe(bot)
+                        observation["decision_layer"] = "strategic"
+                        observation["lessons_from_previous_failures"] = list(
+                            memory.get(bot.name, [])
+                        )
                     selected = brains.profile_for(bot.name)
                     request_id = f"checkpoint-{requests+1}"
                     logger.record(
@@ -317,6 +257,47 @@ def run_scenario(
                             model=selected["model"],
                             backend=selected["backend"],
                         )
+                    record = dict(
+                        role=bot.role,
+                        actor=bot.name,
+                        request_id=request_id,
+                        status=response["status"],
+                        outcome=outcome,
+                        latency_ms=response["latency_ms"],
+                        inference=response.get("inference", {}),
+                    )
+                    inference_records.append(record)
+                    logger.record(
+                        "model_inference", world.time, source="model", **record
+                    )
+                    if (
+                        outcome == "accepted"
+                        and response["decision"].get("action") == "dispatch_repair"
+                    ):
+                        gate, _, recipient = response["decision"]["target"].partition(
+                            ":"
+                        )
+                        task = next(
+                            t
+                            for t in world.task_board.tasks
+                            if t["kind"] == "repair"
+                            and t["target"] == gate
+                            and t["assigned_to"] == recipient
+                            and t["status"] in ("offered", "accepted")
+                        )
+                        person = next(v for v in world.villagers if v.name == recipient)
+                        allocations.append(
+                            dict(
+                                request_id=request_id,
+                                role=bot.role,
+                                task=task,
+                                task_id=task["id"],
+                                gate=gate,
+                                recipient=recipient,
+                                repairs=0,
+                                last_repairs=person.contributions["repairs"],
+                            )
+                        )
                     outcomes[outcome] += 1
                     if (
                         outcome in ("timeout", "error")
@@ -331,6 +312,20 @@ def run_scenario(
             if control["routines"]:
                 brains.tick()
             metrics.after_step(world)
+            for allocation in allocations:
+                person = next(
+                    v for v in world.villagers if v.name == allocation["recipient"]
+                )
+                task = allocation["task"]
+                if (
+                    task["assigned_to"] == person.name
+                    and task["status"] in ("offered", "accepted")
+                    and person.action == f"repairing {allocation['gate']}"
+                ):
+                    allocation["repairs"] += max(
+                        0, person.contributions["repairs"] - allocation["last_repairs"]
+                    )
+                allocation["last_repairs"] = person.contributions["repairs"]
         if world.failed:
             reason = "village_destroyed"
         completed = (
@@ -372,6 +367,26 @@ def run_scenario(
             "contributions": contributions,
             "local_actions": brains.local_decisions,
             "model_requests": requests,
+            "inference_records": inference_records,
+            "model_allocations": [
+                {k: v for k, v in a.items() if k not in ("task", "last_repairs")}
+                for a in allocations
+            ],
+            "productive_model_allocations": sum(a["repairs"] > 0 for a in allocations),
+            "model_deferrals": (
+                sum(r["outcome"] == "accepted" for r in inference_records)
+                - len(allocations)
+                if get_settings()["ai"]["repair_strategy"]["enabled"]
+                else 0
+            ),
+            "travel_villager_seconds": round(metrics.travel_villager_seconds, 6),
+            "store_travel_villager_seconds": round(
+                metrics.store_travel_villager_seconds, 6
+            ),
+            "urgent_partial_deliveries": sum(
+                logger.count("urgent_delivery", source, "accepted")
+                for source in ("local", "model", "player", "external")
+            ),
             "checkpoint_strategy": schedule.strategy,
             "model_coverage": schedule.coverage(),
             "unused_model_calls": (

@@ -2,6 +2,7 @@
 
 import json
 import os
+import time
 from pathlib import Path
 from typing import Protocol
 import urllib.request
@@ -11,11 +12,34 @@ from .decisions import decision_schema
 MAX_RESPONSE_BYTES = 1_048_576  # Defensive protocol bound.
 
 
+class InferenceDecision(dict):
+    def __init__(self, decision, metrics=None):
+        super().__init__(decision)
+        self.metrics = metrics or {}
+
+
 class ModelBackend(Protocol):
     def decide(self, profile: dict, observation: dict, timeout: float) -> dict: ...
 
 
 def messages(observation):
+    if observation.get("decision_layer") == "repair_allocation":
+        prompt = Path(get_settings()["ai"]["repair_strategy"]["prompt"]).read_text(
+            encoding="utf-8"
+        )
+        compact = {
+            k: observation[k]
+            for k in ("role", "wood", "choices", "lessons")
+            if k in observation
+        }
+        compact["choices"] = [
+            {k: v for k, v in c.items() if k not in ("target", "role")}
+            for c in observation["choices"]
+        ]
+        return [
+            {"role": "system", "content": prompt},
+            {"role": "user", "content": json.dumps(compact, separators=(",", ":"))},
+        ]
     prompt = Path(get_settings()["ai"]["system_prompt"]).read_text(encoding="utf-8")
     prompt = prompt.replace(
         "{{dialogue_chars}}", str(get_settings()["memory"]["dialogue_chars"])
@@ -58,13 +82,32 @@ class OllamaBackend:
             },
             "keep_alive": profile["keep_alive"],
         }
+        started = time.monotonic()
         envelope = post_json(
             profile["url"].rstrip("/") + "/api/chat",
             payload,
             timeout,
             profile["api_key_env"],
         )
-        return json.loads(envelope["message"]["content"])
+        metrics = {
+            "http_ms": (time.monotonic() - started) * 1000,
+            "request_bytes": len(json.dumps(payload).encode()),
+        }
+        for source, target in (
+            ("total_duration", "server_total_ms"),
+            ("load_duration", "load_ms"),
+            ("prompt_eval_duration", "prompt_ms"),
+            ("eval_duration", "generation_ms"),
+        ):
+            if isinstance(envelope.get(source), (int, float)):
+                metrics[target] = envelope[source] / 1e6
+        for source, target in (
+            ("prompt_eval_count", "prompt_tokens"),
+            ("eval_count", "generated_tokens"),
+        ):
+            if isinstance(envelope.get(source), int):
+                metrics[target] = envelope[source]
+        return InferenceDecision(json.loads(envelope["message"]["content"]), metrics)
 
 
 class OpenAICompatibleBackend:
@@ -135,4 +178,22 @@ def request_decision(url, model, observation, timeout=None, *, profile=None):
     )
     if not isinstance(result, dict):
         raise ValueError("Expected a decision object")
+    if observation.get("decision_layer") == "repair_allocation":
+        if set(result) != {"choice"} or not isinstance(result["choice"], str):
+            raise ValueError("Expected exactly one strategy choice")
+        choice = result["choice"]
+        if choice == "defer":
+            decision = {"action": "defer_strategy", "target": "", "dialogue": ""}
+        else:
+            candidate = next(
+                (c for c in observation["choices"] if c["id"] == choice), None
+            )
+            if candidate is None:
+                raise ValueError("Unknown strategy choice")
+            decision = {
+                "action": "dispatch_repair",
+                "target": candidate["target"],
+                "dialogue": "",
+            }
+        return InferenceDecision(decision, getattr(result, "metrics", {}))
     return result

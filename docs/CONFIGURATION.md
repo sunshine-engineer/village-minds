@@ -134,3 +134,23 @@ fingerprints are unchanged by these code-only policy improvements.
 ### Holdout matrix
 
 `configs/validation/holdout-v1.json` is a batch plan, passed to `python -m village.validation --plan`, not the game’s `--config`. It contains fresh/excluded seeds, named scenario-config paths, duration/substep and wall budgets. Scenario/output paths resolve relative to this plan. Individual presets in that folder are ordinary game/evaluator configs. See [held-out validation](HELD_OUT_VALIDATION.md).
+
+## Opt-in repair strategy and deliveries
+
+`configs/strategy-v2/development.json` enables the new prototype without changing
+the legacy defaults. See [the experiment protocol](STRATEGY_EXPERIMENT.md) before
+interpreting model results.
+
+| Section | Settings | Purpose |
+| --- | --- | --- |
+| `coordination.resource_aware` | `enabled`, `scarce_wood_below`, `scarcity_multiplier`, `resource_weight`, `travel_weight`, `guard_opportunity_cost`, `late_arrival_penalty`, `handoff_gate_health` | Rank repair assignees and bound urgent supply handoffs |
+| `logistics` | `enabled`, `urgent_wood_below`, `urgent_food_below` | Permit useful partial-load deliveries during shortages |
+| `ai.repair_strategy` | `enabled`, `max_choices`, `max_lessons`, `prompt`, `lease_seconds` | Compact strategic choices, bounded memory/prompt and assignment lease |
+| `inference_probe` | `roles`, `rounds`, `request_seconds`, `suite_seconds`, `seed`, `gate_health` | Controlled per-role reliability diagnostics |
+
+Repair prompt paths follow the existing prompt convention: an explicitly overridden
+path resolves relative to its config file; otherwise the packaged prompt is used.
+The live model profile's `timeout` is a hard request wall deadline. The probe and
+experiment have additional explicit request and suite budgets. Profile context size,
+output budget, temperature, endpoint and model remain configurable as before.
+Experiment plans fix scenario config paths, fresh/excluded seeds, horizon and budgets.

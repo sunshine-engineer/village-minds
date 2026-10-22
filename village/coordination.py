@@ -29,6 +29,7 @@ class TaskBoard:
         self.work_response_seconds = []
         self.next_request = {}
         self.next_maintenance = 0.0
+        self.strategy_leases = {}
 
     def emit(self, event, task, actor=None, source="task_board"):
         self.counts[event] += 1
@@ -106,11 +107,18 @@ class TaskBoard:
                 task.update(
                     status="open", assigned_to=None, accepted_by=None, accepted_at=None
                 )
+                self.strategy_leases.pop(task["id"], None)
                 self.emit("released", task, owner)
         # Bound retained history; counters are independent of retained rows.
         active = [t for t in self.tasks if t["status"] in ACTIVE]
         history = [t for t in self.tasks if t["status"] not in ACTIVE]
         self.tasks = history[-self.settings["history_capacity"] :] + active
+        active_ids = {t["id"] for t in active}
+        self.strategy_leases = {
+            k: v
+            for k, v in self.strategy_leases.items()
+            if k in active_ids and v > self.world.time
+        }
 
     def busy(self, name):
         return any(
@@ -266,6 +274,7 @@ class TaskBoard:
                 source="coordination",
             )
         elif action == "release_task":
+            self.strategy_leases.pop(task["id"], None)
             task.update(
                 status="open", assigned_to=None, accepted_by=None, accepted_at=None
             )
@@ -273,6 +282,11 @@ class TaskBoard:
         return True
 
     def score(self, task, bot):
+        if self.settings["resource_aware"]["enabled"] and task["kind"] == "repair":
+            from .allocation import repair_features
+
+            features = repair_features(self.world, task, bot)
+            return features["cost"] if features else math.inf
         preferences = self.settings["role_preferences"][task["kind"]]
         rank = (
             preferences.index(bot.role) if bot.role in preferences else len(preferences)
@@ -311,6 +325,8 @@ class TaskBoard:
                         source="coordination",
                     )
                     break
+        if self.settings["resource_aware"]["enabled"]:
+            self.rebalance_repairs()
         elders = [
             v
             for v in people
@@ -342,6 +358,111 @@ class TaskBoard:
                         },
                         source="coordination",
                     )
+
+    def release_owner(self, bot, reason):
+        for task in self.tasks:
+            if (
+                task["status"] in ("offered", "accepted")
+                and task["assigned_to"] == bot.name
+            ):
+                task.update(
+                    status="open",
+                    assigned_to=None,
+                    accepted_by=None,
+                    accepted_at=None,
+                    progress_at=None,
+                )
+                self.strategy_leases.pop(task["id"], None)
+                self.emit("released", task, bot.name)
+                if self.world.decision_log:
+                    self.world.decision_log.record(
+                        "task_handoff",
+                        self.world.time,
+                        actor=bot.name,
+                        reason=reason,
+                        task_id=task["id"],
+                    )
+
+    def offer_repair(self, proposer, gate, recipient):
+        from .allocation import can_handoff
+
+        bot = next((v for v in self.living() if v.name == recipient), None)
+        if bot is None or not can_handoff(self, bot, gate):
+            return False
+        task = next(
+            (
+                t
+                for t in self.tasks
+                if t["kind"] == "repair"
+                and t["target"] == gate
+                and t["status"] in ACTIVE
+            ),
+            None,
+        )
+        if task and task["assigned_to"] == recipient:
+            return False
+        if task is None and f"repair:{gate}" not in self.actions(proposer).get(
+            "request_help", []
+        ):
+            return False
+        if task and task["assigned_to"]:
+            previous = next(
+                v for v in self.world.villagers if v.name == task["assigned_to"]
+            )
+            self.release_owner(previous, "repair_reallocation")
+        self.release_owner(bot, "urgent_repair")
+        if task is None:
+            # Reuse validated request construction without bypassing board capacity.
+            token = f"repair:{gate}"
+            if token not in self.actions(proposer).get("request_help", []):
+                return False
+            self.execute(proposer, {"action": "request_help", "target": token})
+            task = next(
+                t
+                for t in self.tasks
+                if t["kind"] == "repair"
+                and t["target"] == gate
+                and t["status"] in ACTIVE
+            )
+        task.update(status="offered", assigned_to=recipient)
+        self.emit("offered", task, proposer.name)
+        return True
+
+    def rebalance_repairs(self):
+        from .allocation import can_handoff
+
+        w = self.world
+        if w.store["wood"] < get_settings()["rules"]["repair_wood_cost"]:
+            return
+        for task in sorted(
+            self.tasks, key=lambda t: w.gates.get(t["target"], math.inf)
+        ):
+            if (
+                task["kind"] != "repair"
+                or task["status"] not in ACTIVE
+                or self.strategy_leases.get(task["id"], 0) > w.time
+            ):
+                continue
+            candidates = [
+                v for v in self.living() if can_handoff(self, v, task["target"])
+            ]
+            if not candidates:
+                continue
+            best = min(candidates, key=lambda v: (self.score(task, v), v.name))
+            owner = next(
+                (v for v in self.world.villagers if v.name == task["assigned_to"]), None
+            )
+            if (
+                owner
+                and self.ready(owner)
+                and self.score(task, owner) <= self.score(task, best)
+            ):
+                continue
+            proposer = next(
+                (v for v in self.living() if v.role in self.settings["assigner_roles"]),
+                best,
+            )
+            self.offer_repair(proposer, task["target"], best.name)
 
     def policy(self, bot):
         """Return a task intent; urgent personal needs still belong to normal policy."""
@@ -482,6 +603,7 @@ class TaskBoard:
         return deepcopy(
             dict(
                 tasks=self.tasks,
+                strategy_leases=self.strategy_leases,
                 next_id=self.next_id,
                 counts=dict(self.counts),
                 response_seconds=self.response_seconds,
@@ -493,6 +615,9 @@ class TaskBoard:
 
     def restore(self, saved):
         # Strictly validate data before installing state; never execute saved text.
+        saved = deepcopy(saved)
+        if isinstance(saved, dict):
+            saved.setdefault("strategy_leases", {})
         if not isinstance(saved, dict) or set(saved) != set(self.snapshot()):
             raise ValueError("Invalid task board state")
         names = {v.name for v in self.world.villagers}
@@ -646,6 +771,14 @@ class TaskBoard:
                 raise ValueError("An offer cannot be accepted already")
             if task["status"] in ACTIVE and task["ended_at"] is not None:
                 raise ValueError("Active task has an end timestamp")
+        leases = saved["strategy_leases"]
+        if (
+            not isinstance(leases, dict)
+            or len(leases) > self.settings["max_active_tasks"]
+            or any(k not in ids or not number(v) for k, v in leases.items())
+        ):
+            raise ValueError("Invalid strategic leases")
+        self.strategy_leases = leases.copy()
         self.tasks = deepcopy(saved["tasks"])
         self.next_id = saved["next_id"]
         self.counts = Counter(saved["counts"])

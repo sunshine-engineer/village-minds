@@ -147,6 +147,25 @@ def _vector(value, length, name, low=None, high=None):
 
 def validate(config, reference):
     _validate_types(config, reference)
+    if not 1 <= config["ai"]["repair_strategy"]["max_choices"] <= 12:
+        raise ValueError("repair_strategy.max_choices must be between 1 and 12")
+    probe = config["inference_probe"]
+    if (
+        probe["rounds"] < 1
+        or not probe["roles"]
+        or len(set(probe["roles"])) != len(probe["roles"])
+        or any(r not in config["roles"] for r in probe["roles"])
+    ):
+        raise ValueError("Invalid inference probe roles or rounds")
+    for value in (
+        probe["request_seconds"],
+        probe["suite_seconds"],
+        config["ai"]["repair_strategy"]["lease_seconds"],
+    ):
+        if value <= 0:
+            raise ValueError("Inference deadlines and leases must be positive")
+    if probe["gate_health"] > config["rules"]["gate_health"]:
+        raise ValueError("Probe gate health exceeds maximum")
     coordination = config["coordination"]
     if coordination["mode"] not in ("independent", "requests", "assigned"):
         raise ValueError("Unknown coordination mode")
@@ -388,6 +407,17 @@ def load_config(path=None):
         result[section][key] = str((base / result[section][key]).resolve())
         if not Path(result[section][key]).is_file():
             raise ValueError(f"Missing {section}.{key}: {result[section][key]}")
+    strategy_prompt = result["ai"]["repair_strategy"]["prompt"]
+    strategy_base = (
+        path.parent
+        if path and "prompt" in override.get("ai", {}).get("repair_strategy", {})
+        else DATA
+    )
+    result["ai"]["repair_strategy"]["prompt"] = str(
+        (strategy_base / strategy_prompt).resolve()
+    )
+    if not Path(result["ai"]["repair_strategy"]["prompt"]).is_file():
+        raise ValueError("Missing repair strategy prompt")
     save_base = (
         path.parent if path and "save_path" in override.get("runtime", {}) else PROJECT
     )
@@ -445,4 +475,17 @@ SETTINGS = {}  # Populated by CLI or lazily by get_settings, after files are ins
 def get_settings():
     if not SETTINGS:
         SETTINGS.update(load_config())
+    return SETTINGS
+
+
+def configure_snapshot(settings):
+    """Initialize a spawned worker from trusted parent settings, before World imports."""
+    import sys
+
+    loaded = deepcopy(settings)
+    validate(loaded, read_json(DEFAULT_PATH))
+    if "village.world" in sys.modules and loaded != SETTINGS:
+        raise RuntimeError("Configuration is startup-only")
+    SETTINGS.clear()
+    SETTINGS.update(loaded)
     return SETTINGS

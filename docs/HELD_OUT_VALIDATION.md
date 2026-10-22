@@ -122,3 +122,10 @@ python scripts/audit_repairs.py artifacts/validation/<run-folder>/summary.json -
 - Effective config hashes include resolved machine-local paths; source config/code hashes support cross-checking the published inputs. They are not a promise of identical file hashes after relocating a checkout.
 - Eight seeds per scenario and four deliberately chosen regimes provide limited evidence. Repeated seeds across scenarios are not independent samples for a pooled win rate.
 - These are scripted-controller results. No inference, personality quality, model learning or general AI-cooperation benefit is established.
+
+## Follow-up repair experiment
+
+The [v2 repair strategy experiment](STRATEGY_EXPERIMENT.md) preserves these 96 results
+and uses a separate fresh seed set. A seed-211 regression rerun matched all 12 old
+scenario/strategy rows. New policies remain opt-in because the fresh comparison
+found survival regressions despite some repair-efficiency gains.

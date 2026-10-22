@@ -419,6 +419,13 @@
         "soldier": "{other}, I'm watching the gates. Call if you see trouble.",
         "elder": "{other}, everyone's work matters. Keep food and defenses ready."
       }
+    },
+    "repair_strategy": {
+      "enabled": false,
+      "max_choices": 4,
+      "max_lessons": 1,
+      "prompt": "prompts/repair_coordinator.txt",
+      "lease_seconds": 30.0
     }
   },
   "display": {
@@ -635,6 +642,34 @@
     "maintenance_seconds": 1.0,
     "assigner_roles": [
       "elder"
-    ]
+    ],
+    "resource_aware": {
+      "enabled": false,
+      "scarce_wood_below": 6,
+      "scarcity_multiplier": 3.0,
+      "resource_weight": 120.0,
+      "travel_weight": 1.0,
+      "guard_opportunity_cost": 60.0,
+      "late_arrival_penalty": 120.0,
+      "handoff_gate_health": 90.0
+    }
+  },
+  "logistics": {
+    "enabled": false,
+    "urgent_wood_below": 2,
+    "urgent_food_below": 2
+  },
+  "inference_probe": {
+    "roles": [
+      "farmer",
+      "worker",
+      "soldier",
+      "elder"
+    ],
+    "rounds": 2,
+    "request_seconds": 15.0,
+    "suite_seconds": 110.0,
+    "seed": 301,
+    "gate_health": 20.0
   }
 }

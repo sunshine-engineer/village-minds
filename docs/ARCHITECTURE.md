@@ -80,3 +80,16 @@ Compare results within that policy; see [evaluation](EVALUATION.md) for limitati
 `coordination.py` owns structured requests, exclusive task ownership, assignment/acceptance, progress, expiry, task policies and validated save state. `World` exposes board actions and public observations; `BrainScheduler` drives automation. Existing role routines remain the independent baseline and handle urgent needs. Evaluation compares the three strategies with a fixed action set and records paired seed differences.
 
 `validation.py` supervises the multi-scenario holdout protocol in fresh evaluator processes. It freezes effective configs and code hashes, enforces batch deadlines, validates result identities/capabilities, and reports missing or censored runs separately. Scenario definitions and seeds live in `configs/validation/`; full-size matrices do not run in ordinary unit tests.
+
+`allocation.py` computes legal repair candidates and resource/travel/urgency features;
+`logistics.py` handles urgent partial-load delivery. `coordination.py` owns handoffs
+and persisted strategic leases. `models.py` translates compact choice IDs into
+validated intents. `inference.py` owns the shared hard-deadline subprocess boundary
+for live scheduling, reliability probes and paused evaluations. Backend decisions
+remain dictionaries, with optional provider timing metadata on `InferenceDecision`.
+
+`inference_probe.py` measures controlled per-role inference reliability.
+`strategy_experiment.py` freezes matched legacy/scripted/model runs using new seeds.
+`evaluation.py` records productive model assignments separately from accepted
+choices, travel time, coverage and urgent deliveries. See
+[repair experiments](STRATEGY_EXPERIMENT.md) for metrics and interpretation limits.

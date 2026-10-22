@@ -1,0 +1,703 @@
+{
+  "fixture": "controlled damaged gates, limited wood, no survival benchmark",
+  "by_role": [
+    {
+      "role": "farmer",
+      "attempted": 2,
+      "expected": 2,
+      "valid_applied": 2,
+      "allocations": 2,
+      "timeouts": 0,
+      "mean_ms": 4795.655750000151,
+      "max_ms": 6807.830999998259,
+      "p50_ms": 4795.655750000151,
+      "p95_ms": 6807.830999998259
+    },
+    {
+      "role": "worker",
+      "attempted": 2,
+      "expected": 2,
+      "valid_applied": 2,
+      "allocations": 2,
+      "timeouts": 0,
+      "mean_ms": 4110.929000002216,
+      "max_ms": 5510.486300001503,
+      "p50_ms": 4110.929000002216,
+      "p95_ms": 5510.486300001503
+    },
+    {
+      "role": "soldier",
+      "attempted": 2,
+      "expected": 2,
+      "valid_applied": 2,
+      "allocations": 2,
+      "timeouts": 0,
+      "mean_ms": 4211.158450001676,
+      "max_ms": 5670.647100007045,
+      "p50_ms": 4211.158450001676,
+      "p95_ms": 5670.647100007045
+    },
+    {
+      "role": "elder",
+      "attempted": 2,
+      "expected": 2,
+      "valid_applied": 2,
+      "allocations": 2,
+      "timeouts": 0,
+      "mean_ms": 4269.13734999107,
+      "max_ms": 5766.133899989654,
+      "p50_ms": 4269.13734999107,
+      "p95_ms": 5766.133899989654
+    }
+  ],
+  "results": [
+    {
+      "role": "farmer",
+      "round": 0,
+      "status": "ok",
+      "decision": {
+        "action": "dispatch_repair",
+        "target": "north_gate:Bram",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 6586.6037999949185,
+        "request_bytes": 1826,
+        "server_total_ms": 4514.306023,
+        "load_ms": 5.167238,
+        "prompt_ms": 4017.754,
+        "generation_ms": 471.695,
+        "prompt_tokens": 375,
+        "generated_tokens": 7
+      },
+      "latency_ms": 6807.830999998259,
+      "observation": {
+        "name": "Mira",
+        "role": "farmer",
+        "personality": "Patient and generous; values food and cooperation.",
+        "decision_layer": "repair_allocation",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "current_owner": null,
+            "replacement_saves_cost": null,
+            "target": "north_gate:Iris",
+            "gate": "north_gate",
+            "actor": "Iris",
+            "role": "farmer",
+            "travel_seconds": 6.4,
+            "hp_per_wood": 10.0,
+            "breach_in_seconds": 6.67
+          },
+          {
+            "id": "r1",
+            "current_owner": null,
+            "replacement_saves_cost": null,
+            "target": "north_gate:Bram",
+            "gate": "north_gate",
+            "actor": "Bram",
+            "role": "worker",
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 6.67
+          },
+          {
+            "id": "r2",
+            "current_owner": null,
+            "replacement_saves_cost": null,
+            "target": "south_gate:Bram",
+            "gate": "south_gate",
+            "actor": "Bram",
+            "role": "worker",
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 6.67
+          },
+          {
+            "id": "r3",
+            "current_owner": null,
+            "replacement_saves_cost": null,
+            "target": "south_gate:Edda",
+            "gate": "south_gate",
+            "actor": "Edda",
+            "role": "elder",
+            "travel_seconds": 6.8,
+            "hp_per_wood": 10.0,
+            "breach_in_seconds": 6.67
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": true
+    },
+    {
+      "role": "worker",
+      "round": 0,
+      "status": "ok",
+      "decision": {
+        "action": "dispatch_repair",
+        "target": "north_gate:Bram",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 5200.450899996213,
+        "request_bytes": 1826,
+        "server_total_ms": 3116.455198,
+        "load_ms": 0.959647,
+        "prompt_ms": 2837.843,
+        "generation_ms": 268.645,
+        "prompt_tokens": 374,
+        "generated_tokens": 7
+      },
+      "latency_ms": 5510.486300001503,
+      "observation": {
+        "name": "Bram",
+        "role": "worker",
+        "personality": "Practical and ambitious; hauls food, gathers wood, and repairs threatened gates.",
+        "decision_layer": "repair_allocation",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "current_owner": null,
+            "replacement_saves_cost": null,
+            "target": "north_gate:Iris",
+            "gate": "north_gate",
+            "actor": "Iris",
+            "role": "farmer",
+            "travel_seconds": 6.4,
+            "hp_per_wood": 10.0,
+            "breach_in_seconds": 6.67
+          },
+          {
+            "id": "r1",
+            "current_owner": null,
+            "replacement_saves_cost": null,
+            "target": "north_gate:Bram",
+            "gate": "north_gate",
+            "actor": "Bram",
+            "role": "worker",
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 6.67
+          },
+          {
+            "id": "r2",
+            "current_owner": null,
+            "replacement_saves_cost": null,
+            "target": "south_gate:Bram",
+            "gate": "south_gate",
+            "actor": "Bram",
+            "role": "worker",
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 6.67
+          },
+          {
+            "id": "r3",
+            "current_owner": null,
+            "replacement_saves_cost": null,
+            "target": "south_gate:Edda",
+            "gate": "south_gate",
+            "actor": "Edda",
+            "role": "elder",
+            "travel_seconds": 6.8,
+            "hp_per_wood": 10.0,
+            "breach_in_seconds": 6.67
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": true
+    },
+    {
+      "role": "soldier",
+      "round": 0,
+      "status": "ok",
+      "decision": {
+        "action": "dispatch_repair",
+        "target": "north_gate:Bram",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 5404.614600003697,
+        "request_bytes": 1827,
+        "server_total_ms": 3341.593558,
+        "load_ms": 0.898646,
+        "prompt_ms": 3031.351,
+        "generation_ms": 300.097,
+        "prompt_tokens": 375,
+        "generated_tokens": 7
+      },
+      "latency_ms": 5670.647100007045,
+      "observation": {
+        "name": "Otto",
+        "role": "soldier",
+        "personality": "Blunt and brave; guards threatened gates and protects the farmers.",
+        "decision_layer": "repair_allocation",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "current_owner": null,
+            "replacement_saves_cost": null,
+            "target": "north_gate:Iris",
+            "gate": "north_gate",
+            "actor": "Iris",
+            "role": "farmer",
+            "travel_seconds": 6.4,
+            "hp_per_wood": 10.0,
+            "breach_in_seconds": 6.67
+          },
+          {
+            "id": "r1",
+            "current_owner": null,
+            "replacement_saves_cost": null,
+            "target": "north_gate:Bram",
+            "gate": "north_gate",
+            "actor": "Bram",
+            "role": "worker",
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 6.67
+          },
+          {
+            "id": "r2",
+            "current_owner": null,
+            "replacement_saves_cost": null,
+            "target": "south_gate:Bram",
+            "gate": "south_gate",
+            "actor": "Bram",
+            "role": "worker",
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 6.67
+          },
+          {
+            "id": "r3",
+            "current_owner": null,
+            "replacement_saves_cost": null,
+            "target": "south_gate:Edda",
+            "gate": "south_gate",
+            "actor": "Edda",
+            "role": "elder",
+            "travel_seconds": 6.8,
+            "hp_per_wood": 10.0,
+            "breach_in_seconds": 6.67
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": true
+    },
+    {
+      "role": "elder",
+      "round": 0,
+      "status": "ok",
+      "decision": {
+        "action": "dispatch_repair",
+        "target": "north_gate:Bram",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 5443.87679999636,
+        "request_bytes": 1825,
+        "server_total_ms": 3379.615641,
+        "load_ms": 0.924084,
+        "prompt_ms": 3086.488,
+        "generation_ms": 281.24,
+        "prompt_tokens": 374,
+        "generated_tokens": 7
+      },
+      "latency_ms": 5766.133899989654,
+      "observation": {
+        "name": "Edda",
+        "role": "elder",
+        "personality": "Calm and thoughtful; coordinates survival, shares food, and remembers earlier failures.",
+        "decision_layer": "repair_allocation",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "current_owner": null,
+            "replacement_saves_cost": null,
+            "target": "north_gate:Iris",
+            "gate": "north_gate",
+            "actor": "Iris",
+            "role": "farmer",
+            "travel_seconds": 6.4,
+            "hp_per_wood": 10.0,
+            "breach_in_seconds": 6.67
+          },
+          {
+            "id": "r1",
+            "current_owner": null,
+            "replacement_saves_cost": null,
+            "target": "north_gate:Bram",
+            "gate": "north_gate",
+            "actor": "Bram",
+            "role": "worker",
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 6.67
+          },
+          {
+            "id": "r2",
+            "current_owner": null,
+            "replacement_saves_cost": null,
+            "target": "south_gate:Bram",
+            "gate": "south_gate",
+            "actor": "Bram",
+            "role": "worker",
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 6.67
+          },
+          {
+            "id": "r3",
+            "current_owner": null,
+            "replacement_saves_cost": null,
+            "target": "south_gate:Edda",
+            "gate": "south_gate",
+            "actor": "Edda",
+            "role": "elder",
+            "travel_seconds": 6.8,
+            "hp_per_wood": 10.0,
+            "breach_in_seconds": 6.67
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": true
+    },
+    {
+      "role": "farmer",
+      "round": 1,
+      "status": "ok",
+      "decision": {
+        "action": "dispatch_repair",
+        "target": "north_gate:Bram",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2480.843299999833,
+        "request_bytes": 1826,
+        "server_total_ms": 376.23834,
+        "load_ms": 4.050355,
+        "prompt_ms": 46.145,
+        "generation_ms": 313.003,
+        "prompt_tokens": 375,
+        "generated_tokens": 7
+      },
+      "latency_ms": 2783.4805000020424,
+      "observation": {
+        "name": "Mira",
+        "role": "farmer",
+        "personality": "Patient and generous; values food and cooperation.",
+        "decision_layer": "repair_allocation",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "current_owner": null,
+            "replacement_saves_cost": null,
+            "target": "north_gate:Iris",
+            "gate": "north_gate",
+            "actor": "Iris",
+            "role": "farmer",
+            "travel_seconds": 6.4,
+            "hp_per_wood": 10.0,
+            "breach_in_seconds": 6.67
+          },
+          {
+            "id": "r1",
+            "current_owner": null,
+            "replacement_saves_cost": null,
+            "target": "north_gate:Bram",
+            "gate": "north_gate",
+            "actor": "Bram",
+            "role": "worker",
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 6.67
+          },
+          {
+            "id": "r2",
+            "current_owner": null,
+            "replacement_saves_cost": null,
+            "target": "south_gate:Bram",
+            "gate": "south_gate",
+            "actor": "Bram",
+            "role": "worker",
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 6.67
+          },
+          {
+            "id": "r3",
+            "current_owner": null,
+            "replacement_saves_cost": null,
+            "target": "south_gate:Edda",
+            "gate": "south_gate",
+            "actor": "Edda",
+            "role": "elder",
+            "travel_seconds": 6.8,
+            "hp_per_wood": 10.0,
+            "breach_in_seconds": 6.67
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": true
+    },
+    {
+      "role": "worker",
+      "round": 1,
+      "status": "ok",
+      "decision": {
+        "action": "dispatch_repair",
+        "target": "north_gate:Bram",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2390.247100003762,
+        "request_bytes": 1826,
+        "server_total_ms": 316.555893,
+        "load_ms": 0.922329,
+        "prompt_ms": 44.956,
+        "generation_ms": 257.29,
+        "prompt_tokens": 374,
+        "generated_tokens": 7
+      },
+      "latency_ms": 2711.3717000029283,
+      "observation": {
+        "name": "Bram",
+        "role": "worker",
+        "personality": "Practical and ambitious; hauls food, gathers wood, and repairs threatened gates.",
+        "decision_layer": "repair_allocation",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "current_owner": null,
+            "replacement_saves_cost": null,
+            "target": "north_gate:Iris",
+            "gate": "north_gate",
+            "actor": "Iris",
+            "role": "farmer",
+            "travel_seconds": 6.4,
+            "hp_per_wood": 10.0,
+            "breach_in_seconds": 6.67
+          },
+          {
+            "id": "r1",
+            "current_owner": null,
+            "replacement_saves_cost": null,
+            "target": "north_gate:Bram",
+            "gate": "north_gate",
+            "actor": "Bram",
+            "role": "worker",
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 6.67
+          },
+          {
+            "id": "r2",
+            "current_owner": null,
+            "replacement_saves_cost": null,
+            "target": "south_gate:Bram",
+            "gate": "south_gate",
+            "actor": "Bram",
+            "role": "worker",
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 6.67
+          },
+          {
+            "id": "r3",
+            "current_owner": null,
+            "replacement_saves_cost": null,
+            "target": "south_gate:Edda",
+            "gate": "south_gate",
+            "actor": "Edda",
+            "role": "elder",
+            "travel_seconds": 6.8,
+            "hp_per_wood": 10.0,
+            "breach_in_seconds": 6.67
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": true
+    },
+    {
+      "role": "soldier",
+      "round": 1,
+      "status": "ok",
+      "decision": {
+        "action": "dispatch_repair",
+        "target": "north_gate:Bram",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2409.1600000101607,
+        "request_bytes": 1827,
+        "server_total_ms": 337.480647,
+        "load_ms": 1.0995,
+        "prompt_ms": 44.043,
+        "generation_ms": 279.929,
+        "prompt_tokens": 375,
+        "generated_tokens": 7
+      },
+      "latency_ms": 2751.669799996307,
+      "observation": {
+        "name": "Otto",
+        "role": "soldier",
+        "personality": "Blunt and brave; guards threatened gates and protects the farmers.",
+        "decision_layer": "repair_allocation",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "current_owner": null,
+            "replacement_saves_cost": null,
+            "target": "north_gate:Iris",
+            "gate": "north_gate",
+            "actor": "Iris",
+            "role": "farmer",
+            "travel_seconds": 6.4,
+            "hp_per_wood": 10.0,
+            "breach_in_seconds": 6.67
+          },
+          {
+            "id": "r1",
+            "current_owner": null,
+            "replacement_saves_cost": null,
+            "target": "north_gate:Bram",
+            "gate": "north_gate",
+            "actor": "Bram",
+            "role": "worker",
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 6.67
+          },
+          {
+            "id": "r2",
+            "current_owner": null,
+            "replacement_saves_cost": null,
+            "target": "south_gate:Bram",
+            "gate": "south_gate",
+            "actor": "Bram",
+            "role": "worker",
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 6.67
+          },
+          {
+            "id": "r3",
+            "current_owner": null,
+            "replacement_saves_cost": null,
+            "target": "south_gate:Edda",
+            "gate": "south_gate",
+            "actor": "Edda",
+            "role": "elder",
+            "travel_seconds": 6.8,
+            "hp_per_wood": 10.0,
+            "breach_in_seconds": 6.67
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": true
+    },
+    {
+      "role": "elder",
+      "round": 1,
+      "status": "ok",
+      "decision": {
+        "action": "dispatch_repair",
+        "target": "north_gate:Bram",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2463.6102999938885,
+        "request_bytes": 1825,
+        "server_total_ms": 379.317043,
+        "load_ms": 1.383973,
+        "prompt_ms": 48.154,
+        "generation_ms": 312.774,
+        "prompt_tokens": 374,
+        "generated_tokens": 7
+      },
+      "latency_ms": 2772.140799992485,
+      "observation": {
+        "name": "Edda",
+        "role": "elder",
+        "personality": "Calm and thoughtful; coordinates survival, shares food, and remembers earlier failures.",
+        "decision_layer": "repair_allocation",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "current_owner": null,
+            "replacement_saves_cost": null,
+            "target": "north_gate:Iris",
+            "gate": "north_gate",
+            "actor": "Iris",
+            "role": "farmer",
+            "travel_seconds": 6.4,
+            "hp_per_wood": 10.0,
+            "breach_in_seconds": 6.67
+          },
+          {
+            "id": "r1",
+            "current_owner": null,
+            "replacement_saves_cost": null,
+            "target": "north_gate:Bram",
+            "gate": "north_gate",
+            "actor": "Bram",
+            "role": "worker",
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 6.67
+          },
+          {
+            "id": "r2",
+            "current_owner": null,
+            "replacement_saves_cost": null,
+            "target": "south_gate:Bram",
+            "gate": "south_gate",
+            "actor": "Bram",
+            "role": "worker",
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 6.67
+          },
+          {
+            "id": "r3",
+            "current_owner": null,
+            "replacement_saves_cost": null,
+            "target": "south_gate:Edda",
+            "gate": "south_gate",
+            "actor": "Edda",
+            "role": "elder",
+            "travel_seconds": 6.8,
+            "hp_per_wood": 10.0,
+            "breach_in_seconds": 6.67
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": true
+    }
+  ]
+}

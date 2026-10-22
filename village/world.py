@@ -201,12 +201,32 @@ class World(SurvivalRules):
             return accepted
         from .telemetry import state_summary
 
+        from .logistics import delivery_reason
+
+        delivery = (
+            delivery_reason(self, bot)
+            if isinstance(decision, dict)
+            and decision.get("action") == "deposit"
+            and max(bot.wood, bot.supplies) < P["deposit_at_inventory"]
+            else None
+        )
         before = state_summary(self, bot)
         if observation is None and self.decision_log.full_observations:
             observation = self.observe(bot)
         accepted = self._apply(bot, decision)
         if accepted:
             self.task_board.note_progress(bot, decision)
+        if accepted and delivery:
+            self.decision_log.record(
+                "urgent_delivery",
+                self.time,
+                source=source,
+                actor=bot.name,
+                outcome="accepted",
+                reason=delivery,
+                food=before["actor"]["food"],
+                wood=before["actor"]["wood"],
+            )
         self.decision_log.record(
             "decision",
             self.time,
@@ -229,6 +249,31 @@ class World(SurvivalRules):
         action = decision.get("action")
         if not isinstance(action, str):
             return False
+        if action == "defer_strategy":
+            return get_settings()["ai"]["repair_strategy"]["enabled"]
+        if action == "dispatch_repair":
+            from .allocation import repair_candidates
+
+            target = decision.get("target", "")
+            if not isinstance(target, str) or target not in [
+                c["target"] for c in repair_candidates(self.task_board)
+            ]:
+                return False
+            gate, _, recipient = target.partition(":")
+            accepted = self.task_board.offer_repair(bot, gate, recipient)
+            if accepted:
+                task = next(
+                    t
+                    for t in self.task_board.tasks
+                    if t["kind"] == "repair"
+                    and t["target"] == gate
+                    and t["assigned_to"] == recipient
+                    and t["status"] == "offered"
+                )
+                self.task_board.strategy_leases[task["id"]] = (
+                    self.time + get_settings()["ai"]["repair_strategy"]["lease_seconds"]
+                )
+            return accepted
         if action in ("request_help", "assign_task", "claim_task", "release_task"):
             return self.task_board.execute(bot, decision)
         if action in self.extensions.actions:
@@ -410,6 +455,15 @@ class World(SurvivalRules):
         return point if walkable(*point) else (x, y)
 
     def fallback(self, bot):
+        if self.failed or not bot.alive:
+            return None
+        from .logistics import delivery_intent
+
+        delivery = delivery_intent(self, bot)
+        if delivery is False:
+            return None
+        if delivery is not None:
+            return delivery
         task = self.task_board.policy(bot)
         if task is False:
             return None

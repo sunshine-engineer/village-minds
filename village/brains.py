@@ -5,7 +5,8 @@ import threading
 import time
 from .config import get_settings
 from .decisions import decision_schema
-from .models import request_decision, resolve_profile, BACKENDS
+from .models import InferenceDecision, request_decision, resolve_profile, BACKENDS
+from .inference import bounded_decision
 from .map_data import GATES, HEARING
 from .navigation import distance, pathfind
 
@@ -65,10 +66,20 @@ class BrainScheduler:
             index, revision, sent_at, observation = self.jobs.get()
             try:
                 profile = self.profile_for(observation["name"])
-                result = request_decision(
-                    profile["url"], profile["model"], observation, profile=profile
+                response = bounded_decision(profile, observation, S, profile["timeout"])
+                if response["status"] != "ok":
+                    raise TimeoutError(response.get("error", response["status"]))
+                self.results.put(
+                    (
+                        index,
+                        revision,
+                        sent_at,
+                        InferenceDecision(
+                            response["decision"], response.get("inference", {})
+                        ),
+                        None,
+                    )
                 )
-                self.results.put((index, revision, sent_at, result, None))
             except Exception as exc:
                 self.results.put(
                     (
@@ -294,8 +305,16 @@ class BrainScheduler:
             index = (self.cursor + offset) % len(world.villagers)
             bot = world.villagers[index]
             if bot.alive and index != world.controlled and world.time >= bot.next_think:
-                observation = world.observe(bot)
-                observation["decision_layer"] = "strategic"
+                if A["repair_strategy"]["enabled"]:
+                    from .allocation import strategy_observation
+
+                    observation = strategy_observation(world, bot, bot.lessons)
+                    if not observation["choices"]:
+                        bot.next_think = world.time + A["think_seconds"]
+                        continue
+                else:
+                    observation = world.observe(bot)
+                    observation["decision_layer"] = "strategic"
                 self.active_profile = self.profile_for(bot.name)
                 self.request_count += 1
                 self.request_context = {
@@ -385,6 +404,12 @@ class BrainScheduler:
             else:
                 reason = "unavailable_or_invalid"
                 self.status += " | outdated/unavailable choice skipped"
+            if accepted and result.get("action") in (
+                "dispatch_repair",
+                "defer_strategy",
+            ):
+                self.model_tasks[index] = None
+                self.override_until[index] = world.time
             bot.next_think = world.time + A["think_seconds"]
         if world.decision_log:
             world.decision_log.record(
@@ -397,6 +422,7 @@ class BrainScheduler:
                 request_id=request_id,
                 decision=result,
                 latency_ms=latency_ms,
+                inference=getattr(result, "metrics", {}),
                 model=profile["model"],
                 backend=profile["backend"],
             )
