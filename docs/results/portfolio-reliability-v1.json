@@ -1,0 +1,2373 @@
+{
+  "fixture": "controlled damaged gates, limited wood, no survival benchmark",
+  "expected_requests": 40,
+  "attempted_requests": 40,
+  "valid_in_deadline": 40,
+  "minimum_valid_rate": 0.95,
+  "passed": true,
+  "sources": {
+    "__init__.py": "dbe5552c40f0d78217b59622478b43fdb180614192ba1c0d04e64d5fef1a8eec",
+    "__main__.py": "c47c05f25172b5e83bfc03c16289ccc182139ab471d5836c7aa45ba83667ab9c",
+    "allocation.py": "93d441936bc3d80a5c60711e22b50a078a7eb8344096298b351b9c790583c94a",
+    "assets.py": "c1870267ba7740f9fd8b333fa8ee99db11ca22910553d0d67b798b3a0961ea36",
+    "brains.py": "b7be6cf67b4e90f04e166cd43b4a1a56a05c58cdf0d5283b5905cbc8b173656a",
+    "cli.py": "db2530dc598cfb55d1ec1b7b7b888bb68174f625e8b53ce75e80bab0d27bcff8",
+    "client.py": "be55bff91d7a02d38f22665cfd15c1615cd1569a9c292ce3640e4b2f8300637d",
+    "config.py": "db96d23483603a57de0020f2a1df219775031a84bd875fddee62c7cb993f4964",
+    "controls.py": "0e316f8f80ba83251e658404bbaa4c40a695d8ac2d343327d17cfda82bbd011b",
+    "coordination.py": "49498984f27e852512747e85d3e5e2c0e84248efc3453f33f831322a1a826e5f",
+    "data\\assets\\catalog.json": "dc3d62d654dc55499efefea7d03a75fc7143d9aea5913e3e6bda7675a34e8604",
+    "data\\default.json": "3a768d772969954761539cd78eb62b155b31860846d871996052993f07a0e77b",
+    "data\\prompts\\repair_coordinator.txt": "c47c86176106293957f3398be39b3da06b29f46e4b6e3b187414d42091261c8a",
+    "data\\prompts\\repair_priority.txt": "36b2206d4773ebc10b69b5ae58ba58cb285a764e5eb83a946ab37954ae49b3cc",
+    "data\\prompts\\villager.txt": "dcf4aca137a54ba51cab33d391dd7ed74d6c0af77aa32376c8c842ed1dad362c",
+    "decisions.py": "1d2754bac40a74f808115a925e43d6409386830fb410a148ce1d112a6f17cefa",
+    "entities.py": "d10a6bed164d974075037a0d72a7c1967093e70b6069441749614b10048a6c25",
+    "evaluation.py": "673b460bb9e424f4401e19a1a111ea304d8419005ad41e05de755754c8832b1a",
+    "evaluation_controls.py": "0ac2948fe1893872f75a2d95111f7d2d65bcbc6b40821ad03f0ba5adc6f384bc",
+    "evaluation_schedule.py": "62a407851e6a46a9cb98aaf00ae753546f257a007d178ab58ccfac3cdd0489fc",
+    "extensions.py": "f0ad2a0adfc8785c89355e50246f07eb413a94361d74f093fbdf9da38ec11227",
+    "game.py": "50d5b1124f3683ee4c223543397ca0cefa2e1c5e549459f0b102e00ce78e29f8",
+    "inference.py": "a4b0f991b28d9e051d3aecc2323b4b9cbe0d2433757c8027022c93ec4d6be691",
+    "inference_probe.py": "7cae93111df127757f668ef591355ac1351e6071e29e8a4c0e64e02165a0ac1a",
+    "interpolation.py": "deb9ac9b26424e245e77ef27d445c60055d52e258e8fd6995c21930948191c64",
+    "logistics.py": "a451f574c9e96addde7225a6d874307b4a3e926d3ba4359583764389c650f4fd",
+    "map_data.py": "7d977ee3c2c0f35afb1c2505da6a222462eeab86989bdd3302a90b6b401b3234",
+    "models.py": "63fcdb4f9f98c6187c5b926ec7e70ae1a6ca2f98280093ad3ea6347f7c727452",
+    "navigation.py": "434df819eb6b6f7a607411999c8a553571b60f2b076008557fee62234bf098ae",
+    "network.py": "aec18e5143e3369863f6cf8ab539799ade96d56fc682b119e6d2abb9d5cd42b7",
+    "persistence.py": "282bcd9ed533522469473df61c7ee088a01571c11e293246808c9fdc4841ea5b",
+    "plugins\\__init__.py": "b900ad6ddfd656b4b7441f67a7196d130037afe027f207b7c9aefe8026b7cfa7",
+    "plugins\\encourage.py": "e7314e889c98b9a28a32a202720c7140839cb9102307eeaf2214da19108ad5ca",
+    "plugins\\offline_backend.py": "f6a6ab3529475e2f5a9e582462e6a904765368b2e226b0ca2cbc11be76c7a73f",
+    "policies.py": "1d88cd6e2b217724bb08f9c1a57908e40ae7bde85a6481e2f967c5089470cc02",
+    "priority_benchmark.py": "591e0b50f8985dfa045ccbdecbcf39ac0ab874fe3e8050a1f2566e4b7396be3d",
+    "probe.py": "c94ac8b76bd44e9c8f108301807491bccd9ada30b4bbbfd20e7c604432ba44d8",
+    "scene.py": "1939b4a58f06cd6becdf6f670f17d1848796f50f9a81537a8744f27e0beffb08",
+    "server.py": "405da87756f20c65cc843943f7bf5444dd964a810f5c160bea0c7eda5748803a",
+    "simulation.py": "077d1753c08d9a44f9d3991e1f0cf029eb5baaa172432048f934789ff5efb204",
+    "strategy_experiment.py": "2a3a94767ffb32c70495ea88f54acb746371cb55f64104efd32ecfcd8978e302",
+    "survival.py": "b5823b0c3ed749ea23f6e68b18bd0ec7b81e310dc4e04b00f079bf505d3311dd",
+    "telemetry.py": "8b326de38a92b0139682ebedc8647c025d52be9f11fe3801bd16b09a82122f23",
+    "timing.py": "1704d392a1caa08c3679b01ca0118abc8952fd215ff4ee2f0ffc292a4e006cc1",
+    "ui.py": "b0fd157b53ecbfe0eb476add7b7a2f8278a89f611e11c56a064df8f667f52cf5",
+    "world.py": "1d8c50376f8722dd974c4d3c1eb7318b4cd342d1985352af94ebcdaf49a0cee2"
+  },
+  "profile": {
+    "backend": "ollama",
+    "url": "http://localhost:11434",
+    "model": "qwen2.5:1.5b",
+    "timeout": 15.0,
+    "temperature": 0.0,
+    "max_tokens": 24,
+    "context_size": 2048,
+    "keep_alive": "10m",
+    "api_key_env": ""
+  },
+  "host": {
+    "platform": "Windows-11-10.0.26300-SP0",
+    "processor": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel",
+    "logical_cpus": 12,
+    "python": "3.14.7 (tags/v3.14.7:823f032, Aug  5 2026, 10:51:32) [MSC v.1944 64 bit (AMD64)]"
+  },
+  "by_role": [
+    {
+      "role": "farmer",
+      "attempted": 10,
+      "expected": 10,
+      "valid_applied": 10,
+      "allocations": 0,
+      "priority_plans": 10,
+      "valid_in_deadline": 10,
+      "timeouts": 0,
+      "mean_ms": 3038.8401100004558,
+      "max_ms": 4117.296699987492,
+      "p50_ms": 2908.8878000038676,
+      "p95_ms": 4117.296699987492
+    },
+    {
+      "role": "worker",
+      "attempted": 10,
+      "expected": 10,
+      "valid_applied": 10,
+      "allocations": 0,
+      "priority_plans": 10,
+      "valid_in_deadline": 10,
+      "timeouts": 0,
+      "mean_ms": 3006.7546799968113,
+      "max_ms": 4073.4800999925938,
+      "p50_ms": 2900.754699992831,
+      "p95_ms": 4073.4800999925938
+    },
+    {
+      "role": "soldier",
+      "attempted": 10,
+      "expected": 10,
+      "valid_applied": 10,
+      "allocations": 0,
+      "priority_plans": 10,
+      "valid_in_deadline": 10,
+      "timeouts": 0,
+      "mean_ms": 3082.085379998898,
+      "max_ms": 4166.221099992981,
+      "p50_ms": 2951.6419999999925,
+      "p95_ms": 4166.221099992981
+    },
+    {
+      "role": "elder",
+      "attempted": 10,
+      "expected": 10,
+      "valid_applied": 10,
+      "allocations": 0,
+      "priority_plans": 10,
+      "valid_in_deadline": 10,
+      "timeouts": 0,
+      "mean_ms": 3096.234510000795,
+      "max_ms": 4115.507099995739,
+      "p50_ms": 2952.7796000038506,
+      "p95_ms": 4115.507099995739
+    }
+  ],
+  "results": [
+    {
+      "role": "farmer",
+      "round": 0,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 3757.3323999968125,
+        "request_bytes": 1007,
+        "server_total_ms": 1621.074094,
+        "load_ms": 1.679733,
+        "prompt_ms": 1363.054,
+        "generation_ms": 243.662,
+        "prompt_tokens": 185,
+        "generated_tokens": 7
+      },
+      "latency_ms": 4117.296699987492,
+      "observation": {
+        "name": "Mira",
+        "role": "farmer",
+        "personality": "Patient and generous; values food and cooperation.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "worker",
+      "round": 0,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 3741.701599996304,
+        "request_bytes": 1007,
+        "server_total_ms": 1549.806492,
+        "load_ms": 1.753601,
+        "prompt_ms": 1296.809,
+        "generation_ms": 239.024,
+        "prompt_tokens": 184,
+        "generated_tokens": 7
+      },
+      "latency_ms": 4073.4800999925938,
+      "observation": {
+        "name": "Bram",
+        "role": "worker",
+        "personality": "Practical and ambitious; hauls food, gathers wood, and repairs threatened gates.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "soldier",
+      "round": 0,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 3868.132199990214,
+        "request_bytes": 1008,
+        "server_total_ms": 1669.950495,
+        "load_ms": 1.552927,
+        "prompt_ms": 1345.303,
+        "generation_ms": 313.283,
+        "prompt_tokens": 185,
+        "generated_tokens": 7
+      },
+      "latency_ms": 4166.221099992981,
+      "observation": {
+        "name": "Otto",
+        "role": "soldier",
+        "personality": "Blunt and brave; guards threatened gates and protects the farmers.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "elder",
+      "round": 0,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 3809.480900003109,
+        "request_bytes": 1006,
+        "server_total_ms": 1671.60263,
+        "load_ms": 2.59742,
+        "prompt_ms": 1334.474,
+        "generation_ms": 325.328,
+        "prompt_tokens": 184,
+        "generated_tokens": 7
+      },
+      "latency_ms": 4115.507099995739,
+      "observation": {
+        "name": "Edda",
+        "role": "elder",
+        "personality": "Calm and thoughtful; coordinates survival, shares food, and remembers earlier failures.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "farmer",
+      "round": 1,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2480.9597999992548,
+        "request_bytes": 1007,
+        "server_total_ms": 367.500246,
+        "load_ms": 1.792528,
+        "prompt_ms": 92.323,
+        "generation_ms": 263.171,
+        "prompt_tokens": 185,
+        "generated_tokens": 7
+      },
+      "latency_ms": 2811.479900003178,
+      "observation": {
+        "name": "Mira",
+        "role": "farmer",
+        "personality": "Patient and generous; values food and cooperation.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "worker",
+      "round": 1,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2496.947599996929,
+        "request_bytes": 1007,
+        "server_total_ms": 380.636171,
+        "load_ms": 1.547346,
+        "prompt_ms": 107.868,
+        "generation_ms": 261.247,
+        "prompt_tokens": 184,
+        "generated_tokens": 7
+      },
+      "latency_ms": 2874.2856999888318,
+      "observation": {
+        "name": "Bram",
+        "role": "worker",
+        "personality": "Practical and ambitious; hauls food, gathers wood, and repairs threatened gates.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "soldier",
+      "round": 1,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2573.0502999940654,
+        "request_bytes": 1008,
+        "server_total_ms": 396.824539,
+        "load_ms": 1.468078,
+        "prompt_ms": 96.961,
+        "generation_ms": 287.682,
+        "prompt_tokens": 185,
+        "generated_tokens": 7
+      },
+      "latency_ms": 2887.8198000020348,
+      "observation": {
+        "name": "Otto",
+        "role": "soldier",
+        "personality": "Blunt and brave; guards threatened gates and protects the farmers.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "elder",
+      "round": 1,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2487.972000002628,
+        "request_bytes": 1006,
+        "server_total_ms": 307.950092,
+        "load_ms": 1.5025,
+        "prompt_ms": 63.548,
+        "generation_ms": 234.371,
+        "prompt_tokens": 184,
+        "generated_tokens": 7
+      },
+      "latency_ms": 3402.781299999333,
+      "observation": {
+        "name": "Edda",
+        "role": "elder",
+        "personality": "Calm and thoughtful; coordinates survival, shares food, and remembers earlier failures.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "farmer",
+      "round": 2,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2562.707799996133,
+        "request_bytes": 1007,
+        "server_total_ms": 372.221585,
+        "load_ms": 2.231487,
+        "prompt_ms": 98.781,
+        "generation_ms": 261.392999,
+        "prompt_tokens": 185,
+        "generated_tokens": 7
+      },
+      "latency_ms": 2867.4016000004485,
+      "observation": {
+        "name": "Mira",
+        "role": "farmer",
+        "personality": "Patient and generous; values food and cooperation.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "worker",
+      "round": 2,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2534.1040000057546,
+        "request_bytes": 1007,
+        "server_total_ms": 380.423727,
+        "load_ms": 1.643738,
+        "prompt_ms": 109.315,
+        "generation_ms": 260.538,
+        "prompt_tokens": 184,
+        "generated_tokens": 7
+      },
+      "latency_ms": 2835.663400008343,
+      "observation": {
+        "name": "Bram",
+        "role": "worker",
+        "personality": "Practical and ambitious; hauls food, gathers wood, and repairs threatened gates.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "soldier",
+      "round": 2,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2522.681799993734,
+        "request_bytes": 1008,
+        "server_total_ms": 397.619715,
+        "load_ms": 1.454737,
+        "prompt_ms": 87.927,
+        "generation_ms": 299.165,
+        "prompt_tokens": 185,
+        "generated_tokens": 7
+      },
+      "latency_ms": 2952.2675999905914,
+      "observation": {
+        "name": "Otto",
+        "role": "soldier",
+        "personality": "Blunt and brave; guards threatened gates and protects the farmers.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "elder",
+      "round": 2,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2492.2237999999197,
+        "request_bytes": 1006,
+        "server_total_ms": 363.282107,
+        "load_ms": 1.483363,
+        "prompt_ms": 87.085,
+        "generation_ms": 266.052,
+        "prompt_tokens": 184,
+        "generated_tokens": 7
+      },
+      "latency_ms": 2886.712899999111,
+      "observation": {
+        "name": "Edda",
+        "role": "elder",
+        "personality": "Calm and thoughtful; coordinates survival, shares food, and remembers earlier failures.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "farmer",
+      "round": 3,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2551.197900000261,
+        "request_bytes": 1007,
+        "server_total_ms": 378.821993,
+        "load_ms": 2.055788,
+        "prompt_ms": 94.273,
+        "generation_ms": 272.694,
+        "prompt_tokens": 185,
+        "generated_tokens": 7
+      },
+      "latency_ms": 2852.308500005165,
+      "observation": {
+        "name": "Mira",
+        "role": "farmer",
+        "personality": "Patient and generous; values food and cooperation.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "worker",
+      "round": 3,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2639.260900003137,
+        "request_bytes": 1007,
+        "server_total_ms": 443.412913,
+        "load_ms": 1.434893,
+        "prompt_ms": 121.046,
+        "generation_ms": 312.329,
+        "prompt_tokens": 184,
+        "generated_tokens": 7
+      },
+      "latency_ms": 2937.4695000005886,
+      "observation": {
+        "name": "Bram",
+        "role": "worker",
+        "personality": "Practical and ambitious; hauls food, gathers wood, and repairs threatened gates.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "soldier",
+      "round": 3,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2545.6889999913983,
+        "request_bytes": 1008,
+        "server_total_ms": 415.707073,
+        "load_ms": 2.359972,
+        "prompt_ms": 150.07,
+        "generation_ms": 254.399,
+        "prompt_tokens": 185,
+        "generated_tokens": 7
+      },
+      "latency_ms": 2951.0164000093937,
+      "observation": {
+        "name": "Otto",
+        "role": "soldier",
+        "personality": "Blunt and brave; guards threatened gates and protects the farmers.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "elder",
+      "round": 3,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2513.2082999916747,
+        "request_bytes": 1006,
+        "server_total_ms": 385.221409,
+        "load_ms": 1.945284,
+        "prompt_ms": 103.47,
+        "generation_ms": 267.630999,
+        "prompt_tokens": 184,
+        "generated_tokens": 7
+      },
+      "latency_ms": 2918.1557999982033,
+      "observation": {
+        "name": "Edda",
+        "role": "elder",
+        "personality": "Calm and thoughtful; coordinates survival, shares food, and remembers earlier failures.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "farmer",
+      "round": 4,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2555.7365999993635,
+        "request_bytes": 1007,
+        "server_total_ms": 399.397113,
+        "load_ms": 1.388016,
+        "prompt_ms": 107.291,
+        "generation_ms": 281.991,
+        "prompt_tokens": 185,
+        "generated_tokens": 7
+      },
+      "latency_ms": 3033.7042000028305,
+      "observation": {
+        "name": "Mira",
+        "role": "farmer",
+        "personality": "Patient and generous; values food and cooperation.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "worker",
+      "round": 4,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2587.457200002973,
+        "request_bytes": 1007,
+        "server_total_ms": 383.063542,
+        "load_ms": 1.504328,
+        "prompt_ms": 90.843,
+        "generation_ms": 281.805,
+        "prompt_tokens": 184,
+        "generated_tokens": 7
+      },
+      "latency_ms": 2901.269499998307,
+      "observation": {
+        "name": "Bram",
+        "role": "worker",
+        "personality": "Practical and ambitious; hauls food, gathers wood, and repairs threatened gates.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "soldier",
+      "round": 4,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2537.656700005755,
+        "request_bytes": 1008,
+        "server_total_ms": 376.223455,
+        "load_ms": 1.555707,
+        "prompt_ms": 95.265,
+        "generation_ms": 269.307,
+        "prompt_tokens": 185,
+        "generated_tokens": 7
+      },
+      "latency_ms": 2885.5735000106506,
+      "observation": {
+        "name": "Otto",
+        "role": "soldier",
+        "personality": "Blunt and brave; guards threatened gates and protects the farmers.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "elder",
+      "round": 4,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2521.303799992893,
+        "request_bytes": 1006,
+        "server_total_ms": 381.59008,
+        "load_ms": 1.562561,
+        "prompt_ms": 82.949,
+        "generation_ms": 288.65,
+        "prompt_tokens": 184,
+        "generated_tokens": 7
+      },
+      "latency_ms": 3037.833199996385,
+      "observation": {
+        "name": "Edda",
+        "role": "elder",
+        "personality": "Calm and thoughtful; coordinates survival, shares food, and remembers earlier failures.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "farmer",
+      "round": 5,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2616.7088999936823,
+        "request_bytes": 1007,
+        "server_total_ms": 399.331446,
+        "load_ms": 1.631824,
+        "prompt_ms": 116.089,
+        "generation_ms": 272.118,
+        "prompt_tokens": 185,
+        "generated_tokens": 7
+      },
+      "latency_ms": 2942.903100003605,
+      "observation": {
+        "name": "Mira",
+        "role": "farmer",
+        "personality": "Patient and generous; values food and cooperation.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "worker",
+      "round": 5,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2487.126399995759,
+        "request_bytes": 1007,
+        "server_total_ms": 334.289925,
+        "load_ms": 1.662827,
+        "prompt_ms": 87.144,
+        "generation_ms": 233.063,
+        "prompt_tokens": 184,
+        "generated_tokens": 7
+      },
+      "latency_ms": 2900.239899987355,
+      "observation": {
+        "name": "Bram",
+        "role": "worker",
+        "personality": "Practical and ambitious; hauls food, gathers wood, and repairs threatened gates.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "soldier",
+      "round": 5,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2574.2277999961516,
+        "request_bytes": 1008,
+        "server_total_ms": 428.690229,
+        "load_ms": 1.849468,
+        "prompt_ms": 91.449,
+        "generation_ms": 326.367,
+        "prompt_tokens": 185,
+        "generated_tokens": 7
+      },
+      "latency_ms": 2967.7820000069914,
+      "observation": {
+        "name": "Otto",
+        "role": "soldier",
+        "personality": "Blunt and brave; guards threatened gates and protects the farmers.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "elder",
+      "round": 5,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2603.736899996875,
+        "request_bytes": 1006,
+        "server_total_ms": 389.996624,
+        "load_ms": 1.304206,
+        "prompt_ms": 104.68,
+        "generation_ms": 271.589,
+        "prompt_tokens": 184,
+        "generated_tokens": 7
+      },
+      "latency_ms": 2987.403400009498,
+      "observation": {
+        "name": "Edda",
+        "role": "elder",
+        "personality": "Calm and thoughtful; coordinates survival, shares food, and remembers earlier failures.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "farmer",
+      "round": 6,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2582.3522999999113,
+        "request_bytes": 1007,
+        "server_total_ms": 343.627877,
+        "load_ms": 1.387821,
+        "prompt_ms": 95.3,
+        "generation_ms": 236.839,
+        "prompt_tokens": 185,
+        "generated_tokens": 7
+      },
+      "latency_ms": 3043.3416000014404,
+      "observation": {
+        "name": "Mira",
+        "role": "farmer",
+        "personality": "Patient and generous; values food and cooperation.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "worker",
+      "round": 6,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2573.208200003137,
+        "request_bytes": 1007,
+        "server_total_ms": 399.146669,
+        "load_ms": 1.256811,
+        "prompt_ms": 96.633,
+        "generation_ms": 291.348,
+        "prompt_tokens": 184,
+        "generated_tokens": 7
+      },
+      "latency_ms": 2955.200700002024,
+      "observation": {
+        "name": "Bram",
+        "role": "worker",
+        "personality": "Practical and ambitious; hauls food, gathers wood, and repairs threatened gates.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "soldier",
+      "round": 6,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2509.7160000004806,
+        "request_bytes": 1008,
+        "server_total_ms": 362.749117,
+        "load_ms": 1.517231,
+        "prompt_ms": 98.38,
+        "generation_ms": 253.432,
+        "prompt_tokens": 185,
+        "generated_tokens": 7
+      },
+      "latency_ms": 2833.1843999912962,
+      "observation": {
+        "name": "Otto",
+        "role": "soldier",
+        "personality": "Blunt and brave; guards threatened gates and protects the farmers.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "elder",
+      "round": 6,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2615.9642999991775,
+        "request_bytes": 1006,
+        "server_total_ms": 493.021638,
+        "load_ms": 1.662658,
+        "prompt_ms": 118.814,
+        "generation_ms": 362.607,
+        "prompt_tokens": 184,
+        "generated_tokens": 7
+      },
+      "latency_ms": 3025.2226000011433,
+      "observation": {
+        "name": "Edda",
+        "role": "elder",
+        "personality": "Calm and thoughtful; coordinates survival, shares food, and remembers earlier failures.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "farmer",
+      "round": 7,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2617.025300001842,
+        "request_bytes": 1007,
+        "server_total_ms": 535.508221,
+        "load_ms": 1.869166,
+        "prompt_ms": 82.03,
+        "generation_ms": 441.361,
+        "prompt_tokens": 185,
+        "generated_tokens": 7
+      },
+      "latency_ms": 3008.8779000070645,
+      "observation": {
+        "name": "Mira",
+        "role": "farmer",
+        "personality": "Patient and generous; values food and cooperation.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "worker",
+      "round": 7,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2503.594299996621,
+        "request_bytes": 1007,
+        "server_total_ms": 362.470988,
+        "load_ms": 5.837238,
+        "prompt_ms": 88.326,
+        "generation_ms": 257.869,
+        "prompt_tokens": 184,
+        "generated_tokens": 7
+      },
+      "latency_ms": 2910.968899988802,
+      "observation": {
+        "name": "Bram",
+        "role": "worker",
+        "personality": "Practical and ambitious; hauls food, gathers wood, and repairs threatened gates.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "soldier",
+      "round": 7,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2679.3313000089256,
+        "request_bytes": 1008,
+        "server_total_ms": 491.225148,
+        "load_ms": 2.025335,
+        "prompt_ms": 203.214,
+        "generation_ms": 272.433,
+        "prompt_tokens": 185,
+        "generated_tokens": 7
+      },
+      "latency_ms": 3195.7522000011522,
+      "observation": {
+        "name": "Otto",
+        "role": "soldier",
+        "personality": "Blunt and brave; guards threatened gates and protects the farmers.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "elder",
+      "round": 7,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2491.4744999987306,
+        "request_bytes": 1006,
+        "server_total_ms": 397.703895,
+        "load_ms": 1.409364,
+        "prompt_ms": 101.299,
+        "generation_ms": 285.565,
+        "prompt_tokens": 184,
+        "generated_tokens": 7
+      },
+      "latency_ms": 2829.083000004175,
+      "observation": {
+        "name": "Edda",
+        "role": "elder",
+        "personality": "Calm and thoughtful; coordinates survival, shares food, and remembers earlier failures.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "farmer",
+      "round": 8,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2548.646800001734,
+        "request_bytes": 1007,
+        "server_total_ms": 404.80024,
+        "load_ms": 2.036219,
+        "prompt_ms": 130.943999,
+        "generation_ms": 262.926,
+        "prompt_tokens": 185,
+        "generated_tokens": 7
+      },
+      "latency_ms": 2874.8725000041304,
+      "observation": {
+        "name": "Mira",
+        "role": "farmer",
+        "personality": "Patient and generous; values food and cooperation.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "worker",
+      "round": 8,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2451.2413000047673,
+        "request_bytes": 1007,
+        "server_total_ms": 384.098496,
+        "load_ms": 2.06018,
+        "prompt_ms": 76.374,
+        "generation_ms": 296.63,
+        "prompt_tokens": 184,
+        "generated_tokens": 7
+      },
+      "latency_ms": 2799.10010000458,
+      "observation": {
+        "name": "Bram",
+        "role": "worker",
+        "personality": "Practical and ambitious; hauls food, gathers wood, and repairs threatened gates.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "soldier",
+      "round": 8,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2490.8172999857925,
+        "request_bytes": 1008,
+        "server_total_ms": 366.607174,
+        "load_ms": 1.548804,
+        "prompt_ms": 103.226,
+        "generation_ms": 253.377,
+        "prompt_tokens": 185,
+        "generated_tokens": 7
+      },
+      "latency_ms": 2878.9103999879444,
+      "observation": {
+        "name": "Otto",
+        "role": "soldier",
+        "personality": "Blunt and brave; guards threatened gates and protects the farmers.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "elder",
+      "round": 8,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2491.505900004995,
+        "request_bytes": 1006,
+        "server_total_ms": 369.679248,
+        "load_ms": 1.15066,
+        "prompt_ms": 102.375,
+        "generation_ms": 257.387,
+        "prompt_tokens": 184,
+        "generated_tokens": 7
+      },
+      "latency_ms": 2866.960300001665,
+      "observation": {
+        "name": "Edda",
+        "role": "elder",
+        "personality": "Calm and thoughtful; coordinates survival, shares food, and remembers earlier failures.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "farmer",
+      "round": 9,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2542.144699997152,
+        "request_bytes": 1007,
+        "server_total_ms": 388.864749,
+        "load_ms": 1.494115,
+        "prompt_ms": 118.66,
+        "generation_ms": 259.29,
+        "prompt_tokens": 185,
+        "generated_tokens": 7
+      },
+      "latency_ms": 2836.2150999892037,
+      "observation": {
+        "name": "Mira",
+        "role": "farmer",
+        "personality": "Patient and generous; values food and cooperation.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "worker",
+      "round": 9,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2465.276700007962,
+        "request_bytes": 1007,
+        "server_total_ms": 333.220901,
+        "load_ms": 1.520307,
+        "prompt_ms": 59.346,
+        "generation_ms": 263.355,
+        "prompt_tokens": 184,
+        "generated_tokens": 7
+      },
+      "latency_ms": 2879.868999996688,
+      "observation": {
+        "name": "Bram",
+        "role": "worker",
+        "personality": "Practical and ambitious; hauls food, gathers wood, and repairs threatened gates.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "soldier",
+      "round": 9,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2607.791600006749,
+        "request_bytes": 1008,
+        "server_total_ms": 423.844569,
+        "load_ms": 1.314326,
+        "prompt_ms": 114.674,
+        "generation_ms": 298.958,
+        "prompt_tokens": 185,
+        "generated_tokens": 7
+      },
+      "latency_ms": 3102.3263999959454,
+      "observation": {
+        "name": "Otto",
+        "role": "soldier",
+        "personality": "Blunt and brave; guards threatened gates and protects the farmers.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    },
+    {
+      "role": "elder",
+      "round": 9,
+      "request_seconds": 15.0,
+      "within_deadline": true,
+      "status": "ok",
+      "decision": {
+        "action": "plan_repairs",
+        "target": "north_gate",
+        "dialogue": ""
+      },
+      "inference": {
+        "http_ms": 2587.9194000008283,
+        "request_bytes": 1006,
+        "server_total_ms": 483.173824,
+        "load_ms": 6.233739,
+        "prompt_ms": 62.921,
+        "generation_ms": 404.408,
+        "prompt_tokens": 184,
+        "generated_tokens": 7
+      },
+      "latency_ms": 2892.685500002699,
+      "observation": {
+        "name": "Edda",
+        "role": "elder",
+        "personality": "Calm and thoughtful; coordinates survival, shares food, and remembers earlier failures.",
+        "decision_layer": "repair_priority",
+        "wood": 2,
+        "choices": [
+          {
+            "id": "r0",
+            "target": "north_gate",
+            "gate": "north_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          },
+          {
+            "id": "r1",
+            "target": "south_gate",
+            "gate": "south_gate",
+            "health": 20.0,
+            "threats": 1,
+            "travel_seconds": 9.2,
+            "hp_per_wood": 18.0,
+            "breach_in_seconds": 13.33
+          }
+        ],
+        "lessons": []
+      },
+      "applied": true,
+      "allocation": false,
+      "plan": true
+    }
+  ]
+}
