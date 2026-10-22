@@ -84,7 +84,11 @@ def main():
             demo,
         )
         result = json.loads(contract.read_text())
-        assert Path(result["package"]).is_relative_to(venv), result
+        assert Path(result["package"]).resolve().is_relative_to(venv.resolve()), dict(
+            result,
+            expected_environment=str(venv),
+            resolved_environment=str(venv.resolve()),
+        )
         checks += result["checked"]
         execute([python, "-m", "village.client", "--help"], demo)
         checks.append("client entry point loads packaged startup configuration")
