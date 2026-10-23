@@ -1,21 +1,34 @@
-"""Resource allocation, partial loads and strategic ownership safety."""
+"""Resource allocation, partial loads and strategic ownership safety.
 
-from copy import deepcopy
-from pathlib import Path
+File: tests/test_strategy.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
+
 import tempfile
 import unittest
+from copy import deepcopy
+from pathlib import Path
 from unittest.mock import patch
+
+from village.allocation import repair_candidates, repair_features, strategy_observation
 from village.config import get_settings
-from village.world import World
-from village.allocation import repair_features, repair_candidates, strategy_observation
 from village.entities import Monster
-from village.models import request_decision, InferenceDecision
-from village.telemetry import DecisionLog
+from village.models import InferenceDecision, request_decision
 from village.strategy_experiment import paired_results, validate_plan
+from village.telemetry import DecisionLog
+from village.world import World
 
 
 class StrategyTests(unittest.TestCase):
+    """Regression cases for strategy."""
+
     def setUp(self):
+        """Create isolated state for each regression case.
+
+        Returns:
+            None.
+        """
         self.settings = get_settings()
         self.saved = deepcopy(self.settings)
         self.settings["ai"]["repair_strategy"]["enabled"] = True
@@ -31,7 +44,22 @@ class StrategyTests(unittest.TestCase):
         self.w.store["wood"] = 2
 
     def tearDown(self):
+        """Restore state and release resources after each regression case.
+
+        Returns:
+            None.
+        """
+
         def restore(target, saved):
+            """Restore nested shared test settings without replacing cached dictionary aliases.
+
+            Args:
+                target: Action target token or destination.
+                saved: Saved JSON-compatible state to validate before use.
+
+            Returns:
+                None; performs the side effects described above.
+            """
             for key in list(target):
                 if key not in saved:
                     del target[key]
@@ -44,6 +72,11 @@ class StrategyTests(unittest.TestCase):
         restore(self.settings, self.saved)
 
     def test_worker_efficiency_accounts_for_travel_and_clipped_repairs(self):
+        """Verify worker efficiency accounts for travel and clipped repairs.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         task = dict(kind="repair", target="north_gate")
         self.worker.position = self.farmer.position = (0, 15)
         a = repair_features(self.w, task, self.worker)
@@ -58,6 +91,11 @@ class StrategyTests(unittest.TestCase):
         self.assertGreater(a["travel_seconds"], 0)
 
     def test_partial_wood_delivery_during_shortage(self):
+        """Verify partial wood delivery during shortage.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         self.worker.wood = 1
         self.worker.position = tuple(self.settings["world"]["locations"]["storehouse"])
         self.w.store["wood"] = 0
@@ -68,6 +106,11 @@ class StrategyTests(unittest.TestCase):
         self.assertEqual(self.worker.wood, 0)
 
     def test_partial_food_delivery_for_hungry_neighbor(self):
+        """Verify partial food delivery for hungry neighbor.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         self.worker.supplies = 1
         self.w.store["food"] = 0
         self.farmer.hunger = 90
@@ -75,6 +118,11 @@ class StrategyTests(unittest.TestCase):
         self.assertEqual(self.w.fallback(self.worker), {"action": "deposit"})
 
     def test_busy_supplier_handoff_preserves_supply_task(self):
+        """Verify busy supplier handoff preserves supply task.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         b = self.w.task_board
         self.w.store["wood"] = 0
         self.assertTrue(
@@ -96,6 +144,11 @@ class StrategyTests(unittest.TestCase):
         self.assertEqual(repair["status"], "offered")
 
     def test_rejected_offer_is_atomic(self):
+        """Verify rejected offer is atomic.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         b = self.w.task_board
         b.next_request[self.elder.name] = 100
         before = b.snapshot()
@@ -103,6 +156,11 @@ class StrategyTests(unittest.TestCase):
         self.assertEqual(b.snapshot(), before)
 
     def test_active_guard_cannot_be_reassigned(self):
+        """Verify active guard cannot be reassigned.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         soldier = next(v for v in self.w.villagers if v.role == "soldier")
         soldier.action = "guarding north_gate"
         self.w.monsters.append(Monster("probe", "north_gate", (0, 23)))
@@ -114,6 +172,11 @@ class StrategyTests(unittest.TestCase):
         )
 
     def test_model_lease_restores_and_stale_target_is_rejected(self):
+        """Verify model lease restores and stale target is rejected.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         obs = strategy_observation(self.w, self.elder)
         target = obs["choices"][0]["target"]
         self.assertTrue(
@@ -135,6 +198,11 @@ class StrategyTests(unittest.TestCase):
         self.assertEqual(board.strategy_leases, {})
 
     def test_compact_model_choice_validation_and_metrics(self):
+        """Verify compact model choice validation and metrics.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         obs = strategy_observation(self.w, self.elder)
         profile = {
             "backend": "fixture",
@@ -145,7 +213,17 @@ class StrategyTests(unittest.TestCase):
         from village.models import BACKENDS
 
         class Backend:
+            """Deterministic backend fixture exercising the structured decision contract."""
+
             def decide(self, *args):
+                """Supply a controlled backend response for the enclosing validation case.
+
+                Args:
+                    *args: Parsed command-line options for this entry point.
+
+                Returns:
+                    Configured deterministic decision or deliberate invalid response.
+                """
                 return InferenceDecision({"choice": "r0"}, {"prompt_tokens": 200})
 
         with patch.dict(BACKENDS, fixture=Backend):
@@ -154,7 +232,17 @@ class StrategyTests(unittest.TestCase):
         self.assertEqual(decision.metrics["prompt_tokens"], 200)
 
         class Invalid:
+            """Deliberately invalid backend fixture used to verify response rejection."""
+
             def decide(self, *args):
+                """Supply a controlled backend response for the enclosing validation case.
+
+                Args:
+                    *args: Parsed command-line options for this entry point.
+
+                Returns:
+                    Configured deterministic decision or deliberate invalid response.
+                """
                 return {"choice": "injected-action"}
 
         with patch.dict(BACKENDS, fixture=Invalid):
@@ -162,6 +250,11 @@ class StrategyTests(unittest.TestCase):
                 request_decision("unused", "fixture", obs, profile=profile)
 
     def test_logger_handles_invalid_input_and_counts_partial_delivery(self):
+        """Verify logger handles invalid input and counts partial delivery.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         with tempfile.TemporaryDirectory() as d:
             log = DecisionLog(Path(d) / "events.jsonl", max_bytes=100000)
             self.w.decision_log = log
@@ -178,6 +271,11 @@ class StrategyTests(unittest.TestCase):
             log.close()
 
     def test_pairs_exclude_deadline_censoring(self):
+        """Verify pairs exclude deadline censoring.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         base = dict(
             case="siege",
             seed=401,
@@ -193,6 +291,11 @@ class StrategyTests(unittest.TestCase):
         self.assertFalse(paired_results([base, model])[0]["eligible"])
 
     def test_strategy_does_not_pause_proposers_local_routine(self):
+        """Verify strategy does not pause proposers local routine.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         from village.brains import BrainScheduler
 
         brains = BrainScheduler(self.w, "", "", demo=True)
@@ -208,6 +311,11 @@ class StrategyTests(unittest.TestCase):
         self.assertFalse(brains._keep_model_task(index, self.elder))
 
     def test_metrics_measure_travel_and_store_routes(self):
+        """Verify metrics measure travel and store routes.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         from village.evaluation import Metrics
 
         self.worker.path = [(0, 0)]
@@ -218,6 +326,11 @@ class StrategyTests(unittest.TestCase):
         self.assertEqual(metrics.store_travel_villager_seconds, 0.1)
 
     def test_experiment_rejects_reused_seeds(self):
+        """Verify experiment rejects reused seeds.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         plan = dict(
             seeds=[401],
             excluded_seeds=[401],
@@ -231,7 +344,14 @@ class StrategyTests(unittest.TestCase):
             validate_plan(plan)
 
     def test_experiment_cli_runs_three_matched_conditions(self):
-        import json, subprocess, sys
+        """Verify experiment cli runs three matched conditions.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
+        import json
+        import subprocess
+        import sys
 
         with tempfile.TemporaryDirectory() as d:
             root = Path(d)
@@ -276,7 +396,14 @@ class StrategyTests(unittest.TestCase):
             self.assertTrue(report["protocol"]["config_hashes"])
 
     def test_suite_deadline_persists_missing_runs(self):
-        import json, subprocess, sys
+        """Verify suite deadline persists missing runs.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
+        import json
+        import subprocess
+        import sys
 
         with tempfile.TemporaryDirectory() as d:
             root = Path(d)
@@ -318,11 +445,21 @@ class StrategyTests(unittest.TestCase):
             )
 
     def test_requester_cooldown_is_filtered_before_inference(self):
+        """Verify requester cooldown is filtered before inference.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         self.w.task_board.next_request[self.elder.name] = 100
         self.assertEqual(strategy_observation(self.w, self.elder)["choices"], [])
         self.assertTrue(strategy_observation(self.w, self.farmer)["choices"])
 
     def test_existing_open_repair_remains_assignable_during_cooldown(self):
+        """Verify existing open repair remains assignable during cooldown.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         self.assertTrue(
             self.w.apply(
                 self.elder, dict(action="request_help", target="repair:north_gate")
@@ -338,6 +475,11 @@ class StrategyTests(unittest.TestCase):
         )
 
     def test_full_board_filters_new_requests(self):
+        """Verify full board filters new requests.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         board = self.w.task_board
         board.settings = deepcopy(board.settings)
         board.settings["max_active_tasks"] = 1
@@ -352,6 +494,11 @@ class StrategyTests(unittest.TestCase):
         self.assertEqual(strategy_observation(self.w, self.elder)["choices"], [])
 
     def test_handoff_switch_does_not_change_repair_scoring(self):
+        """Verify handoff switch does not change repair scoring.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         self.settings["coordination"]["repair_handoffs"] = False
         board = self.w.task_board
         self.w.store["wood"] = 0
@@ -371,6 +518,11 @@ class StrategyTests(unittest.TestCase):
         self.assertFalse(can_handoff(board, self.worker, "north_gate"))
 
     def test_delayed_evaluation_advances_world_and_rejects_expired_intent(self):
+        """Verify delayed evaluation advances world and rejects expired intent.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         from village.evaluation import run_scenario
         from village.models import resolve_profile
 
@@ -388,6 +540,14 @@ class StrategyTests(unittest.TestCase):
         )
 
         def request(*args):
+            """Return the deterministic model-response fixture for this regression.
+
+            Args:
+                *args: Parsed command-line options for this entry point.
+
+            Returns:
+                Controlled response envelope used by the test.
+            """
             return dict(
                 status="ok", latency_ms=2.0, decision=dict(action="move", target="farm")
             )

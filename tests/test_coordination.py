@@ -1,21 +1,33 @@
-"""Structured cooperation: ownership, real work, safety and restart continuity."""
+"""Structured cooperation: ownership, real work, safety and restart continuity.
 
-from copy import deepcopy
-import json
-from pathlib import Path
+File: tests/test_coordination.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
+
 import tempfile
 import unittest
-from village.world import World
-from village.entities import Monster
-from village.config import get_settings, DEFAULT_PATH
+from copy import deepcopy
+from pathlib import Path
+
+from village.config import DEFAULT_PATH, get_settings
 from village.decisions import decision_schema
-from village.persistence import snapshot, restore
-from village.evaluation import run_scenario, paired_coordination
+from village.entities import Monster
+from village.evaluation import paired_coordination, run_scenario
 from village.models import resolve_profile
+from village.persistence import restore, snapshot
+from village.world import World
 
 
 class CoordinationTests(unittest.TestCase):
+    """Regression cases for coordination."""
+
     def setUp(self):
+        """Create isolated state for each regression case.
+
+        Returns:
+            None.
+        """
         self.world = World()
         self.board = self.world.task_board
         self.board.settings = deepcopy(self.board.settings)
@@ -25,6 +37,11 @@ class CoordinationTests(unittest.TestCase):
         self.world.store["wood"] = 0
 
     def request(self):
+        """Return the deterministic model-response fixture for this regression.
+
+        Returns:
+            Controlled response envelope used by the test.
+        """
         self.assertTrue(
             self.world.apply(
                 self.worker, {"action": "request_help", "target": "wood:storehouse"}
@@ -33,6 +50,11 @@ class CoordinationTests(unittest.TestCase):
         return self.board.tasks[-1]
 
     def test_requests_do_not_duplicate_or_teleport_resources(self):
+        """Verify requests do not duplicate or teleport resources.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         task = self.request()
         self.assertFalse(
             self.world.apply(
@@ -44,6 +66,11 @@ class CoordinationTests(unittest.TestCase):
         self.assertEqual(len(self.board.tasks), 1)
 
     def test_only_authorized_assigners_offer_and_only_recipient_accepts(self):
+        """Verify only authorized assigners offer and only recipient accepts.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         task = self.request()
         offer = {"action": "assign_task", "target": task["id"] + ":" + self.farmer.name}
         self.assertFalse(self.world.apply(self.worker, offer))
@@ -61,6 +88,11 @@ class CoordinationTests(unittest.TestCase):
         self.assertEqual(task["accepted_by"], self.farmer.name)
 
     def test_exclusive_ownership_and_release(self):
+        """Verify exclusive ownership and release.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         task = self.request()
         self.assertTrue(
             self.world.apply(
@@ -84,6 +116,11 @@ class CoordinationTests(unittest.TestCase):
         )
 
     def test_real_wood_delivery_marks_productive_work_and_completion(self):
+        """Verify real wood delivery marks productive work and completion.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         task = self.request()
         self.world.apply(self.worker, {"action": "claim_task", "target": task["id"]})
         self.worker.position = tuple(get_settings()["world"]["locations"]["storehouse"])
@@ -95,6 +132,11 @@ class CoordinationTests(unittest.TestCase):
         self.assertEqual(self.board.counts["completed"], 1)
 
     def test_someone_else_resolving_need_does_not_credit_assignee(self):
+        """Verify someone else resolving need does not credit assignee.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         task = self.request()
         self.world.apply(self.farmer, {"action": "claim_task", "target": task["id"]})
         self.worker.position = tuple(get_settings()["world"]["locations"]["storehouse"])
@@ -105,6 +147,11 @@ class CoordinationTests(unittest.TestCase):
         self.assertEqual(self.board.counts["completed"], 0)
 
     def test_guard_automatic_attack_counts_real_task_progress(self):
+        """Verify guard automatic attack counts real task progress.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         bot = self.world.villagers[3]
         self.world.monsters = [Monster("test", "north_gate", (0, 25))]
         self.world.apply(
@@ -121,6 +168,11 @@ class CoordinationTests(unittest.TestCase):
         )
 
     def test_hunger_overrides_task_without_destroying_ownership(self):
+        """Verify hunger overrides task without destroying ownership.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         task = self.request()
         self.world.apply(self.farmer, {"action": "claim_task", "target": task["id"]})
         self.farmer.position = tuple(get_settings()["world"]["locations"]["storehouse"])
@@ -129,6 +181,11 @@ class CoordinationTests(unittest.TestCase):
         self.assertEqual(task["assigned_to"], self.farmer.name)
 
     def test_expiry_and_dead_owner_release(self):
+        """Verify expiry and dead owner release.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         task = self.request()
         self.world.apply(self.worker, {"action": "claim_task", "target": task["id"]})
         self.worker.health = 0
@@ -139,6 +196,11 @@ class CoordinationTests(unittest.TestCase):
         self.assertEqual(task["status"], "expired")
 
     def test_automatic_assignments_skip_player(self):
+        """Verify automatic assignments skip player.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         self.board.mode = "assigned"
         self.world.possess(1)
         self.board.coordinate()
@@ -148,6 +210,11 @@ class CoordinationTests(unittest.TestCase):
         )
 
     def test_board_survives_restart_and_legacy_snapshots_remain_valid(self):
+        """Verify board survives restart and legacy snapshots remain valid.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         task = self.request()
         self.world.apply(self.worker, {"action": "claim_task", "target": task["id"]})
         self.world.time = 3
@@ -160,6 +227,11 @@ class CoordinationTests(unittest.TestCase):
         self.assertEqual(restore(saved).task_board.tasks, [])
 
     def test_corrupt_saved_task_owner_is_rejected(self):
+        """Verify corrupt saved task owner is rejected.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         self.request()
         saved = snapshot(self.world)
         saved["world"]["task_board"]["tasks"][0]["assigned_to"] = "unknown"
@@ -167,6 +239,11 @@ class CoordinationTests(unittest.TestCase):
             restore(saved)
 
     def test_model_schema_exposes_only_valid_structured_tokens(self):
+        """Verify model schema exposes only valid structured tokens.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         self.request()
         observation = self.world.observe(self.elder)
         observation["decision_layer"] = "strategic"
@@ -183,6 +260,11 @@ class CoordinationTests(unittest.TestCase):
         )
 
     def test_paired_comparison_keeps_regressions_and_excludes_deadlines(self):
+        """Verify paired comparison keeps regressions and excludes deadlines.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         base = dict(
             seed=7,
             mode="scripted",
@@ -214,6 +296,11 @@ class CoordinationTests(unittest.TestCase):
         self.assertEqual(row["mean_uncovered_fraction_delta"], 0.3)
 
     def test_board_capacity_does_not_remove_survival_actions(self):
+        """Verify board capacity does not remove survival actions.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         before = self.world.available_actions(self.worker)
         self.board.settings["max_active_tasks"] = 1
         self.request()
@@ -224,6 +311,11 @@ class CoordinationTests(unittest.TestCase):
             self.assertEqual(before[action], after[action])
 
     def test_fake_model_can_request_then_assign_a_real_threat_task(self):
+        """Verify fake model can request then assign a real threat task.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         options = deepcopy(get_settings()["evaluation"])
         options.update(
             duration_seconds=190,
@@ -237,6 +329,16 @@ class CoordinationTests(unittest.TestCase):
         seen = []
 
         def request(profile, observation, *args):
+            """Return the deterministic model-response fixture for this regression.
+
+            Args:
+                profile: Resolved model profile containing backend and generation options.
+                observation: Request-time context containing legal choices and relevant world state.
+                *args: Parsed command-line options for this entry point.
+
+            Returns:
+                Controlled response envelope used by the test.
+            """
             seen.append(observation)
             actions = observation["available_actions"]
             if len(seen) == 1:

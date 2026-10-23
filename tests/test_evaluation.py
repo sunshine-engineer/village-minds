@@ -1,41 +1,78 @@
-"""Evaluation tests use fake model responses; only timeout tests spawn processes."""
+"""Evaluation tests use fake model responses; only timeout tests spawn processes.
 
-from copy import deepcopy
+File: tests/test_evaluation.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
+
 import json
 import multiprocessing
 import subprocess
 import sys
-from pathlib import Path
 import tempfile
 import time
 import unittest
-from village.config import get_settings, DEFAULT_PATH
+from copy import deepcopy
+from pathlib import Path
+
+from village.brains import BrainScheduler
+from village.config import DEFAULT_PATH, get_settings
 from village.evaluation import (
-    bounded_decision,
-    run_scenario,
-    generate_lessons,
-    aggregate,
     Metrics,
+    aggregate,
+    bounded_decision,
+    generate_lessons,
+    run_scenario,
     write_report,
 )
 from village.models import resolve_profile
 from village.telemetry import DecisionLog
 from village.timing import SimulationClock
 from village.world import World
-from village.brains import BrainScheduler
 
 
 def hanging_worker(connection, config, profile, observation, timeout):
+    """Keep a spawned worker pending so the hard deadline must terminate it.
+
+    Args:
+        connection: Multiprocessing pipe endpoint used for one response.
+        config: Resolved settings; omitted values use the current process configuration.
+        profile: Resolved model profile containing backend and generation options.
+        observation: Request-time context containing legal choices and relevant world state.
+        timeout: Maximum request wall time in seconds.
+
+    Returns:
+        None; performs the side effects described above.
+    """
     time.sleep(10)
 
 
 def successful_worker(connection, config, profile, observation, timeout):
+    """Send a successful deterministic decision through the worker pipe.
+
+    Args:
+        connection: Multiprocessing pipe endpoint used for one response.
+        config: Resolved settings; omitted values use the current process configuration.
+        profile: Resolved model profile containing backend and generation options.
+        observation: Request-time context containing legal choices and relevant world state.
+        timeout: Maximum request wall time in seconds.
+
+    Returns:
+        None; performs the side effects described above.
+    """
     connection.send({"status": "ok", "decision": {"action": "move", "target": "farm"}})
     connection.close()
 
 
 class EvaluationTests(unittest.TestCase):
+    """Regression cases for evaluation."""
+
     def setUp(self):
+        """Create isolated state for each regression case.
+
+        Returns:
+            None.
+        """
         self.temporary = tempfile.TemporaryDirectory()
         self.root = Path(self.temporary.name)
         self.options = deepcopy(get_settings()["evaluation"])
@@ -49,9 +86,26 @@ class EvaluationTests(unittest.TestCase):
         self.profile = resolve_profile()
 
     def tearDown(self):
+        """Restore state and release resources after each regression case.
+
+        Returns:
+            None.
+        """
         self.temporary.cleanup()
 
     def run_mode(self, mode, *, request=None, fixture=None, name=None, options=None):
+        """Run one evaluation condition in the isolated test output directory.
+
+        Args:
+            mode: Named evaluation condition.
+            request: Bounded inference callable; injectable for deterministic tests.
+            fixture: Optional deterministic state or prior-lesson fixture.
+            name: Registered identity or name selected by the caller.
+            options: Validated run settings and budgets.
+
+        Returns:
+            Evaluation result dictionary.
+        """
         output = self.root / (name or mode)
         output.mkdir()
         kwargs = {"request": request} if request else {}
@@ -67,6 +121,11 @@ class EvaluationTests(unittest.TestCase):
         )
 
     def test_metrics_count_starvation_and_repeated_gate_breaches(self):
+        """Verify metrics count starvation and repeated gate breaches.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         world = World()
         metrics = Metrics(world)
         world.store["food"] = 0
@@ -86,6 +145,11 @@ class EvaluationTests(unittest.TestCase):
         self.assertEqual(metrics.gate_breaches, 2)
 
     def test_zero_time_budget_does_not_spawn_model_worker(self):
+        """Verify zero time budget does not spawn model worker.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         result = bounded_decision(
             self.profile, {}, DEFAULT_PATH, 0, worker=hanging_worker
         )
@@ -93,6 +157,11 @@ class EvaluationTests(unittest.TestCase):
         self.assertEqual(result["latency_ms"], 0)
 
     def test_cli_writes_report_and_never_reads_campaign_save(self):
+        """Verify cli writes report and never reads campaign save.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         campaign = self.root / "campaign.json"
         campaign.write_text('{"sentinel":"untouched"}')
         config = self.root / "override.json"
@@ -124,7 +193,21 @@ class EvaluationTests(unittest.TestCase):
         self.assertEqual(campaign.read_text(), '{"sentinel":"untouched"}')
 
     def test_scripted_run_never_calls_model_and_repeats_identically(self):
+        """Verify scripted run never calls model and repeats identically.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
+
         def forbidden(*args):
+            """Reject an unexpected provider request in a provider-free regression.
+
+            Args:
+                *args: Parsed command-line options for this entry point.
+
+            Returns:
+                None; performs the side effects described above.
+            """
             raise AssertionError("Scripted mode contacted model")
 
         a = self.run_mode("scripted", request=forbidden)
@@ -143,9 +226,24 @@ class EvaluationTests(unittest.TestCase):
         self.assertEqual(a["model_requests"], 0)
 
     def test_hybrid_uses_budget_and_logs_actual_model_provenance(self):
+        """Verify hybrid uses budget and logs actual model provenance.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         seen = []
 
         def decide(profile, observation, *args):
+            """Supply a controlled backend response for the enclosing validation case.
+
+            Args:
+                profile: Resolved model profile containing backend and generation options.
+                observation: Request-time context containing legal choices and relevant world state.
+                *args: Parsed command-line options for this entry point.
+
+            Returns:
+                Configured deterministic decision or deliberate invalid response.
+            """
             seen.append(observation)
             return {
                 "status": "ok",
@@ -175,9 +273,24 @@ class EvaluationTests(unittest.TestCase):
         )
 
     def test_memory_changes_only_explicit_model_lesson_field(self):
+        """Verify memory changes only explicit model lesson field.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         seen = []
 
         def decide(profile, observation, *args):
+            """Supply a controlled backend response for the enclosing validation case.
+
+            Args:
+                profile: Resolved model profile containing backend and generation options.
+                observation: Request-time context containing legal choices and relevant world state.
+                *args: Parsed command-line options for this entry point.
+
+            Returns:
+                Configured deterministic decision or deliberate invalid response.
+            """
             seen.append(deepcopy(observation))
             return {
                 "status": "ok",
@@ -196,6 +309,11 @@ class EvaluationTests(unittest.TestCase):
         self.assertEqual(seen[0], seen[1])
 
     def test_threat_checkpoint_integration_covers_roles_and_late_waves(self):
+        """Verify threat checkpoint integration covers roles and late waves.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         seen = []
         options = deepcopy(get_settings()["evaluation"])
         options.update(
@@ -206,6 +324,16 @@ class EvaluationTests(unittest.TestCase):
         )
 
         def decide(profile, observation, *args):
+            """Supply a controlled backend response for the enclosing validation case.
+
+            Args:
+                profile: Resolved model profile containing backend and generation options.
+                observation: Request-time context containing legal choices and relevant world state.
+                *args: Parsed command-line options for this entry point.
+
+            Returns:
+                Configured deterministic decision or deliberate invalid response.
+            """
             seen.append(deepcopy(observation))
             decision = (
                 {
@@ -230,6 +358,11 @@ class EvaluationTests(unittest.TestCase):
         self.assertEqual(result["unused_model_calls"], 0)
 
     def test_threat_mode_short_horizon_reports_unexercised_budget(self):
+        """Verify threat mode short horizon reports unexercised budget.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         options = deepcopy(get_settings()["evaluation"])
         options.update(
             duration_seconds=60.0,
@@ -239,6 +372,14 @@ class EvaluationTests(unittest.TestCase):
         )
 
         def forbidden(*args):
+            """Reject an unexpected provider request in a provider-free regression.
+
+            Args:
+                *args: Parsed command-line options for this entry point.
+
+            Returns:
+                None; performs the side effects described above.
+            """
             raise AssertionError("No monster wave before this horizon")
 
         result = self.run_mode("hybrid", request=forbidden, options=options)
@@ -248,6 +389,11 @@ class EvaluationTests(unittest.TestCase):
         self.assertEqual(result["unused_model_calls"], 2)
 
     def test_rejected_model_action_is_not_counted_as_accepted(self):
+        """Verify rejected model action is not counted as accepted.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         result = self.run_mode(
             "hybrid",
             request=lambda *a: {
@@ -260,6 +406,11 @@ class EvaluationTests(unittest.TestCase):
         self.assertEqual(result["model_outcomes"], {"rejected": 1})
 
     def test_timeout_opens_circuit_but_local_simulation_finishes(self):
+        """Verify timeout opens circuit but local simulation finishes.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         self.options["max_model_calls"] = 6
         result = self.run_mode(
             "hybrid",
@@ -275,6 +426,11 @@ class EvaluationTests(unittest.TestCase):
         self.assertGreater(result["local_actions"], 0)
 
     def test_run_wall_budget_censors_instead_of_claiming_survival(self):
+        """Verify run wall budget censors instead of claiming survival.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         self.options.update(run_wall_seconds=0.01, duration_seconds=1000.0)
         result = self.run_mode("scripted")
         self.assertFalse(result["completed_horizon"])
@@ -283,6 +439,11 @@ class EvaluationTests(unittest.TestCase):
         self.assertEqual(result["stop_reason"], "run_wall_time_limit")
 
     def test_idle_failure_fixture_contains_factual_contributions(self):
+        """Verify idle failure fixture contains factual contributions.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         fixture = generate_lessons(7, 900, 0.1, time.monotonic() + 10)
         self.assertTrue(fixture["failed"])
         self.assertIn("Mira", fixture["lessons"])
@@ -292,6 +453,11 @@ class EvaluationTests(unittest.TestCase):
         self.assertEqual(unfinished["lessons"], {})
 
     def test_process_timeout_cleans_up_child(self):
+        """Verify process timeout cleans up child.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         before = {p.pid for p in multiprocessing.active_children()}
         start = time.monotonic()
         result = bounded_decision(
@@ -302,6 +468,11 @@ class EvaluationTests(unittest.TestCase):
         self.assertEqual({p.pid for p in multiprocessing.active_children()}, before)
 
     def test_process_returns_decision(self):
+        """Verify process returns decision.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         result = bounded_decision(
             self.profile, {}, DEFAULT_PATH, 5, worker=successful_worker
         )
@@ -309,6 +480,11 @@ class EvaluationTests(unittest.TestCase):
         self.assertEqual(result["decision"]["action"], "move")
 
     def test_reports_keep_censored_and_failed_outcomes_separate(self):
+        """Verify reports keep censored and failed outcomes separate.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         result = self.run_mode("scripted")
         limited = {
             **result,
@@ -337,6 +513,11 @@ class EvaluationTests(unittest.TestCase):
         self.assertTrue((self.root / "results.csv").is_file())
 
     def test_jsonl_cap_retains_counters_even_when_rows_drop(self):
+        """Verify jsonl cap retains counters even when rows drop.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         log = DecisionLog(self.root / "limited.jsonl", max_bytes=300)
         try:
             for _ in range(10):
@@ -350,6 +531,11 @@ class EvaluationTests(unittest.TestCase):
         self.assertLessEqual((self.root / "limited.jsonl").stat().st_size, 300)
 
     def test_log_tracks_player_and_stale_model_decisions(self):
+        """Verify log tracks player and stale model decisions.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         log = DecisionLog(self.root / "player.jsonl", max_bytes=100000)
         world = World(decision_log=log)
         brains = BrainScheduler(world, "", "", demo=True)
@@ -366,6 +552,11 @@ class EvaluationTests(unittest.TestCase):
         log.close()
 
     def test_fast_forward_substeps_preserve_elapsed_time_and_wave_timing(self):
+        """Verify fast forward substeps preserve elapsed time and wave timing.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         world = World()
         world.next_wave = 0.5
         brains = BrainScheduler(world, "", "", demo=True)
@@ -376,6 +567,11 @@ class EvaluationTests(unittest.TestCase):
         self.assertAlmostEqual(clock.pending, 0)
 
     def test_frame_work_cap_keeps_time_pending(self):
+        """Verify frame work cap keeps time pending.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         world = World()
         brains = BrainScheduler(world, "", "", demo=True)
         clock = SimulationClock(0.1, 2)

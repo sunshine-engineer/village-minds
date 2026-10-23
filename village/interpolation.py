@@ -1,12 +1,25 @@
-"""Bounded presentation-only interpolation of confirmed network positions."""
+"""Bounded presentation-only interpolation of confirmed network positions.
 
+File: village/interpolation.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
+
+import math
 from collections import deque
 from dataclasses import dataclass
-import math
 
 
 @dataclass(frozen=True)
 class Pose:
+    """Confirmed position and entity-generation identity used for safe interpolation.
+
+    Attributes:
+        position: Planar world coordinates in simulation units.
+        generation: Entity incarnation counter preventing interpolation across respawn.
+        alive: Whether the confirmed entity had positive health.
+    """
+
     position: tuple
     generation: int
     alive: bool
@@ -14,6 +27,14 @@ class Pose:
 
 @dataclass(frozen=True)
 class Sample:
+    """Received snapshot time and confirmed poses for one presentation history entry.
+
+    Attributes:
+        received_at: Local monotonic snapshot receive timestamp.
+        simulated_at: Authoritative simulation timestamp for this sample.
+        poses: Stable entity keys mapped to confirmed Pose values.
+    """
+
     received_at: float
     simulated_at: float
     poses: dict
@@ -23,6 +44,14 @@ class SnapshotInterpolator:
     """A delayed playhead holds on underrun; it never predicts beyond a packet."""
 
     def __init__(self, settings):
+        """Initialize SnapshotInterpolator and its owned state.
+
+        Args:
+            settings: Validated configuration for this component.
+
+        Returns:
+            None.
+        """
         self.settings = dict(settings)
         self.samples = deque(maxlen=settings["buffer_size"])
         self.identity = None
@@ -34,6 +63,14 @@ class SnapshotInterpolator:
         self.generation_counter = 0
 
     def push(self, packet):
+        """Validate epoch/frame order and add confirmed poses to bounded presentation history.
+
+        Args:
+            packet: Authoritative snapshot with local receive-time/epoch metadata.
+
+        Returns:
+            Whether the packet was accepted.
+        """
         epoch = packet["_client_epoch"]
         identity, frame = packet["server_id"], packet["frame"]
         if epoch < self.epoch or (
@@ -88,6 +125,14 @@ class SnapshotInterpolator:
         return True
 
     def sample(self, now):
+        """Sample confirmed poses at a delayed playhead without extrapolating.
+
+        Args:
+            now: Local monotonic render timestamp.
+
+        Returns:
+            Pair of position mapping and interpolated simulation time.
+        """
         if not self.samples:
             return {}, 0.0
         oldest, newest = self.samples[0], self.samples[-1]

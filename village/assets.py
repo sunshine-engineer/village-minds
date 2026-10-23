@@ -1,11 +1,30 @@
-"""Data-defined visual prefabs and optional Panda3D model files."""
+"""Data-defined visual prefabs and optional Panda3D model files.
+
+File: village/assets.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
 
 from pathlib import Path
-from .config import _vector, _validate_types, get_settings, DATA, read_json
+
+from .config import DATA, _validate_types, _vector, get_settings, read_json
 
 
 class AssetCatalog:
+    """Validated visual prefab catalog with manifest-relative model paths."""
+
     def __init__(self, path):
+        """Initialize AssetCatalog and its owned state.
+
+        Args:
+            path: Input/output filesystem path for the described resource.
+
+        Returns:
+            None.
+
+        Raises:
+            ValueError: If the input violates the validation contract described above.
+        """
         self.path = Path(path)
         self.catalog = read_json(self.path)
         if not isinstance(self.catalog, dict) or not isinstance(
@@ -52,7 +71,7 @@ class AssetCatalog:
                 if "hpr" in part:
                     _vector(part["hpr"], 3, f"{name}.hpr")
                 if "model" in part and not (self.path.parent / part["model"]).is_file():
-                    raise ValueError(f'Missing model: {part["model"]}')
+                    raise ValueError(f"Missing model: {part['model']}")
             if len(set(names)) != len(names):
                 raise ValueError(f"Duplicate part names: {name}")
         required_parts = {
@@ -115,13 +134,27 @@ class AssetCatalog:
             else:
                 _vector(instance.get("position"), 3, "asset instance position")
             if instance["prefab"] not in self.catalog["prefabs"]:
-                raise ValueError(f'Unknown prefab: {instance["prefab"]}')
+                raise ValueError(f"Unknown prefab: {instance['prefab']}")
         for prefab in self.catalog["role_prefabs"].values():
             if prefab not in self.catalog["prefabs"]:
                 raise ValueError(f"Unknown role prefab: {prefab}")
 
     def instantiate(self, game, parent, name, *, color=None, bounds=None):
-        """Return named part nodes; animated roles require body and leg_* parts."""
+        """Instantiate a validated prefab and return its named visual parts.
+
+        Args:
+            game: Game instance owning scene/UI references.
+            parent: Parent scene node, or parent IPC endpoint in worker helpers.
+            name: Registered identity or name selected by the caller.
+            color: Optional RGB tint for this visual.
+            bounds: Optional dimensions used when instantiating geometry.
+
+        Returns:
+            Mapping from configured part names to Panda3D node paths.
+
+        Raises:
+            ValueError: If the input violates the validation contract described above.
+        """
         result = {}
         for part in self.catalog["prefabs"][name]["parts"]:
             pos = list(part["position"])
@@ -145,7 +178,7 @@ class AssetCatalog:
                 )
                 model = game.loader.loadModel(filename)
                 if model.isEmpty():
-                    raise ValueError(f'Cannot load model: {part["model"]}')
+                    raise ValueError(f"Cannot load model: {part['model']}")
                 node = model.copyTo(parent)
                 model.removeNode()
                 node.setPos(*pos)

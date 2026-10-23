@@ -1,19 +1,25 @@
-"""Versioned, atomic JSON snapshots; never deserialize executable objects."""
+"""Versioned, atomic JSON snapshots; never deserialize executable objects.
 
+File: village/persistence.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
+
+import json
+import math
+import os
+import shutil
+import tempfile
 from collections import deque
 from copy import deepcopy
 from dataclasses import asdict, fields
 from datetime import datetime, timezone
-import json
-import math
-import os
 from pathlib import Path
-import shutil
-import tempfile
-from .world import World
+
+from .config import fingerprint, get_settings, load_config
 from .entities import Crop, Monster, Villager
-from .map_data import CAST, GATES, GATE_MAX, LIMIT
-from .config import get_settings, fingerprint, load_config
+from .map_data import CAST, GATE_MAX, GATES, LIMIT
+from .world import World
 
 S = get_settings()
 R, M = S["rules"], S["memory"]
@@ -23,6 +29,14 @@ DEFAULT_SAVE_PATH = Path(S["runtime"]["save_path"])
 
 
 def jsonable(value):
+    """Convert tuples, deques and nested mappings into JSON-compatible containers.
+
+    Args:
+        value: Value to validate, convert or publish as described above.
+
+    Returns:
+        Converted value with scalar values preserved.
+    """
     if isinstance(value, dict):
         return {key: jsonable(item) for key, item in value.items()}
     if isinstance(value, (tuple, list, deque)):
@@ -31,6 +45,19 @@ def jsonable(value):
 
 
 def number(value, low=0, high=1e12):
+    """Validate a finite saved number against inclusive bounds.
+
+    Args:
+        value: Value to validate, convert or publish as described above.
+        low: Optional inclusive lower bound.
+        high: Optional inclusive upper bound.
+
+    Returns:
+        The validated numeric value.
+
+    Raises:
+        ValueError: If the input violates the validation contract described above.
+    """
     if (
         isinstance(value, bool)
         or not isinstance(value, (int, float))
@@ -42,12 +69,36 @@ def number(value, low=0, high=1e12):
 
 
 def point(value):
+    """Validate a saved planar position against configured map bounds.
+
+    Args:
+        value: Value to validate, convert or publish as described above.
+
+    Returns:
+        Two-coordinate tuple.
+
+    Raises:
+        ValueError: If the input violates the validation contract described above.
+    """
     if not isinstance(value, list) or len(value) != 2:
         raise ValueError("Invalid saved position")
     return tuple(number(n, -LIMIT, LIMIT) for n in value)
 
 
 def strings(value, maximum=8, length=2000):
+    """Validate bounded saved memories or dialogue strings.
+
+    Args:
+        value: Value to validate, convert or publish as described above.
+        maximum: Maximum number of saved strings.
+        length: Required vector length.
+
+    Returns:
+        The validated list of strings.
+
+    Raises:
+        ValueError: If the input violates the validation contract described above.
+    """
     if (
         not isinstance(value, list)
         or len(value) > maximum
@@ -58,6 +109,17 @@ def strings(value, maximum=8, length=2000):
 
 
 def validate_campaign(value):
+    """Validate attempts, failure records and per-villager lessons.
+
+    Args:
+        value: Value to validate, convert or publish as described above.
+
+    Returns:
+        Independent campaign dictionary.
+
+    Raises:
+        ValueError: If the input violates the validation contract described above.
+    """
     if not isinstance(value, dict) or set(value) != {"attempt", "failures", "lessons"}:
         raise ValueError("Invalid campaign")
     number(value["attempt"], 1, 1e9)
@@ -80,6 +142,18 @@ def validate_campaign(value):
 
 
 def snapshot(world):
+    """Capture simulation, RNG, task and campaign state in the versioned JSON format.
+
+    Args:
+        world: Authoritative simulation world used by this operation.
+
+    Returns:
+        JSON-compatible save envelope including configuration fingerprint.
+
+    Example:
+        saved = snapshot(world)
+        restored = restore(saved)  # compatible startup config must remain active
+    """
     return jsonable(
         {
             "version": VERSION,
@@ -110,6 +184,17 @@ def snapshot(world):
 
 
 def restore(data):
+    """Validate save compatibility and reconstruct a world with refreshed AI scheduling.
+
+    Args:
+        data: Structured payload or versioned save data for the described operation.
+
+    Returns:
+        Restored World; possession is intentionally not restored.
+
+    Raises:
+        ValueError: If save structure, identities, bounds or configuration compatibility are invalid.
+    """
     if not isinstance(data, dict) or data.get("version") not in (1, VERSION):
         raise ValueError("Unsupported save format version")
     expected = (
@@ -251,6 +336,14 @@ def restore(data):
     )
 
     def tuples(value):
+        """Rebuild nested tuples required by random-generator state restoration.
+
+        Args:
+            value: Value to validate, convert or publish as described above.
+
+        Returns:
+            Nested tuple/scalar value.
+        """
         return tuple(tuples(v) for v in value) if isinstance(value, list) else value
 
     world.rng.setstate(tuples(state["rng_state"]))
@@ -261,11 +354,29 @@ def restore(data):
 
 
 class SaveStore:
+    """One-writer atomic JSON campaign storage with backup recovery and archived attempts."""
+
     def __init__(self, path):
+        """Initialize SaveStore and its owned state.
+
+        Args:
+            path: Input/output filesystem path for the described resource.
+
+        Returns:
+            None.
+        """
         self.path = Path(path).expanduser().resolve()
         self.recovered = False
 
     def load(self):
+        """Load a primary save or valid backup without overwriting damaged input.
+
+        Returns:
+            Restored World, or None when neither save file exists.
+
+        Raises:
+            ValueError: If files exist but neither primary nor backup is a valid compatible save.
+        """
         if not self.path.exists():
             return None
         errors = []
@@ -296,6 +407,18 @@ class SaveStore:
         )
 
     def save(self, world):
+        """Atomically write a versioned snapshot and retain the preceding backup.
+
+        Args:
+            world: Authoritative simulation world used by this operation.
+
+        Returns:
+            None; does not silently suppress I/O or serialization errors.
+
+        Raises:
+            OSError: If snapshot creation, backup or atomic replacement cannot complete.
+            ValueError: If state is not valid finite JSON.
+        """
         data = json.dumps(
             snapshot(world), ensure_ascii=False, indent=2, allow_nan=False
         )
@@ -325,6 +448,11 @@ class SaveStore:
                 temporary.unlink()
 
     def new_attempt(self):
+        """Archive an existing compatible attempt and carry factual lessons into a fresh world.
+
+        Returns:
+            New World with retained campaign history and incremented attempt.
+        """
         previous = self.load()
         if previous is None:
             return World()

@@ -2,12 +2,25 @@
 
 Starts from damaged gates in an isolated temporary save. It does not modify any
 existing campaign or Docker container. Run from the repository root.
+
+File: scripts/check_priority_server.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
 """
 
-import pathlib, sys, tempfile, json, subprocess
+import json
+import pathlib
+import subprocess
+import sys
+import tempfile
 
 
 def main():
+    """Run the check priority server diagnostic and write its evidence.
+
+    Returns:
+        None; writes artifacts or exits with a nonzero status on failure.
+    """
     with tempfile.TemporaryDirectory() as d:
         root = pathlib.Path(d)
         config = json.loads(pathlib.Path("configs/server-local.json").read_text())
@@ -21,8 +34,8 @@ def main():
         from village.config import configure
 
         configure(path)
-        from village.world import World
         from village.persistence import SaveStore
+        from village.world import World
 
         world = World(seed=301)
         for gate in world.gates:
@@ -46,7 +59,8 @@ def main():
         )
         assert result.returncode == 0, result.stdout + result.stderr
         rows = [
-            json.loads(l) for l in (root / "decisions.jsonl").read_text().splitlines()
+            json.loads(line)
+            for line in (root / "decisions.jsonl").read_text().splitlines()
         ]
         requests = [r for r in rows if r["event"] == "model_request"]
         responses = [r for r in rows if r["event"] == "model_response"]

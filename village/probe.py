@@ -1,12 +1,23 @@
-"""Verify a real local model response without starting graphics."""
+"""Verify a real local model response without starting graphics.
+
+File: village/probe.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
 
 import argparse
 import json
-from .cli import prepare, attach_profile
+
+from .cli import attach_profile, prepare
 from .models import request_decision
 
 
 def main():
+    """Check one real configured model response independently of rendering.
+
+    Returns:
+        None; writes artifacts or exits with a nonzero status on failure.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     prepare(parser)
     parser.add_argument("--timeout", type=float, default=None)

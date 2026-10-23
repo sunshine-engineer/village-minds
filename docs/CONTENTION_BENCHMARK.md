@@ -1,3 +1,10 @@
+<!--
+File: docs/CONTENTION_BENCHMARK.md
+Purpose: Consequential repair-priority benchmark.
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+-->
+
 # Consequential repair-priority benchmark
 
 The v4 full-village runs accepted model plans but did not change local actions.

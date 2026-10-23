@@ -1,19 +1,25 @@
-"""Frozen paired experiment: legacy scripts, improved scripts and model assistance."""
+"""Frozen paired experiment: legacy scripts, improved scripts and model assistance.
+
+File: village/strategy_experiment.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
 
 import argparse
-from copy import deepcopy
-from datetime import datetime, timezone
 import csv
 import json
 import math
 import re
-from pathlib import Path
 import subprocess
 import sys
 import time
 import uuid
+from copy import deepcopy
+from datetime import datetime, timezone
+from pathlib import Path
+
 from .config import load_config, read_json
-from .validation import source_hashes, digest
+from .validation import digest, source_hashes
 
 CONDITIONS = ("legacy", "scripted", "model")
 ABLATIONS = (
@@ -29,6 +35,17 @@ ABLATIONS = (
 
 
 def validate_plan(plan):
+    """Validate fresh seed exclusions, experiment conditions and wall budgets.
+
+    Args:
+        plan: Validated experiment protocol dictionary.
+
+    Returns:
+        None when the declared strategy protocol is valid.
+
+    Raises:
+        ValueError: If the input violates the validation contract described above.
+    """
     strategy_mode = plan.get("strategy_mode", "assignment")
     if strategy_mode not in ("assignment", "priority_plan") or (
         "scripted-priority" in plan.get("conditions", ())
@@ -67,6 +84,14 @@ def validate_plan(plan):
 
 
 def repair_audit(path):
+    """Measure actual useful HP restored per wood from accepted repair records.
+
+    Args:
+        path: Input/output filesystem path for the described resource.
+
+    Returns:
+        Repair HP/wood totals and ratio dictionary.
+    """
     wood = hp = 0.0
     for line in path.read_text(encoding="utf-8").splitlines():
         row = json.loads(line)
@@ -87,6 +112,15 @@ def repair_audit(path):
 
 
 def paired_results(rows, baseline_condition="scripted"):
+    """Compare matched experimental conditions against a named baseline.
+
+    Args:
+        rows: Verified run-result records.
+        baseline_condition: Named comparator used for paired differences.
+
+    Returns:
+        Paired outcome rows excluding ineligible comparisons.
+    """
     pairs = []
     for row in rows:
         if row["condition"] != "model":
@@ -127,6 +161,11 @@ def paired_results(rows, baseline_condition="scripted"):
 
 
 def main():
+    """Run matched strategy conditions with frozen sources, budgets and seed exclusions.
+
+    Returns:
+        None; writes artifacts or exits with a nonzero status on failure.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--plan", required=True)
     parser.add_argument("--output", default="artifacts/strategy")
@@ -365,7 +404,7 @@ def main():
         writer = csv.DictWriter(handle, fieldnames=fields, extrasaction="ignore")
         writer.writeheader()
         writer.writerows(rows)
-    print(f'Report: {root / "summary.json"}', flush=True)
+    print(f"Report: {root / 'summary.json'}", flush=True)
     if (
         failures
         or len(rows) != frozen["expected_runs"]

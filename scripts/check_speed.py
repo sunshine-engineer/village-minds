@@ -1,9 +1,14 @@
-"""Offscreen integration for speed keys, substeps, pause and player decision logs."""
+"""Offscreen integration for speed keys, substeps, pause and player decision logs.
+
+File: scripts/check_speed.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
 
 import json
-from pathlib import Path
 import sys
 import tempfile
+from pathlib import Path
 from types import SimpleNamespace
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -11,12 +16,17 @@ sys.path.insert(0, str(ROOT))
 
 
 def main():
+    """Run the check speed diagnostic and write its evidence.
+
+    Returns:
+        None; writes artifacts or exits with a nonzero status on failure.
+    """
     artifacts = ROOT / "artifacts"
     artifacts.mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory(dir=artifacts) as directory:
         log_path = Path(directory) / "decisions.jsonl"
-        from village.game import VillageGame
         from village.config import get_settings
+        from village.game import VillageGame
 
         game = VillageGame(
             SimpleNamespace(

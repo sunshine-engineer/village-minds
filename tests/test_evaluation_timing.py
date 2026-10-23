@@ -1,17 +1,30 @@
-"""An inert inference response must not change the physics integration grid."""
+"""An inert inference response must not change the physics integration grid.
 
-from copy import deepcopy
+File: tests/test_evaluation_timing.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
+
 import json
-from pathlib import Path
 import tempfile
 import unittest
+from copy import deepcopy
+from pathlib import Path
+
 from village.config import get_settings
-from village.models import resolve_profile
 from village.evaluation import run_scenario
+from village.models import resolve_profile
 
 
 class TimingGridTests(unittest.TestCase):
+    """Regression cases for evaluation timing."""
+
     def test_arbitrary_measured_delays_leave_noop_gameplay_identical(self):
+        """Verify arbitrary measured delays leave noop gameplay identical.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         options = deepcopy(get_settings()["evaluation"])
         options.update(
             duration_seconds=180.0,
@@ -35,6 +48,14 @@ class TimingGridTests(unittest.TestCase):
             )
 
             def events(folder):
+                """Read normalized local decision events from a completed fixture trace.
+
+                Args:
+                    folder: Per-case artifact directory.
+
+                Returns:
+                    Normalized decision-event list.
+                """
                 return [
                     {
                         k: r.get(k)
@@ -63,6 +84,14 @@ class TimingGridTests(unittest.TestCase):
                 folder.mkdir()
 
                 def request(*args):
+                    """Return the deterministic model-response fixture for this regression.
+
+                    Args:
+                        *args: Parsed command-line options for this entry point.
+
+                    Returns:
+                        Controlled response envelope used by the test.
+                    """
                     return dict(
                         status="ok",
                         latency_ms=delay * 1000,

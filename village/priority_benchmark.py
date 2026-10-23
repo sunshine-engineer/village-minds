@@ -2,16 +2,20 @@
 
 One recovering repairer, two open jobs and scarce wood. This isolates allocation;
 it does not establish full-village survival or production model reliability.
+
+File: village/priority_benchmark.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
 """
 
 import argparse
-from copy import deepcopy
-from datetime import datetime, timezone
 import json
 import math
-from pathlib import Path
 import time
 import uuid
+from copy import deepcopy
+from datetime import datetime, timezone
+from pathlib import Path
 
 from .config import configure, get_settings, read_json
 from .inference import bounded_decision
@@ -21,6 +25,17 @@ CONDITIONS = ("baseline", "scripted", "model", "adverse")
 
 
 def validate_plan(plan):
+    """Validate the declared contention cases, seed exclusions, timing and budgets.
+
+    Args:
+        plan: Validated experiment protocol dictionary.
+
+    Returns:
+        None when the experiment protocol is valid.
+
+    Raises:
+        ValueError: If the input violates the validation contract described above.
+    """
     required = {
         "name",
         "config",
@@ -136,12 +151,29 @@ def validate_plan(plan):
 
 
 def oriented_case(case, seed, enabled=True):
-    """Rotate both gate identities and positions so a fixed gate name cannot win."""
+    """Rotate both gate identities and positions so a fixed gate name cannot win.
+
+    Args:
+        case: Declared contention case.
+        seed: Nonnegative deterministic world/randomization seed.
+        enabled: Whether the optional rotation or behavior is enabled.
+
+    Returns:
+        Independent case dictionary with seed-selected orientation.
+    """
     from .map_data import GATES
 
     turns = seed % 4 if enabled else 0
 
     def rotate(point):
+        """Apply the enclosing case's quarter-turn rotation to a planar point.
+
+        Args:
+            point: Planar coordinate pair.
+
+        Returns:
+            Rotated coordinate list.
+        """
         x, y = point
         for _ in range(turns):
             x, y = -y, x
@@ -158,10 +190,23 @@ def oriented_case(case, seed, enabled=True):
 
 
 def fixture(plan, case, seed):
-    from .world import World
+    """Create the ordinary-physics contention world with bounded position projection.
+
+    Args:
+        plan: Validated experiment protocol dictionary.
+        case: Declared contention case.
+        seed: Nonnegative deterministic world/randomization seed.
+
+    Returns:
+        World and recovering worker tuple.
+
+    Raises:
+        ValueError: If the input violates the validation contract described above.
+    """
     from .entities import Monster
-    from .navigation import walkable, work_point
     from .map_data import GATES
+    from .navigation import walkable, work_point
+    from .world import World
 
     w = World(seed=seed)
     settings = get_settings()
@@ -213,11 +258,26 @@ def run_case(
     request=bounded_decision,
     deadline=math.inf,
 ):
+    """Run one condition on a fixed grid and retain ownership, breach and timing evidence.
+
+    Args:
+        plan: Validated experiment protocol dictionary.
+        case: Declared contention case.
+        seed: Nonnegative deterministic world/randomization seed.
+        condition: Named baseline/scripted/model/adverse condition.
+        role: Configured villager role name.
+        folder: Per-case artifact directory.
+        request: Bounded inference callable; injectable for deterministic tests.
+        deadline: Absolute monotonic wall deadline.
+
+    Returns:
+        Case result dictionary; campaign saves are not used.
+    """
     from .allocation import strategy_observation
     from .brains import BrainScheduler
     from .models import resolve_profile
-    from .telemetry import DecisionLog
     from .persistence import snapshot
+    from .telemetry import DecisionLog
 
     w, worker = fixture(plan, case, seed)
     folder.mkdir(parents=True, exist_ok=True)
@@ -264,6 +324,11 @@ def run_case(
         stop_reason = "duration_reached"
 
         def step():
+            """Advance one normal contention tick and capture actual first task ownership.
+
+            Returns:
+                None; updates the enclosing fixture and event evidence.
+            """
             nonlocal first_owner, before_gates
             dt = min(plan["step_seconds"], plan["duration_seconds"] - w.time)
             w.tick(dt)
@@ -352,6 +417,11 @@ def run_case(
 
 
 def main():
+    """Run causal gate-allocation fixtures and retain every declared condition outcome.
+
+    Returns:
+        None; writes artifacts or exits with a nonzero status on failure.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--plan", required=True, type=Path)
     parser.add_argument("--output", default="artifacts/contention", type=Path)
@@ -426,7 +496,7 @@ def main():
                     )
                     + "\n"
                 )
-    print(f'Report: {root / "summary.json"}', flush=True)
+    print(f"Report: {root / 'summary.json'}", flush=True)
     if (
         failures
         or len(rows) != protocol["expected_runs"]

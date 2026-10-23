@@ -1,3 +1,8 @@
+# File: .gitignore
+# Purpose: Keep local environments, campaigns, secrets and generated artifacts out of Git.
+# Maintainer: sunshine-engineer
+# Modified: 2026-10-23
+
 .venv*/
 __pycache__/
 *.pyc
@@ -10,3 +15,5 @@ saves/
 .git-storage/
 build/
 dist/
+
+.ruff_cache/

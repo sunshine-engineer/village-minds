@@ -1,7 +1,25 @@
+<!--
+File: VALIDATION.md
+Purpose: Validation evidence.
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+-->
+
 # Validation evidence
 
 Current handover: [runbook](docs/HANDOVER.md), [document index](docs/INDEX.md).
 Historical counts below belong to their dated source snapshots.
+
+## Project consistency pass — 23 October 2026
+
+All 176 regression tests passed on Linux and native Windows. The maintained-source
+pass adds headers, complete explicit-definition documentation, pinned lint/format
+checks, a file inventory and shared configuration for three diagnostics. Fresh
+Linux/Windows wheel installs, installed Windows rendering, contributor contracts,
+custom-config autonomy and the 1,800-simulated-second authority soak passed.
+The first generic provider probe timed out and is retained; see the
+[complete consistency review](docs/CONSISTENCY_REVIEW.md) for base comparison,
+retry, exact scope and unverified layers. Frozen data/prompts/configs remain unchanged.
 
 ## Portfolio release checks, 2026-10-22
 

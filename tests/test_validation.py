@@ -1,20 +1,33 @@
-"""Holdout harness checks use tiny runs, never the full research matrix."""
+"""Holdout harness checks use tiny runs, never the full research matrix.
 
-from copy import deepcopy
+File: tests/test_validation.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
+
 import json
-from pathlib import Path
 import subprocess
 import sys
 import tempfile
 import unittest
-from village.validation import read_plan, collect_runs, summarize
+from copy import deepcopy
+from pathlib import Path
+
 from village.config import get_settings
+from village.validation import collect_runs, read_plan, summarize
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 class ValidationTests(unittest.TestCase):
+    """Regression cases for validation."""
+
     def setUp(self):
+        """Create isolated state for each regression case.
+
+        Returns:
+            None.
+        """
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name)
         self.plan = json.loads(
@@ -27,13 +40,28 @@ class ValidationTests(unittest.TestCase):
         self.path = self.root / "plan.json"
 
     def tearDown(self):
+        """Restore state and release resources after each regression case.
+
+        Returns:
+            None.
+        """
         self.temp.cleanup()
 
     def write_plan(self):
+        """Write a tiny bounded validation protocol using the fixture output paths.
+
+        Returns:
+            Fixture value consumed by assertions in this regression.
+        """
         self.path.write_text(json.dumps(self.plan))
         return self.path
 
     def test_new_seeds_and_all_four_scenarios_preflight(self):
+        """Verify new seeds and all four scenarios preflight.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         plan, scenarios = read_plan(self.write_plan())
         self.assertFalse(set(plan["seeds"]) & set(plan["excluded_development_seeds"]))
         self.assertEqual(len(scenarios), 4)
@@ -51,6 +79,11 @@ class ValidationTests(unittest.TestCase):
             )
 
     def test_overlap_duplicate_seeds_and_invalid_budget_rejected(self):
+        """Verify overlap duplicate seeds and invalid budget rejected.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         for patch in ({"seeds": [7]}, {"seeds": [211, 211]}, {"suite_wall_seconds": 0}):
             with self.subTest(patch=patch):
                 original = deepcopy(self.plan)
@@ -60,6 +93,11 @@ class ValidationTests(unittest.TestCase):
                 self.plan = original
 
     def test_disabled_survival_actions_rejected_before_running(self):
+        """Verify disabled survival actions rejected before running.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         config = json.loads((ROOT / "configs/cooperation-siege.json").read_text())
         config["evaluation"]["controls"] = {
             "cooperative": {"disabled_actions": ["guard"]}
@@ -71,6 +109,11 @@ class ValidationTests(unittest.TestCase):
             read_plan(self.write_plan())
 
     def test_collector_keeps_missing_and_censored_runs_explicit(self):
+        """Verify collector keeps missing and censored runs explicit.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         path = self.root / "211-scripted-independent"
         path.mkdir()
         result = dict(
@@ -93,6 +136,11 @@ class ValidationTests(unittest.TestCase):
         self.assertEqual(summary["strategies"][0]["incomplete_or_missing"], 1)
 
     def test_collector_rejects_inference_or_capability_changes(self):
+        """Verify collector rejects inference or capability changes.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         path = self.root / "211-scripted-independent"
         path.mkdir()
         result = dict(
@@ -110,6 +158,11 @@ class ValidationTests(unittest.TestCase):
             collect_runs(self.root, [211])
 
     def test_cli_freezes_inputs_runs_three_strategies_and_preserves_save(self):
+        """Verify cli freezes inputs runs three strategies and preserves save.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         config = json.loads((ROOT / "configs/cooperation-siege.json").read_text())
         save = self.root / "campaign.json"
         save.write_text('{"sentinel":"untouched"}')

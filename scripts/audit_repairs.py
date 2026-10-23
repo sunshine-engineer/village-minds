@@ -1,13 +1,27 @@
-"""Audit actual gate HP restored per wood from a completed validation batch."""
+"""Audit actual gate HP restored per wood from a completed validation batch.
+
+File: scripts/audit_repairs.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
 
 import argparse
-from collections import Counter
 import hashlib
 import json
+from collections import Counter
 from pathlib import Path
 
 
 def audit(summary_path, scenario_name):
+    """Reconstruct useful repair HP and actual wood consumption from accepted trace records.
+
+    Args:
+        summary_path: Completed validation summary JSON containing scenario evidence references.
+        scenario_name: Exact scenario label whose repair traces should be audited.
+
+    Returns:
+        Per-strategy efficiency and contribution audit dictionary.
+    """
     summary_path = Path(summary_path).resolve()
     root = summary_path.parent
     summary = json.loads(summary_path.read_text(encoding="utf-8"))
@@ -63,6 +77,11 @@ def audit(summary_path, scenario_name):
 
 
 def main():
+    """Run the audit repairs diagnostic and write its evidence.
+
+    Returns:
+        None; writes artifacts or exits with a nonzero status on failure.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("summary", type=Path)
     parser.add_argument("--scenario", default="wood-pressure")

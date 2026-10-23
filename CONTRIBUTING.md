@@ -1,7 +1,22 @@
+<!--
+File: CONTRIBUTING.md
+Purpose: Contributing.
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+-->
+
 # Contributing
 
 Start with [README.md](README.md) for native Windows or Linux setup. Keep local
 virtual environments, saves, generated screenshots and model files out of commits.
+
+## Consistency conventions
+
+Read [project standards](docs/PROJECT_STANDARDS.md) before adding source. Install
+`python -m pip install -e ".[dev]"`, then run Ruff lint/format checks and
+`python scripts/check_consistency.py` as well as the tests below. Preserve startup
+configuration ordering and explicit compatibility imports. Frozen prompts, protocols,
+results and LICENSE use inventory metadata instead of intrusive inline headers.
 
 ## Development checks
 

@@ -1,12 +1,27 @@
-"""Hard wall deadlines shared by live play, evaluation and reliability probes."""
+"""Hard wall deadlines shared by live play, evaluation and reliability probes.
+
+File: village/inference.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
 
 import math
 import multiprocessing
 import time
+
 from .config import configure
 
 
 def send_result(connection, result):
+    """Send a worker response unless the deadline-owning parent has already closed its pipe.
+
+    Args:
+        connection: Multiprocessing pipe endpoint used for one response.
+        result: Returned decision or result envelope being consumed.
+
+    Returns:
+        None; broken-pipe/EOF/OS errors during sending are intentionally ignored.
+    """
     try:
         connection.send(result)
     except (BrokenPipeError, EOFError, OSError):
@@ -14,7 +29,18 @@ def send_result(connection, result):
 
 
 def model_worker(connection, config_path, profile, observation, timeout):
-    """Spawned request process: initialization cannot mutate the parent's world."""
+    """Spawned request process: initialization cannot mutate the parent's world.
+
+    Args:
+        connection: Multiprocessing pipe endpoint used for one response.
+        config_path: Startup JSON path, or trusted resolved snapshot when accepted by the worker.
+        profile: Resolved model profile containing backend and generation options.
+        observation: Request-time context containing legal choices and relevant world state.
+        timeout: Maximum request wall time in seconds.
+
+    Returns:
+        None; errors are serialized and the pipe is always closed.
+    """
     try:
         if isinstance(config_path, dict):
             from .config import configure_snapshot
@@ -51,7 +77,18 @@ def model_worker(connection, config_path, profile, observation, timeout):
 
 
 def bounded_decision(profile, observation, config_path, timeout, *, worker=None):
-    """Enforce a wall deadline even when a custom transport ignores its timeout."""
+    """Enforce a wall deadline even when a custom transport ignores its timeout.
+
+    Args:
+        profile: Resolved model profile containing backend and generation options.
+        observation: Request-time context containing legal choices and relevant world state.
+        config_path: Startup JSON path, or trusted resolved snapshot when accepted by the worker.
+        timeout: Maximum request wall time in seconds.
+        worker: Optional spawned worker override used by contract/deadline tests.
+
+    Returns:
+        Status envelope with decision/error, optional provider metrics and latency_ms.
+    """
     if not math.isfinite(timeout) or timeout <= 0:
         return {
             "status": "timeout",

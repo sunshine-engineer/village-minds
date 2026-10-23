@@ -1,12 +1,23 @@
-"""HUD widget construction from the asset catalog."""
+"""HUD widget construction from the asset catalog.
 
-from direct.gui.OnscreenText import OnscreenText
+File: village/ui.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
+
 from direct.gui.DirectGui import DirectEntry, DirectFrame
+from direct.gui.OnscreenText import OnscreenText
 from panda3d.core import TextNode
+
 from .config import get_settings
 
 
 def control_help():
+    """Build displayed help from the actual configured bindings.
+
+    Returns:
+        Multiline controls string.
+    """
     keys = get_settings()["controls"]
     move = "/".join(keys[k].upper() for k in ("forward", "left", "backward", "right"))
     lines = [
@@ -27,6 +38,14 @@ def control_help():
 
 
 def build_ui(game):
+    """Create configured HUD widgets and attach named references to the game.
+
+    Args:
+        game: Game instance owning scene/UI references.
+
+    Returns:
+        None; initializes UI nodes.
+    """
     factories = {
         "OnscreenText": OnscreenText,
         "DirectEntry": DirectEntry,

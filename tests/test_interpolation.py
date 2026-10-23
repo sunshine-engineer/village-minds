@@ -1,9 +1,15 @@
-"""Deterministic presentation tests use synthetic packets, never physics prediction."""
+"""Deterministic presentation tests use synthetic packets, never physics prediction.
 
-from copy import deepcopy
+File: tests/test_interpolation.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
+
 import math
 import unittest
-from village.config import get_settings, load_config, fingerprint
+from copy import deepcopy
+
+from village.config import fingerprint, get_settings, load_config
 from village.interpolation import SnapshotInterpolator
 
 
@@ -18,6 +24,21 @@ def packet(
     health=100,
     monster=True,
 ):
+    """Construct a confirmed snapshot with explicit pose, generation and epoch metadata.
+
+    Args:
+        t: Controlled simulation/receive timestamp in seconds.
+        x: Planar x coordinate.
+        frame: Monotonically increasing fixture snapshot number.
+        epoch: Connection generation used to reject stale snapshot history.
+        server: Stable fixture server identity.
+        controlled: Possessed actor index, or None for observer state.
+        health: Fixture actor health used to model alive/dead transitions.
+        monster: Target living monster.
+
+    Returns:
+        Confirmed fixture snapshot dictionary.
+    """
     return dict(
         server_id=server,
         frame=round(t * 100) if frame is None else frame,
@@ -35,15 +56,37 @@ def packet(
 
 
 class InterpolationTests(unittest.TestCase):
+    """Regression cases for interpolation."""
+
     def setUp(self):
+        """Create isolated state for each regression case.
+
+        Returns:
+            None.
+        """
         self.settings = deepcopy(get_settings()["network"]["interpolation"])
         self.settings["catch_up_rate"] = 1.0
         self.smoother = SnapshotInterpolator(self.settings)
 
     def push(self, t, x, **kwargs):
+        """Push one controlled snapshot into the presentation buffer.
+
+        Args:
+            t: Controlled simulation/receive timestamp in seconds.
+            x: Planar x coordinate.
+            **kwargs: Keyword options forwarded to the owning implementation.
+
+        Returns:
+            None; performs the side effects described above.
+        """
         self.assertTrue(self.smoother.push(packet(t, x, **kwargs)))
 
     def test_intermediate_positions_and_animation_time_without_packet_mutation(self):
+        """Verify intermediate positions and animation time without packet mutation.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         source = packet(0, 0)
         saved = deepcopy(source)
         self.smoother.push(source)
@@ -55,6 +98,11 @@ class InterpolationTests(unittest.TestCase):
         self.assertEqual(source, saved)
 
     def test_render_updates_between_packets_and_holds_without_extrapolation(self):
+        """Verify render updates between packets and holds without extrapolation.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         self.push(0, 0)
         self.push(0.2, 1)
         xs = []
@@ -67,6 +115,11 @@ class InterpolationTests(unittest.TestCase):
         self.assertEqual(self.smoother.sample(0.5)[0]["villager", "Mira"], (1.0, 0.0))
 
     def test_jitter_and_lost_packet_do_not_jump_to_latest_position(self):
+        """Verify jitter and lost packet do not jump to latest position.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         self.smoother = SnapshotInterpolator(dict(self.settings, catch_up_rate=1.1))
         self.push(0, 0)
         self.push(0.2, 1)
@@ -82,6 +135,11 @@ class InterpolationTests(unittest.TestCase):
         self.assertLess(after, 3.05)
 
     def test_teleport_is_immediate_and_new_monsters_do_not_fly_from_origin(self):
+        """Verify teleport is immediate and new monsters do not fly from origin.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         self.push(0, 0, monster=False)
         self.push(0.2, 20)
         poses, _ = self.smoother.sample(0.25)
@@ -89,6 +147,11 @@ class InterpolationTests(unittest.TestCase):
         self.assertEqual(poses["monster", "m1"], (20, 5))
 
     def test_respawn_and_reused_ids_do_not_interpolate_old_lives(self):
+        """Verify respawn and reused ids do not interpolate old lives.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         self.push(0, 0)
         self.push(0.1, 1, health=0, monster=False)
         self.push(0.2, 2, health=100)
@@ -97,11 +160,21 @@ class InterpolationTests(unittest.TestCase):
         self.assertEqual(poses["monster", "m1"], (2, 5))
 
     def test_despawn_is_immediate(self):
+        """Verify despawn is immediate.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         self.push(0, 0)
         self.push(0.2, 1, monster=False)
         self.assertNotIn(("monster", "m1"), self.smoother.sample(0.25)[0])
 
     def test_reconnect_server_restart_and_possession_reset_history(self):
+        """Verify reconnect server restart and possession reset history.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         for change in [
             dict(epoch=2),
             dict(epoch=2, server="server-b"),
@@ -116,12 +189,22 @@ class InterpolationTests(unittest.TestCase):
                 self.assertEqual(len(smooth.samples), 1)
 
     def test_stale_frames_or_epochs_cannot_replace_newer_state(self):
+        """Verify stale frames or epochs cannot replace newer state.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         self.push(0.1, 1, epoch=2, frame=2)
         self.assertFalse(self.smoother.push(packet(0.2, 0, epoch=1, frame=5)))
         self.assertFalse(self.smoother.push(packet(0.2, 0, epoch=2, frame=1)))
         self.assertEqual(self.smoother.sample(0.2)[0]["villager", "Mira"], (1, 0))
 
     def test_long_gap_or_paused_renderer_snaps_without_replaying_history(self):
+        """Verify long gap or paused renderer snaps without replaying history.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         self.push(0, 0)
         self.push(0.2, 1)
         self.smoother.sample(0.3)
@@ -130,6 +213,11 @@ class InterpolationTests(unittest.TestCase):
         self.assertEqual(self.smoother.sample(3)[0]["villager", "Mira"], (2, 0))
 
     def test_buffer_is_bounded_and_disabled_mode_matches_snapshot(self):
+        """Verify buffer is bounded and disabled mode matches snapshot.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         self.settings.update(buffer_size=3, enabled=False)
         smooth = SnapshotInterpolator(self.settings)
         for i in range(20):
@@ -138,6 +226,11 @@ class InterpolationTests(unittest.TestCase):
         self.assertAlmostEqual(smooth.sample(2)[0]["villager", "Mira"][0], 1.9)
 
     def test_straight_line_is_smoother_than_snapshot_snapping_at_multiple_fps(self):
+        """Verify straight line is smoother than snapshot snapping at multiple fps.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         for fps in (30, 60, 144):
             smooth = SnapshotInterpolator(self.settings)
             displayed = []
@@ -153,15 +246,32 @@ class InterpolationTests(unittest.TestCase):
                 snapped.append((next_packet - 1) * 0.2 * 5)
             # Ignore startup buffering; compare actual frame displacement, not acceptance counts.
             start = math.ceil(0.4 * fps)
-            jump = lambda xs: max(
-                abs(b - a) for a, b in zip(xs[start:], xs[start + 1 :])
-            )
+
+            def jump(positions):
+                """Measure the largest frame displacement after fixture warm-up.
+
+                Args:
+                    positions: Consecutive displayed or direct-snapshot x positions.
+
+                Returns:
+                    Maximum absolute post-warm-up displacement.
+                """
+                return max(
+                    abs(b - a)
+                    for a, b in zip(positions[start:], positions[start + 1 :])
+                )
+
             self.assertLess(jump(displayed), jump(snapped) / 4)
             self.assertTrue(
                 all(a <= b + 1e-9 for a, b in zip(displayed, displayed[1:]))
             )
 
     def test_settings_do_not_change_gameplay_fingerprint(self):
+        """Verify settings do not change gameplay fingerprint.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         old = load_config()
         changed = deepcopy(old)
         changed["network"]["interpolation"]["delay_seconds"] = 0.3

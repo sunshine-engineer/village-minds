@@ -1,4 +1,9 @@
-"""Shared map and roster loaded from startup configuration."""
+"""Shared map and roster loaded from startup configuration.
+
+File: village/map_data.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
 
 from .config import get_settings
 

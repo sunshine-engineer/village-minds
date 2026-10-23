@@ -2,26 +2,35 @@
 
 No simulated clock, inference, save files or prediction. A controlled fixture
 isolates movement in an open part of the map; this is not a human playtest.
+
+File: scripts/check_client_responsiveness.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
 """
 
 import argparse
-import os
 import json
 import math
-from pathlib import Path
-import statistics
-import sys
-import threading
-import subprocess
-import tempfile
+import os
 import queue
-from copy import deepcopy
+import statistics
+import subprocess
+import sys
+import tempfile
+import threading
 import time
+from copy import deepcopy
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 
 def main():
+    """Run the check client responsiveness diagnostic and write its evidence.
+
+    Returns:
+        None; writes artifacts or exits with a nonzero status on failure.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--samples", type=int, default=6)
     parser.add_argument(
@@ -36,12 +45,12 @@ def main():
     args = parser.parse_args()
     if args.samples < 2:
         parser.error("At least two samples required")
-    from village.config import get_settings
-    from village.world import World
-    from village.persistence import SaveStore
-    from village.network import RemoteSession
     from village.client import game_class
+    from village.config import get_settings
     from village.game import C
+    from village.network import RemoteSession
+    from village.persistence import SaveStore
+    from village.world import World
 
     settings = get_settings()
     settings["network"]["exchange_motion"] = args.transport != "legacy"
@@ -85,6 +94,11 @@ def main():
     ready = queue.Queue(maxsize=1)
 
     def read_ready():
+        """Read the child server's readiness line into a bounded queue.
+
+        Returns:
+            None; does not mutate the parent world.
+        """
         ready.put(process.stdout.readline())
 
     reader = threading.Thread(target=read_ready, daemon=True)
@@ -94,9 +108,19 @@ def main():
     overall_deadline = time.monotonic() + args.suite_seconds
 
     class TracedSession(RemoteSession):
+        """Real HTTP session recording request, acknowledgement and displacement times."""
+
         trial = None
 
         def command(self, command):
+            """Trace send/ack wall times for the current matching movement request.
+
+            Args:
+                command: Sequenced player input command dictionary.
+
+            Returns:
+                Original server command response.
+            """
             trial = self.trial
             matching = (
                 trial is not None
@@ -111,6 +135,11 @@ def main():
             return super().command(command)
 
         def poll(self):
+            """Mark the first authoritative displacement observed after injected input.
+
+            Returns:
+                Newest available snapshot, or None when no packet is pending.
+            """
             state = super().poll()
             trial = self.trial
             if (
@@ -144,6 +173,14 @@ def main():
         game.clock_dt = lambda: 1 / 60
 
         def frame():
+            """Advance and explicitly render one frame within the measurement wall budget.
+
+            Returns:
+                None; raises RuntimeError if the fixture server exits or the suite expires.
+
+            Raises:
+                RuntimeError: If the input violates the validation contract described above.
+            """
             if time.monotonic() >= overall_deadline:
                 raise RuntimeError("Responsiveness suite wall budget exceeded")
             if process.poll() is not None:
@@ -155,6 +192,17 @@ def main():
             time.sleep(1 / 120)
 
         def settle(seconds):
+            """Wait for stationary authoritative/displayed poses before a timed input sample.
+
+            Args:
+                seconds: Requested simulated duration in seconds.
+
+            Returns:
+                None; raises RuntimeError if settling fails within the bounded wait.
+
+            Raises:
+                RuntimeError: If the input violates the validation contract described above.
+            """
             started = changed_at = time.monotonic()
             previous = None
             while (
@@ -186,7 +234,7 @@ def main():
         if game.world.controlled != 0:
             raise RuntimeError("Failed to take control")
         for i in range(args.samples):
-            for enabled in ((False, True) if i % 2 == 0 else (True, False)):
+            for enabled in (False, True) if i % 2 == 0 else (True, False):
                 # Alternate order to reduce constant warm-up and scheduling bias.
                 game.presentation.settings["enabled"] = enabled
                 game.keys.clear()
@@ -224,8 +272,9 @@ def main():
                         interpolation=enabled,
                         sample=i,
                         **{
-                            k.removesuffix("_at")
-                            + "_ms": round(1000 * (trial[k] - trial["input_at"]), 3)
+                            k.removesuffix("_at") + "_ms": round(
+                                1000 * (trial[k] - trial["input_at"]), 3
+                            )
                             for k in (
                                 "request_sent_at",
                                 "ack_received_at",

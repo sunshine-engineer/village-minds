@@ -1,7 +1,15 @@
+<!--
+File: docs/INDEX.md
+Purpose: Documentation index.
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+-->
+
 # Documentation index
 
 Reviewed 22 October 2026 against production source `e1cc748` and release evidence
 `28d766a`. Documentation changes are recorded in [the audit](DOCUMENTATION_AUDIT.md).
+A 23 October source-consistency pass is recorded in [the consistency review](CONSISTENCY_REVIEW.md).
 Start with [the handover runbook](HANDOVER.md). A historical result is evidence for
 its recorded source/configuration, not a new validation of the current checkout.
 
@@ -9,6 +17,9 @@ its recorded source/configuration, not a new validation of the current checkout.
 | --- | --- |
 | [README](../README.md) | Current Windows/Linux setup, gameplay, controls, persistence and troubleshooting |
 | [Handover](HANDOVER.md) | Receiving developer's setup, operations, recovery, checks and sign-off |
+| [Consistency review](CONSISTENCY_REVIEW.md) | Current project-wide maintenance scope, tests and remaining validation limits |
+| [Project standards](PROJECT_STANDARDS.md) | Current file headers, docstrings, formatter, environment and configuration boundaries |
+| [File inventory](FILE_INVENTORY.md) | Purpose and preservation policy for every tracked file |
 | [Contributing](../CONTRIBUTING.md) | Change workflow, focused validation and extension boundaries |
 | [Architecture](ARCHITECTURE.md) | Current ownership, data flow, simulation/inference/transport boundaries |
 | [Configuration](CONFIGURATION.md) | Startup overrides, paths, fingerprint compatibility and settings map |

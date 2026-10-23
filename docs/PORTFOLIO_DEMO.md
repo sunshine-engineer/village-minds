@@ -1,3 +1,10 @@
+<!--
+File: docs/PORTFOLIO_DEMO.md
+Purpose: Three-minute review walkthrough.
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+-->
+
 # Three-minute review walkthrough
 
 This is a recording script, not a claim that a video or human playtest exists.

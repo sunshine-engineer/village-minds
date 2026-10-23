@@ -1,19 +1,41 @@
-"""Panda3D viewer/controller for a continuously running loopback village server."""
+"""Panda3D viewer/controller for a continuously running loopback village server.
+
+File: village/client.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
 
 import argparse
 import math
 import time
+
 from .config import get_settings
 
 
 def game_class():
     # Import rendering only after startup settings and the initial server handshake.
-    from .game import VillageGame, C, D
-    from .persistence import restore
+    """Construct the remote-rendering subclass after startup configuration is available.
+
+    Returns:
+        RemoteGame class; no local physics or inference is enabled.
+    """
+    from .game import C, D, VillageGame
     from .interpolation import SnapshotInterpolator
+    from .persistence import restore
 
     class RemoteGame(VillageGame):
+        """Panda3D presentation of authoritative snapshots with queued player input."""
+
         def __init__(self, args, session):
+            """Initialize RemoteGame and its owned state.
+
+            Args:
+                args: Parsed command-line options for this entry point.
+                session: RemoteSession supplying confirmed snapshots and accepting queued input.
+
+            Returns:
+                None.
+            """
             self.session = session
             self.presentation = SnapshotInterpolator(
                 get_settings()["network"]["interpolation"]
@@ -43,6 +65,14 @@ def game_class():
 
         def advance_world(self, dt):
             # Send current input before snapshot validation/scene work can delay it.
+            """Publish input before restoring the newest authoritative snapshot and sampling presentation.
+
+            Args:
+                dt: Elapsed simulation seconds; rendering overrides receive real frame seconds.
+
+            Returns:
+                None; updates the local render/HUD mirror without advancing physics.
+            """
             if self.session.connected:
                 self.orbit += (
                     (
@@ -79,38 +109,104 @@ def game_class():
                 self.world.controlled = None
 
         def display_position(self, kind, identity, authoritative):
+            """Choose a buffered presentation pose while preserving authoritative fallback.
+
+            Args:
+                kind: Entity or request category used by the owning operation.
+                identity: Stable entity identifier used to match presentation history.
+                authoritative: Newest confirmed position used when a buffered pose is unavailable.
+
+            Returns:
+                Displayed position, or the supplied authoritative position.
+            """
             return self.display_poses.get((kind, identity), authoritative)
 
         def display_time(self):
+            """Expose interpolated simulation time for animation.
+
+            Returns:
+                Presentation time in simulation seconds.
+            """
             return self.animation_time
 
         def takeover(self, index):
+            """Queue a possession change for acknowledgement by the server.
+
+            Args:
+                index: Villager roster index selected by the caller.
+
+            Returns:
+                None; possession changes only after server validation.
+            """
             if not self.typing:
                 self.keys.clear()
                 self.session.motion = (0.0, 0.0)
                 self.session.submit(dict(kind="takeover", index=index))
 
         def apply_player_decision(self, bot, decision):
+            """Queue a player work action instead of mutating the client world.
+
+            Args:
+                bot: Villager whose current state or work is being considered.
+                decision: Proposed structured action with optional target/dialogue fields.
+
+            Returns:
+                Whether the bounded client queue accepted the action.
+            """
             return self.session.submit(dict(kind="action", **decision))
 
         def submit_chat(self, text):
+            """Queue player dialogue for server-side validation and hearing.
+
+            Args:
+                text: Dialogue or event text to validate and publish.
+
+            Returns:
+                None; closes the local dialogue editor.
+            """
             if self.typing:
                 self.session.submit(dict(kind="say", text=text))
                 self.close_chat()
 
         def toggle_pause(self):
+            """Explain that pausing is unavailable in the remote client.
+
+            Returns:
+                None; the authoritative server keeps running.
+            """
             self.brains.status = (
                 "Server simulation continues while connected or disconnected"
             )
 
         def cycle_speed(self):
+            """Explain that the remote client cannot alter server simulation pace.
+
+            Returns:
+                None; server timing remains unchanged.
+            """
             self.brains.status = "Simulation speed is managed by the server"
 
         def save_world(self):
+            """Keep the rendering client from writing authoritative campaign files.
+
+            Returns:
+                True; saving belongs to the server.
+            """
             return True
 
         def update(self, task):
             # Suppress the single-player smoke harness: it mutates World directly.
+            """Run a render frame and optional bounded client smoke-test interactions.
+
+            Args:
+                task: Panda3D task context providing continuation/completion status.
+
+            Returns:
+                Panda3D task continuation status.
+
+            Raises:
+                RuntimeError: If the input violates the validation contract described above.
+            """
             smoke = self.smoke_frames
             self.smoke_frames = None
             result = super().update(task)
@@ -153,7 +249,12 @@ def game_class():
 
 
 def main():
-    from .cli import prepare, attach_profile
+    """Connect a render-only client to the authoritative loopback server.
+
+    Returns:
+        None; writes artifacts or exits with a nonzero status on failure.
+    """
+    from .cli import attach_profile, prepare
 
     parser = argparse.ArgumentParser(description=__doc__)
     settings = prepare(parser)
@@ -164,7 +265,7 @@ def main():
     parser.add_argument("--smoke-test", action="store_true")
     args = parser.parse_args()
     attach_profile(parser, args)
-    from .network import RemoteSession, RemoteError
+    from .network import RemoteError, RemoteSession
 
     try:
         session = RemoteSession(args.server)

@@ -1,15 +1,28 @@
-"""Optional JSONL decision traces with bounded disk usage and aggregate counters."""
+"""Optional JSONL decision traces with bounded disk usage and aggregate counters.
 
-from collections import Counter
-from datetime import datetime, timezone
+File: village/telemetry.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
+
 import json
 import math
-from pathlib import Path
 import time
 import uuid
+from collections import Counter
+from datetime import datetime, timezone
+from pathlib import Path
 
 
 def json_safe(value):
+    """Convert observations to bounded-shape JSON values and label unsupported/nonfinite scalars.
+
+    Args:
+        value: Value to validate, convert or publish as described above.
+
+    Returns:
+        JSON-compatible value.
+    """
     if isinstance(value, dict):
         return {str(k): json_safe(v) for k, v in value.items()}
     if isinstance(value, (list, tuple)):
@@ -22,6 +35,15 @@ def json_safe(value):
 
 
 def state_summary(world, bot=None):
+    """Capture compact village and optional actor state for decision attribution.
+
+    Args:
+        world: Authoritative simulation world used by this operation.
+        bot: Villager whose current state or work is being considered.
+
+    Returns:
+        Independent summary dictionary.
+    """
     result = {
         "village_health": world.village_health,
         "store": world.store.copy(),
@@ -45,6 +67,17 @@ class DecisionLog:
     """One owner on the simulation thread; no writes from inference workers."""
 
     def __init__(self, path, *, max_bytes, full_observations=False, run_id=None):
+        """Initialize DecisionLog and its owned state.
+
+        Args:
+            path: Input/output filesystem path for the described resource.
+            max_bytes: Maximum allowed trace file size in bytes.
+            full_observations: Whether to include complete request context in trace records.
+            run_id: Optional stable identifier for this trace session.
+
+        Returns:
+            None.
+        """
         self.path = Path(path).expanduser().resolve()
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.run_id = run_id or uuid.uuid4().hex
@@ -61,6 +94,16 @@ class DecisionLog:
         )
 
     def record(self, event, sim_time, **data):
+        """Count an event and append JSONL only while the configured byte budget permits.
+
+        Args:
+            event: Structured event name.
+            sim_time: Simulation timestamp attached to the event.
+            **data: Structured payload or versioned save data for the described operation.
+
+        Returns:
+            None; counts dropped records when the byte cap is reached.
+        """
         self.sequence += 1
         source, outcome = data.get("source", "system"), data.get("outcome", "")
         self.counts[(event, source, outcome)] += 1
@@ -90,8 +133,23 @@ class DecisionLog:
         self.bytes_written += size
 
     def count(self, event, source, outcome):
+        """Read the aggregate count for one event/source/outcome combination.
+
+        Args:
+            event: Structured event name.
+            source: Provenance label identifying the caller or decision layer.
+            outcome: Recorded acceptance/error category.
+
+        Returns:
+            Integer event count.
+        """
         return self.counts[(event, source, outcome)]
 
     def close(self):
+        """Close the trace handle after the simulation owner finishes using it.
+
+        Returns:
+            None.
+        """
         if not self.handle.closed:
             self.handle.close()

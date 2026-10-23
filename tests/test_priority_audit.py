@@ -1,15 +1,31 @@
-"""Evidence auditing must detect actual behavior changes, not wall-clock noise."""
+"""Evidence auditing must detect actual behavior changes, not wall-clock noise.
 
-from copy import deepcopy
+File: tests/test_priority_audit.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
+
 import json
-from pathlib import Path
 import tempfile
 import unittest
+from pathlib import Path
+
 from scripts.audit_priority_results import audit
 
 
 class PriorityAuditTests(unittest.TestCase):
+    """Regression cases for priority audit."""
+
     def write_fixture(self, root, changed):
+        """Write paired audit evidence with an optional deliberate behavioral difference.
+
+        Args:
+            root: Root artifact directory searched for result files.
+            changed: Whether to introduce a deliberate difference into the audit fixture.
+
+        Returns:
+            None; performs the side effects described above.
+        """
         rows = [
             dict(case="siege", seed=301, condition=c) for c in ("scripted", "model")
         ]
@@ -52,6 +68,11 @@ class PriorityAuditTests(unittest.TestCase):
             )
 
     def test_wall_noise_and_planner_acceptance_are_not_behavior_changes(self):
+        """Verify wall noise and planner acceptance are not behavior changes.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             self.write_fixture(root, False)
@@ -60,6 +81,11 @@ class PriorityAuditTests(unittest.TestCase):
             self.assertTrue(pair["same_accepted_task_ownership"])
 
     def test_real_task_handoff_difference_is_detected(self):
+        """Verify real task handoff difference is detected.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             self.write_fixture(root, True)

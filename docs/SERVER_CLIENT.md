@@ -1,3 +1,10 @@
+<!--
+File: docs/SERVER_CLIENT.md
+Purpose: Single-server, single-client prototype.
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+-->
+
 # Single-server, single-client prototype
 
 The server owns the world, local villagers, model calls, player actions and saves.

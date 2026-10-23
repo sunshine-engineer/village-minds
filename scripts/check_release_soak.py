@@ -1,16 +1,26 @@
-"""Fast-forward authority/persistence soak; not a wall-time or human playtest."""
+"""Fast-forward authority/persistence soak; not a wall-time or human playtest.
+
+File: scripts/check_release_soak.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
 
 import argparse
 import json
-from pathlib import Path
 import sys
 import tempfile
 import time
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 
 def main():
+    """Run the check release soak diagnostic and write its evidence.
+
+    Returns:
+        None; writes artifacts or exits with a nonzero status on failure.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--simulated-seconds", type=float, default=1800.0)
     parser.add_argument("--step", type=float, default=0.05)
@@ -26,10 +36,10 @@ def main():
         or args.simulated_seconds < 20
     ):
         parser.error("Invalid soak duration/step")
-    from village.world import World
     from village.brains import BrainScheduler
-    from village.server import VillageServer
     from village.persistence import SaveStore, snapshot
+    from village.server import VillageServer
+    from village.world import World
 
     elapsed = [0.0]
     switches = 0
@@ -39,6 +49,15 @@ def main():
     started = time.monotonic()
 
     def runtime(world, store):
+        """Create a demo authority using the fixture clock and the supplied saved world.
+
+        Args:
+            world: Authoritative simulation world used by this operation.
+            store: Optional SaveStore for server persistence.
+
+        Returns:
+            VillageServer ready for direct-authority lifecycle checks.
+        """
         return VillageServer(
             world,
             BrainScheduler(world, "", "", demo=True),

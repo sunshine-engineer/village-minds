@@ -1,3 +1,10 @@
+<!--
+File: docs/EVALUATION_GAPS.md
+Purpose: Evaluation correctness and component experiments.
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+-->
+
 # Evaluation correctness and component experiments
 
 > Scope: v3 component/timing study. Results describe the frozen source identified below,

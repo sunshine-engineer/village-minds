@@ -1,30 +1,46 @@
 """Bounded, headless comparisons with fixed simulation steps and AI checkpoints.
 
 Run `python -m village.evaluation --help`. No Panda3D import or game saves needed.
+
+File: village/evaluation.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
 """
 
-from collections import Counter
-from datetime import datetime, timezone
 import argparse
 import csv
 import hashlib
 import json
 import math
-import multiprocessing
-from pathlib import Path
 import statistics
 import time
 import uuid
-from .config import configure, get_settings, fingerprint
-from .evaluation_schedule import CheckpointSchedule
+from collections import Counter
+from datetime import datetime, timezone
+from pathlib import Path
 
-from .inference import bounded_decision, model_worker, send_result
+from .config import configure as configure
+from .config import fingerprint, get_settings
+from .evaluation_schedule import CheckpointSchedule
+from .inference import bounded_decision
+from .inference import model_worker as model_worker
+from .inference import send_result as send_result
 
 MODES = ("scripted", "hybrid", "hybrid-memory")
 
 
 def generate_lessons(seed, seconds, step, deadline):
-    """Get factual failure lessons from an idle run, never invent training history."""
+    """Get factual failure lessons from an idle run, never invent training history.
+
+    Args:
+        seed: Nonnegative deterministic world/randomization seed.
+        seconds: Requested simulated duration in seconds.
+        step: Maximum simulation substep in seconds.
+        deadline: Absolute monotonic wall deadline.
+
+    Returns:
+        Fixture dictionary with observed failure status and per-villager lessons.
+    """
     from .world import World
 
     world = World(seed=seed)
@@ -44,7 +60,17 @@ def generate_lessons(seed, seconds, step, deadline):
 
 
 class Metrics:
+    """Interval and transition measurements for one bounded evaluation run."""
+
     def __init__(self, world):
+        """Initialize Metrics and its owned state.
+
+        Args:
+            world: Authoritative simulation world used by this operation.
+
+        Returns:
+            None.
+        """
         self.food_shortage_seconds = 0.0
         self.starvation_villager_seconds = 0.0
         self.gate_breaches = 0
@@ -56,6 +82,15 @@ class Metrics:
 
     def step(self, world, dt):
         # Intervals use the state at the start of a substep.
+        """Accumulate state-interval metrics before advancing a simulation substep.
+
+        Args:
+            world: Authoritative simulation world used by this operation.
+            dt: Elapsed simulation seconds; rendering overrides receive real frame seconds.
+
+        Returns:
+            None; updates the metrics accumulator.
+        """
         from .map_data import GATES
         from .navigation import distance
 
@@ -86,6 +121,14 @@ class Metrics:
         )
 
     def after_step(self, world):
+        """Capture post-step losses, breaches, contributions and model-task progress.
+
+        Args:
+            world: Authoritative simulation world used by this operation.
+
+        Returns:
+            None; updates metrics from the advanced world.
+        """
         self.gate_breaches += sum(
             self.previous_gates[k] > 0 and hp <= 0 for k, hp in world.gates.items()
         )
@@ -104,9 +147,28 @@ def run_scenario(
     suite_deadline=math.inf,
     request=bounded_decision,
 ):
+    """Execute one bounded seed/mode case using ordinary simulation and validated decisions.
+
+    Args:
+        seed: Nonnegative deterministic world/randomization seed.
+        mode: Named evaluation condition.
+        options: Validated run settings and budgets.
+        profile: Resolved model profile containing backend and generation options.
+        output: Destination directory or file for generated evidence.
+        config_path: Startup JSON path, or trusted resolved snapshot when accepted by the worker.
+        lesson_fixture: Optional factual prior-failure fixture.
+        suite_deadline: Absolute monotonic deadline shared across the batch.
+        request: Bounded inference callable; injectable for deterministic tests.
+
+    Returns:
+        Result dictionary with stop reason, coverage, metrics and model outcomes.
+
+    Raises:
+        ValueError: If the input violates the validation contract described above.
+    """
     from .allocation import repair_candidates
-    from .evaluation_controls import EvaluationWorld
     from .brains import BrainScheduler
+    from .evaluation_controls import EvaluationWorld
     from .telemetry import DecisionLog
 
     if mode not in MODES:
@@ -177,6 +239,14 @@ def run_scenario(
     )
 
     def advance_step(dt):
+        """Advance one ordinary integration tick and update the enclosing run's metrics.
+
+        Args:
+            dt: Elapsed simulation seconds; rendering overrides receive real frame seconds.
+
+        Returns:
+            None; preserves the normal simulation grid during inference replay.
+        """
         previous_repairs = {v.name: v.contributions["repairs"] for v in world.villagers}
         metrics.step(world, dt)
         world.tick(dt)
@@ -253,7 +323,7 @@ def run_scenario(
                             memory.get(bot.name, [])
                         )
                     selected = brains.profile_for(bot.name)
-                    request_id = f"checkpoint-{requests+1}"
+                    request_id = f"checkpoint-{requests + 1}"
                     logger.record(
                         "model_request",
                         world.time,
@@ -491,7 +561,6 @@ def run_scenario(
                 round(statistics.mean(latencies), 3) if latencies else None
             ),
             "memory_available": bool(memory),
-            "timing_policy": options.get("timing_policy", "paused_checkpoints"),
             "decision_log": "decisions.jsonl",
             "log_dropped_records": logger.dropped,
         }
@@ -515,6 +584,14 @@ def run_scenario(
 
 
 def aggregate(results):
+    """Group scenario outcomes without counting missing or wall-limited runs as survival.
+
+    Args:
+        results: Completed result rows to aggregate or report.
+
+    Returns:
+        Aggregate result rows for each comparable condition.
+    """
     rows = []
     for mode, control, coordination in dict.fromkeys(
         (
@@ -598,13 +675,31 @@ def aggregate(results):
 
 
 def paired_coordination(results):
-    """Within-seed differences, excluding interrupted/deadline-limited pairs."""
-    key = lambda r: (
-        r.get("scenario_name", "standard"),
-        r["seed"],
-        r["mode"],
-        r.get("control", "cooperative"),
-    )
+    """Within-seed differences, excluding interrupted/deadline-limited pairs.
+
+    Args:
+        results: Completed result rows to aggregate or report.
+
+    Returns:
+        Rows with paired gains, regressions and metric differences.
+    """
+
+    def key(row):
+        """Identify a matched scenario, seed, mode and intervention condition.
+
+        Args:
+            row: Completed evaluation result dictionary.
+
+        Returns:
+            Stable tuple used to find the independent comparator.
+        """
+        return (
+            row.get("scenario_name", "standard"),
+            row["seed"],
+            row["mode"],
+            row.get("control", "cooperative"),
+        )
+
     baselines = {
         key(r): r
         for r in results
@@ -670,6 +765,16 @@ def paired_coordination(results):
 
 
 def write_report(output, results, manifest):
+    """Write the evaluator manifest, summaries, CSV and readable comparison.
+
+    Args:
+        output: Destination directory or file for generated evidence.
+        results: Completed result rows to aggregate or report.
+        manifest: Frozen run protocol and completion metadata.
+
+    Returns:
+        None; writes report artifacts under the supplied output directory.
+    """
     comparison = aggregate(results)
     paired = paired_coordination(results)
     summary = {
@@ -885,7 +990,12 @@ def write_report(output, results, manifest):
 
 
 def main():
-    from .cli import prepare, attach_profile
+    """Run bounded headless comparisons and publish completed/missing result evidence.
+
+    Returns:
+        None; writes artifacts or exits with a nonzero status on failure.
+    """
+    from .cli import attach_profile, prepare
 
     parser = argparse.ArgumentParser(description=__doc__)
     settings = prepare(parser)
@@ -956,7 +1066,7 @@ def main():
     for name in ("duration", "model_timeout", "wall_seconds", "suite_seconds"):
         value = getattr(args, name)
         if not math.isfinite(value) or value <= 0:
-            parser.error(f'--{name.replace("_","-")} must be finite and positive')
+            parser.error(f"--{name.replace('_', '-')} must be finite and positive")
     if args.max_model_calls < 0 or any(seed < 0 for seed in args.seeds):
         parser.error("Call budget and seeds must be nonnegative")
     options = {
@@ -1078,7 +1188,7 @@ def main():
             time.monotonic() - (deadline - args.suite_seconds), 6
         )
         write_report(output, results, manifest)
-    print(f'Report: {output / "report.md"}', flush=True)
+    print(f"Report: {output / 'report.md'}", flush=True)
     if manifest["interrupted"]:
         raise SystemExit(130)
 

@@ -2,20 +2,29 @@
 
 Requires a local wheel; dependencies come from --wheelhouse or pip's configured
 index. This is an automated clean-install check, not another developer's review.
+
+File: scripts/check_wheel_install.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
 """
 
 import argparse
 import json
 import os
-from pathlib import Path
 import shutil
 import subprocess
 import sys
 import tempfile
 import time
+from pathlib import Path
 
 
 def main():
+    """Run the check wheel install diagnostic and write its evidence.
+
+    Returns:
+        None; writes artifacts or exits with a nonzero status on failure.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--wheel-directory", type=Path, required=True)
     parser.add_argument("--wheelhouse", type=Path)
@@ -36,6 +45,18 @@ def main():
     checks = []
 
     def execute(cmd, cwd):
+        """Run one isolated-install subprocess and preserve bounded failure diagnostics.
+
+        Args:
+            cmd: Argument vector for the isolated subprocess; no shell interpolation is used.
+            cwd: Working directory outside the source checkout for this subprocess.
+
+        Returns:
+            CompletedProcess on success; raises RuntimeError for a nonzero command exit.
+
+        Raises:
+            RuntimeError: If the input violates the validation contract described above.
+        """
         result = subprocess.run(
             [str(p) for p in cmd],
             cwd=cwd,

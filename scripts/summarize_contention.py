@@ -1,14 +1,27 @@
-"""Audit paired fixture identity and actual event order in a frozen contention batch."""
+"""Audit paired fixture identity and actual event order in a frozen contention batch.
+
+File: scripts/summarize_contention.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
 
 import argparse
 import csv
 import json
 import math
-from pathlib import Path
 import statistics
+from pathlib import Path
 
 
 def summarize(root):
+    """Audit paired starting worlds, event-order plan timeliness and adverse breach controls.
+
+    Args:
+        root: Root artifact directory searched for result files.
+
+    Returns:
+        Audited batch summary with per-run and paired evidence.
+    """
     data = json.loads((root / "summary.json").read_text())
     rows = data["runs"]
     plan = data["protocol"]["plan"]
@@ -146,6 +159,11 @@ def summarize(root):
 
 
 def main():
+    """Run the summarize contention diagnostic and write its evidence.
+
+    Returns:
+        None; writes artifacts or exits with a nonzero status on failure.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--batch", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)

@@ -1,3 +1,10 @@
+<!--
+File: docs/EXTENDING.md
+Purpose: Adding assets, gameplay and models.
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+-->
+
 # Adding assets, gameplay and models
 
 Choose the smallest extension point for the change. Simulation modules never import

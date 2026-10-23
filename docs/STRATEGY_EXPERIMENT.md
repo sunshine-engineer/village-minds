@@ -1,3 +1,10 @@
+<!--
+File: docs/STRATEGY_EXPERIMENT.md
+Purpose: Repair strategy and logistics experiment v2.
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+-->
+
 # Repair strategy and logistics experiment v2
 
 > Scope: v2 repair study. Results describe the frozen source identified below,

@@ -2,20 +2,24 @@
 
 Each scenario runs in a fresh interpreter because village configuration is startup-only.
 No models or campaign saves are used. Run python -m village.validation --help.
+
+File: village/validation.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
 """
 
 import argparse
 import csv
-from copy import deepcopy
-from datetime import datetime, timezone
 import hashlib
 import json
-from pathlib import Path
 import re
 import subprocess
 import sys
 import time
 import uuid
+from copy import deepcopy
+from datetime import datetime, timezone
+from pathlib import Path
 
 from .config import load_config, read_json
 
@@ -23,11 +27,23 @@ STRATEGIES = ("independent", "requests", "assigned")
 
 
 def digest(path):
+    """Hash a file for immutable experiment-input verification.
+
+    Args:
+        path: Input/output filesystem path for the described resource.
+
+    Returns:
+        Hexadecimal SHA-256 digest.
+    """
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
 def source_hashes():
-    """Freeze simulation/evaluator inputs; the batch reporting module is separate."""
+    """Freeze simulation/evaluator inputs; the batch reporting module is separate.
+
+    Returns:
+        Relative source-path to digest mapping.
+    """
     package = Path(__file__).parent
     files = [p for p in package.rglob("*.py") if p.name != "validation.py"]
     files += list((package / "data").rglob("*.json"))
@@ -36,6 +52,17 @@ def source_hashes():
 
 
 def read_plan(path):
+    """Load and validate disjoint seeds, scenario capabilities and batch budgets.
+
+    Args:
+        path: Input/output filesystem path for the described resource.
+
+    Returns:
+        Validated plan and resolved scenario-config pairs.
+
+    Raises:
+        ValueError: If the input violates the validation contract described above.
+    """
     path = Path(path).resolve()
     plan = read_json(path)
     required = {
@@ -138,7 +165,18 @@ def read_plan(path):
 
 
 def collect_runs(root, expected_seeds):
-    """Only complete, verified seed/strategy results enter the primary comparison."""
+    """Only complete, verified seed/strategy results enter the primary comparison.
+
+    Args:
+        root: Root artifact directory searched for result files.
+        expected_seeds: Declared seeds permitted in the verified result set.
+
+    Returns:
+        Result rows and validation-problem list pair.
+
+    Raises:
+        ValueError: If the input violates the validation contract described above.
+    """
     rows = []
     problems = []
     for seed in expected_seeds:
@@ -159,13 +197,22 @@ def collect_runs(root, expected_seeds):
                 raise ValueError(f"Capabilities/inference mismatch in {file}")
             if not (row.get("completed_horizon") or row.get("failed")):
                 problems.append(
-                    f'incomplete seed={seed} strategy={strategy}: {row.get("stop_reason")}'
+                    f"incomplete seed={seed} strategy={strategy}: {row.get('stop_reason')}"
                 )
             rows.append(row)
     return rows, problems
 
 
 def summarize(rows, seeds):
+    """Summarize strategy outcomes and within-seed coordination differences.
+
+    Args:
+        rows: Verified run-result records.
+        seeds: Declared deterministic seeds for paired coverage.
+
+    Returns:
+        Aggregate strategies/paired-comparison dictionary.
+    """
     groups = []
     for strategy in STRATEGIES:
         group = [r for r in rows if r["coordination_mode"] == strategy]
@@ -199,6 +246,16 @@ def summarize(rows, seeds):
 
 
 def write_batch_report(output, manifest, scenarios):
+    """Write the frozen matrix manifest and readable outcome tables.
+
+    Args:
+        output: Destination directory or file for generated evidence.
+        manifest: Frozen run protocol and completion metadata.
+        scenarios: Resolved scenario definitions and their result records.
+
+    Returns:
+        None; creates JSON, CSV and Markdown artifacts.
+    """
     result = {"manifest": manifest, "scenarios": scenarios}
     (output / "summary.json").write_text(
         json.dumps(result, indent=2, allow_nan=False) + "\n", encoding="utf-8"
@@ -284,6 +341,11 @@ def write_batch_report(output, manifest, scenarios):
 
 
 def main():
+    """Run the frozen multi-scenario scripted holdout in isolated child processes.
+
+    Returns:
+        None; writes artifacts or exits with a nonzero status on failure.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--plan", default="configs/validation/holdout-v1.json")
     parser.add_argument("--output", help="Override parent output directory")
@@ -337,6 +399,14 @@ def main():
     )
 
     def verify_inputs():
+        """Verify that package source and frozen scenario settings have not changed.
+
+        Returns:
+            None; changed inputs abort the experiment.
+
+        Raises:
+            RuntimeError: If the input violates the validation contract described above.
+        """
         if source_hashes() != frozen or digest(__file__) != manifest["runner_sha256"]:
             raise RuntimeError(
                 "Simulation/evaluation code changed after the protocol was frozen"
@@ -347,7 +417,7 @@ def main():
                     "Frozen scenario configuration changed during validation"
                 )
 
-    print(f'Frozen protocol: {output / "protocol.json"}', flush=True)
+    print(f"Frozen protocol: {output / 'protocol.json'}", flush=True)
     deadline = time.monotonic() + plan["suite_wall_seconds"]
     results = []
     try:
@@ -420,7 +490,7 @@ def main():
                     f"{g['strategy']} {g['survived']}/{g['completed_or_failed']}"
                     for g in scenario["summary"]["strategies"]
                 )
-                + f'; incomplete/missing={sum(g["incomplete_or_missing"] for g in scenario["summary"]["strategies"])}',
+                + f"; incomplete/missing={sum(g['incomplete_or_missing'] for g in scenario['summary']['strategies'])}",
                 flush=True,
             )
             write_batch_report(output, manifest, results)
@@ -455,7 +525,7 @@ def main():
                 )
         manifest["finished_at"] = datetime.now(timezone.utc).isoformat()
         write_batch_report(output, manifest, results)
-    print(f'Report: {output / "report.md"}', flush=True)
+    print(f"Report: {output / 'report.md'}", flush=True)
     if manifest["status"] != "complete":
         raise SystemExit(1)
 
