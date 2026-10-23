@@ -1,3 +1,10 @@
+<!--
+File: docs/REPAIR_PRIORITY_PLANS.md
+Purpose: Temporary repair priorities.
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+-->
+
 # Temporary repair priorities
 
 > Scope: v4 priority study and current planner interface. Results describe the frozen source identified below,

@@ -1,3 +1,8 @@
+# File: .github/workflows/tests.yml
+# Purpose: Cross-platform regression, consistency and isolated package-install checks.
+# Maintainer: sunshine-engineer
+# Modified: 2026-10-23
+
 name: Tests
 on: [push, pull_request]
 permissions:
@@ -15,7 +20,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-      - run: python -m pip install -e .
+      - run: python -m pip install -e ".[dev]"
+      - run: python -m ruff check village scripts tests
+      - run: python -m ruff format --check village scripts tests
+      - run: python scripts/check_consistency.py
       - run: python -m unittest discover -s tests -v
       - run: python -m compileall -q village scripts tests
       - run: python scripts/check_contributor_contracts.py

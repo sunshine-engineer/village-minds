@@ -1,8 +1,21 @@
+"""Command-line entry point for the local village game.
+
+File: village/__main__.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
+
 import argparse
-from .cli import prepare, attach_profile
+
+from .cli import attach_profile, prepare
 
 
 def main():
+    """Launch/resume single-player rendering after startup-only config/profile validation.
+
+    Returns:
+        None; writes artifacts or exits with a nonzero status on failure.
+    """
     parser = argparse.ArgumentParser(description="Village Minds — local AI village")
     settings = prepare(parser)
     parser.add_argument(

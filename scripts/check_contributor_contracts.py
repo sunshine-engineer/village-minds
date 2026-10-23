@@ -1,15 +1,25 @@
-"""Verify packaged action/backend extension contracts without a model or renderer."""
+"""Verify packaged action/backend extension contracts without a model or renderer.
+
+File: scripts/check_contributor_contracts.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
 
 import argparse
 import json
-from pathlib import Path
 import sys
 import tempfile
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 
 def main():
+    """Run the check contributor contracts diagnostic and write its evidence.
+
+    Returns:
+        None; writes artifacts or exits with a nonzero status on failure.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--config", type=Path, default=Path("examples/contributor.json")
@@ -21,10 +31,10 @@ def main():
     from village.config import configure
 
     configure(args.config)
-    from village.world import World
+    import village
     from village.models import request_decision, resolve_profile
     from village.persistence import SaveStore
-    import village
+    from village.world import World
 
     w = World(seed=301)
     giver, receiver = w.villagers[:2]

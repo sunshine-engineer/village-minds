@@ -1,21 +1,45 @@
-"""Default role/needs policy. Register alternative policies through extensions."""
+"""Default role/needs policy. Register alternative policies through extensions.
+
+File: village/policies.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
 
 from .config import get_settings
-from .map_data import LOCATIONS, GATES, GATE_MAX
-from .navigation import distance
+from .map_data import GATE_MAX
+from .map_data import GATES as GATES
+from .map_data import LOCATIONS as LOCATIONS
+from .navigation import distance as distance
 
 P = get_settings()["policy"]
 R = get_settings()["rules"]
 
 
 def default_policy(self, bot):
-    """Fast needs/role policy, always active and also supplied as model advice."""
+    """Fast needs/role policy, always active and also supplied as model advice.
+
+    Args:
+        bot: Villager whose current state or work is being considered.
+
+    Returns:
+        Local intent dictionary, or None when the current order can continue.
+    """
     if not bot.alive or self.failed:
         return None
 
     available = self.available_actions(bot)
 
     def go(place, action, **fields):
+        """Choose a legal service action or movement toward a reachable work point.
+
+        Args:
+            place: Configured service or gate name.
+            action: Registered action name.
+            **fields: Additional structured intent fields.
+
+        Returns:
+            Intent dictionary, or None when the current work order should continue.
+        """
         if fields.get("target", "") in available.get(action, []):
             return {"action": action, **fields}
         if self.time < bot.work_at:

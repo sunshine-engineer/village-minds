@@ -1,3 +1,10 @@
+<!--
+File: docs/CONFIGURATION.md
+Purpose: Configuration.
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+-->
+
 # Configuration
 
 Defaults live in [`village/data/default.json`](../village/data/default.json).
@@ -186,3 +193,13 @@ Gate-level strategy, expiry and the scripted comparator are described in
 `inference_probe.minimum_valid_rate` defaults to 0.95 and is an operational sample
 acceptance threshold; the report retains each response, deadline and missing call.
 The portfolio reliability preset requests ten rounds across all four roles.
+
+
+## Environment and diagnostic helpers
+
+[Project standards](PROJECT_STANDARDS.md) documents every application environment
+variable, shell examples and the comment-only `.env.example`. No dotenv loader is
+used. The autonomy, X11 keyboard and runtime-metadata helpers now accept the same
+`--config`, `--profile`, `--url` and `--model` options as the game. Configuration is
+initialized before runtime imports. The metadata helper targets Ollama's `/api/ps`
+and accepts `--timeout` (five seconds by default); it does not measure model quality.

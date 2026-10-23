@@ -1,0 +1,33 @@
+# File: .editorconfig
+# Purpose: Shared UTF-8, newline and indentation conventions for maintained files.
+# Maintainer: sunshine-engineer
+# Modified: 2026-10-23
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+
+[*.{json,yaml,yml}]
+indent_size = 2
+
+[*.md]
+indent_size = 2
+trim_trailing_whitespace = false
+
+# Frozen evidence and legal text retain their original bytes.
+[docs/results/**]
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+
+[LICENSE]
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset

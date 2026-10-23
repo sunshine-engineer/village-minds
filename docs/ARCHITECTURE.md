@@ -1,3 +1,10 @@
+<!--
+File: docs/ARCHITECTURE.md
+Purpose: Architecture.
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+-->
+
 # Architecture
 
 The host runs Panda3D and authoritative simulation rules. Docker runs an independent

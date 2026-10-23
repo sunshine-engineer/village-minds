@@ -1,3 +1,10 @@
+<!--
+File: docs/EVALUATION.md
+Purpose: AI evaluation and fast-forward.
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+-->
+
 # AI evaluation and fast-forward
 
 Use the headless runner to test survival quickly. It imports no Panda3D, requires no

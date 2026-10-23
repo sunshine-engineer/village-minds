@@ -2,13 +2,18 @@
 
 The village board is a public communication channel, not a simulated hearing event.
 Model text never becomes instructions: only validated action tokens can change it.
+
+File: village/coordination.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
 """
 
+import math
 from collections import Counter
 from copy import deepcopy
-import math
+
 from .config import get_settings
-from .map_data import GATES, GATE_MAX, LOCATIONS
+from .map_data import GATE_MAX, GATES, LOCATIONS
 from .navigation import distance
 
 MODES = ("independent", "requests", "assigned")
@@ -16,7 +21,17 @@ ACTIVE = ("open", "offered", "accepted")
 
 
 class TaskBoard:
+    """Public needs, exclusive task ownership, progress history and temporary repair plans."""
+
     def __init__(self, world):
+        """Initialize TaskBoard and its owned state.
+
+        Args:
+            world: Authoritative simulation world used by this operation.
+
+        Returns:
+            None.
+        """
         self.world = world
         self.settings = get_settings()["coordination"]
         self.mode = self.settings["mode"]
@@ -33,6 +48,17 @@ class TaskBoard:
         self.repair_plan = None
 
     def emit(self, event, task, actor=None, source="task_board"):
+        """Record a structured task transition and its provenance.
+
+        Args:
+            event: Structured event name.
+            task: Task-board job dictionary with kind, target and ownership state.
+            actor: Optional villager attributed to the event.
+            source: Provenance label identifying the caller or decision layer.
+
+        Returns:
+            None; appends task telemetry when enabled.
+        """
         self.counts[event] += 1
         if self.world.decision_log:
             self.world.decision_log.record(
@@ -44,6 +70,11 @@ class TaskBoard:
             )
 
     def living(self):
+        """Find living villagers eligible for automatic coordination.
+
+        Returns:
+            Villagers excluding the player-controlled actor.
+        """
         return [
             v
             for i, v in enumerate(self.world.villagers)
@@ -51,6 +82,11 @@ class TaskBoard:
         ]
 
     def needs(self):
+        """Derive deduplicated food, wood, repair and defence needs from current state.
+
+        Returns:
+            Priority-ordered kind/destination pairs.
+        """
         w, s = self.world, self.settings
         needs = [("defend", gate) for gate in w.gate_threats()]
         needs += [
@@ -65,6 +101,14 @@ class TaskBoard:
         return sorted(needs, key=lambda item: (s["priority"].index(item[0]), item[1]))
 
     def done(self, task):
+        """Check whether a task's resource, repair or defence need is resolved.
+
+        Args:
+            task: Task-board job dictionary with kind, target and ownership state.
+
+        Returns:
+            Whether the task's completion condition currently holds.
+        """
         w = self.world
         kind, target = task["kind"], task["target"]
         if kind == "defend":
@@ -80,6 +124,11 @@ class TaskBoard:
         )
 
     def maintain(self):
+        """Expire jobs, release unavailable owners and close resolved needs.
+
+        Returns:
+            None; updates board lifecycle state.
+        """
         if self.world.time < self.next_maintenance:
             return
         self.next_maintenance = self.world.time + self.settings["maintenance_seconds"]
@@ -122,12 +171,28 @@ class TaskBoard:
         }
 
     def busy(self, name):
+        """Check whether a villager already owns an offer or accepted task.
+
+        Args:
+            name: Registered identity or name selected by the caller.
+
+        Returns:
+            Whether active ownership exists for the supplied name.
+        """
         return any(
             t["status"] in ("offered", "accepted") and t["assigned_to"] == name
             for t in self.tasks
         )
 
     def ready(self, bot):
+        """Check local needs, life and possession before assigning work.
+
+        Args:
+            bot: Villager whose current state or work is being considered.
+
+        Returns:
+            Whether the villager can accept coordinated work now.
+        """
         p = get_settings()["policy"]
         return (
             bot in self.living()
@@ -137,6 +202,14 @@ class TaskBoard:
         )
 
     def actions(self, bot):
+        """Expose currently legal structured coordination action targets.
+
+        Args:
+            bot: Villager whose current state or work is being considered.
+
+        Returns:
+            Action-name to legal-target mapping.
+        """
         if not self.settings["enabled"] or not bot.alive or self.world.failed:
             return {}
         result = {}
@@ -185,6 +258,14 @@ class TaskBoard:
                 people_by_name = {v.name: v for v in self.living()}
 
                 def offer_score(token):
+                    """Order an offered task by category, helper cost and stable token.
+
+                    Args:
+                        token: Current session token or structured task-selection token.
+
+                    Returns:
+                        Deterministic sorting tuple.
+                    """
                     identity, _, name = token.partition(":")
                     task = tasks_by_id[identity]
                     return (
@@ -204,6 +285,15 @@ class TaskBoard:
         return result
 
     def execute(self, bot, decision):
+        """Validate and apply a help request, offer, claim or release intent.
+
+        Args:
+            bot: Villager whose current state or work is being considered.
+            decision: Proposed structured action with optional target/dialogue fields.
+
+        Returns:
+            Whether the board transition was accepted.
+        """
         action, target = decision.get("action"), decision.get("target", "")
         if not isinstance(target, str) or target not in self.actions(bot).get(
             action, []
@@ -283,6 +373,14 @@ class TaskBoard:
         return True
 
     def plan_priority(self, task):
+        """Rank a repair task using a valid, unexpired gate-priority plan.
+
+        Args:
+            task: Task-board job dictionary with kind, target and ownership state.
+
+        Returns:
+            Priority rank; lower values are preferred.
+        """
         plan = self.repair_plan
         strategy = get_settings()["ai"]["repair_strategy"]
         return (
@@ -302,6 +400,15 @@ class TaskBoard:
         )
 
     def install_repair_plan(self, bot, gate):
+        """Install a bounded gate preference without preempting task owners.
+
+        Args:
+            bot: Villager whose current state or work is being considered.
+            gate: Configured cardinal gate name.
+
+        Returns:
+            Whether the plan was valid and installed.
+        """
         from .allocation import priority_candidates
 
         strategy = get_settings()["ai"]["repair_strategy"]
@@ -319,6 +426,15 @@ class TaskBoard:
         return True
 
     def score(self, task, bot):
+        """Price a helper for a task using configured role/distance or resource-aware costs.
+
+        Args:
+            task: Task-board job dictionary with kind, target and ownership state.
+            bot: Villager whose current state or work is being considered.
+
+        Returns:
+            Numeric cost; infinity represents unreachable work.
+        """
         if self.settings["resource_aware"]["enabled"] and task["kind"] == "repair":
             from .allocation import repair_features
 
@@ -336,6 +452,11 @@ class TaskBoard:
         )
 
     def coordinate(self):
+        """Post current needs and offer assignments for the selected automatic strategy.
+
+        Returns:
+            None; independent mode leaves explicit actions available.
+        """
         self.maintain()
         w = self.world
         if (
@@ -398,6 +519,15 @@ class TaskBoard:
                     )
 
     def release_owner(self, bot, reason):
+        """Release a villager's owned jobs and strategic leases.
+
+        Args:
+            bot: Villager whose current state or work is being considered.
+            reason: Recorded explanation for the lifecycle transition.
+
+        Returns:
+            None; records the supplied release reason.
+        """
         for task in self.tasks:
             if (
                 task["status"] in ("offered", "accepted")
@@ -422,6 +552,16 @@ class TaskBoard:
                     )
 
     def offer_repair(self, proposer, gate, recipient):
+        """Offer a specific repair while rechecking ownership and proposer constraints.
+
+        Args:
+            proposer: Optional villager proposing a strategic repair.
+            gate: Configured cardinal gate name.
+            recipient: Name of the proposed task recipient.
+
+        Returns:
+            Whether the repair offer was installed.
+        """
         from .allocation import can_handoff
 
         bot = next((v for v in self.living() if v.name == recipient), None)
@@ -467,6 +607,11 @@ class TaskBoard:
         return True
 
     def rebalance_repairs(self):
+        """Reassign eligible lower-priority supply work when repair handoffs are enabled.
+
+        Returns:
+            None; preserves active guards and existing repair/defence work.
+        """
         from .allocation import can_handoff
 
         w = self.world
@@ -503,7 +648,14 @@ class TaskBoard:
             self.offer_repair(proposer, task["target"], best.name)
 
     def policy(self, bot):
-        """Return a task intent; urgent personal needs still belong to normal policy."""
+        """Return a task intent; urgent personal needs still belong to normal policy.
+
+        Args:
+            bot: Villager whose current state or work is being considered.
+
+        Returns:
+            Intent dictionary, False to keep work, or None when no task policy applies.
+        """
         if not self.settings["enabled"] or not self.ready(bot):
             return None
         w = self.world
@@ -554,6 +706,16 @@ class TaskBoard:
         kind, target = task["kind"], task["target"]
 
         def go(place, action, target=""):
+            """Choose a legal work action or movement toward its service point.
+
+            Args:
+                place: Configured service or gate name.
+                action: Registered action name.
+                target: Action target token or destination.
+
+            Returns:
+                Intent dictionary, or False while already performing the required work.
+            """
             if target in actions.get(action, []):
                 return {"action": action, **({"target": target} if target else {})}
             if bot.path and bot.action == f"walking to {place}":
@@ -586,6 +748,16 @@ class TaskBoard:
         return go("farm", "farm") if w.crop_destination(bot) is not None else False
 
     def note_progress(self, bot, decision, *, target_gate=None):
+        """Attribute relevant work to an accepted task separately from mere acknowledgement.
+
+        Args:
+            bot: Villager whose current state or work is being considered.
+            decision: Proposed structured action with optional target/dialogue fields.
+            target_gate: Optional gate identity inferred from the accepted work.
+
+        Returns:
+            None; may update productive-progress timestamps and counters.
+        """
         for task in self.tasks:
             if (
                 task["status"] != "accepted"
@@ -613,6 +785,11 @@ class TaskBoard:
                 self.emit("progress", task, bot.name)
 
     def summary(self):
+        """Summarize task mode, counts, active work and bounded response history.
+
+        Returns:
+            JSON-compatible summary dictionary.
+        """
         return dict(
             mode=self.mode,
             counts=dict(self.counts),
@@ -636,9 +813,19 @@ class TaskBoard:
         )
 
     def observe(self):
+        """Expose active public tasks without handing out mutable board state.
+
+        Returns:
+            Deep copy of active task dictionaries.
+        """
         return deepcopy([t for t in self.tasks if t["status"] in ACTIVE])
 
     def snapshot(self):
+        """Capture board state, leases, plans, counters and response histories for persistence.
+
+        Returns:
+            Independent JSON-compatible state dictionary.
+        """
         return deepcopy(
             dict(
                 tasks=self.tasks,
@@ -655,6 +842,17 @@ class TaskBoard:
 
     def restore(self, saved):
         # Strictly validate data before installing state; never execute saved text.
+        """Validate and restore board identities, lifecycle, ownership and planning state.
+
+        Args:
+            saved: Saved JSON-compatible state to validate before use.
+
+        Returns:
+            None; replaces board state only after validation.
+
+        Raises:
+            ValueError: If the input violates the validation contract described above.
+        """
         saved = deepcopy(saved)
         if isinstance(saved, dict):
             saved.setdefault("strategy_leases", {})
@@ -686,6 +884,14 @@ class TaskBoard:
         )
 
         def number(value):
+            """Check the bounded finite number contract used by saved task state.
+
+            Args:
+                value: Value to validate, convert or publish as described above.
+
+            Returns:
+                Whether the value is a valid nonnegative task timestamp or counter.
+            """
             return (
                 not isinstance(value, bool)
                 and isinstance(value, (int, float))

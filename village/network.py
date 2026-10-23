@@ -1,4 +1,9 @@
-"""Bounded HTTP transport and one background client worker; no rendering imports."""
+"""Bounded HTTP transport and one background client worker; no rendering imports.
+
+File: village/network.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
 
 import json
 import queue
@@ -7,18 +12,44 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from .config import get_settings, fingerprint
+
+from .config import fingerprint, get_settings
 from .server import PROTOCOL
 
 
 class RemoteError(Exception):
+    """HTTP failure retaining status and server error text for client recovery."""
+
     def __init__(self, status, message):
+        """Initialize RemoteError and its owned state.
+
+        Args:
+            status: HTTP status code.
+            message: Server error description retained for client diagnostics.
+
+        Returns:
+            None.
+        """
         super().__init__(message)
         self.status = status
 
 
 class RemoteSession:
+    """Bounded background HTTP session; the renderer consumes snapshots without physics."""
+
     def __init__(self, url, *, autostart=True):
+        """Initialize RemoteSession and its owned state.
+
+        Args:
+            url: Configured model endpoint, or loopback server URL for network sessions.
+            autostart: Whether to start the background session worker immediately.
+
+        Returns:
+            None.
+
+        Raises:
+            ValueError: If the input violates the validation contract described above.
+        """
         parsed = urllib.parse.urlparse(url)
         if (
             parsed.scheme != "http"
@@ -52,16 +83,43 @@ class RemoteSession:
 
     @property
     def motion(self):
+        """Read or publish normalized movement axes and wake the bounded worker on changes.
+
+        Returns:
+            Current axis pair for the getter; None for the setter.
+        """
         return self._motion
 
     @motion.setter
     def motion(self, value):
+        """Read or publish normalized movement axes and wake the bounded worker on changes.
+
+        Args:
+            value: Value to validate, convert or publish as described above.
+
+        Returns:
+            Current axis pair for the getter; None for the setter.
+        """
         changed = getattr(self, "_motion", None) != value
         self._motion = value
         if changed and self.settings["wake_on_input"]:
             self.wake.set()
 
     def request(self, route, body=None):
+        """Send one bounded loopback HTTP request with the current session token.
+
+        Args:
+            route: Allowed HTTP route.
+            body: Parsed JSON request payload.
+
+        Returns:
+            Decoded response dictionary.
+
+        Raises:
+            RemoteError: If the server responds with an HTTP failure.
+            ValueError: If the snapshot exceeds the configured size or is invalid JSON.
+            OSError: If a connection or socket operation fails.
+        """
         headers = {"Content-Type": "application/json"}
         if self.token:
             headers["Authorization"] = "Bearer " + self.token
@@ -84,6 +142,15 @@ class RemoteSession:
             return json.loads(raw)
 
     def connect(self):
+        """Acquire/resume a session and verify protocol and gameplay compatibility.
+
+        Returns:
+            Stamped initial authoritative snapshot.
+
+        Raises:
+            ValueError: If protocol or world fingerprints differ.
+            RemoteError: If the server refuses session acquisition.
+        """
         try:
             state = self.request("/session", {})
         except RemoteError as exc:
@@ -110,6 +177,14 @@ class RemoteSession:
         return self.stamp(state)
 
     def stamp(self, state):
+        """Add local monotonic receive time and connection epoch to a snapshot.
+
+        Args:
+            state: Validated snapshot to publish to the renderer.
+
+        Returns:
+            New snapshot dictionary with client-only metadata.
+        """
         return dict(
             state,
             _client_received_at=time.monotonic(),
@@ -117,6 +192,17 @@ class RemoteSession:
         )
 
     def submit(self, command):
+        """Queue an input command without blocking the rendering thread.
+
+        Args:
+            command: Sequenced player input command dictionary.
+
+        Returns:
+            Whether the bounded queue accepted the command.
+
+        Example:
+            session.submit({'kind': 'takeover', 'index': 0})
+        """
         if not self.connected:
             return False
         try:
@@ -129,6 +215,14 @@ class RemoteSession:
             return False
 
     def command(self, command):
+        """Send a sequenced command, using post-tick exchange for configured movement.
+
+        Args:
+            command: Sequenced player input command dictionary.
+
+        Returns:
+            Server acknowledgement, optionally containing an authoritative snapshot.
+        """
         self.sequence += 1
         route = (
             "/exchange"
@@ -138,6 +232,11 @@ class RemoteSession:
         return self.request(route, dict(sequence=self.sequence, command=command))
 
     def poll(self):
+        """Consume the newest published state without blocking render input.
+
+        Returns:
+            Latest pending snapshot, or None if no newer state is available.
+        """
         try:
             state = self.frames.get_nowait()
         except queue.Empty:
@@ -145,6 +244,14 @@ class RemoteSession:
         return state
 
     def publish(self, state):
+        """Replace the pending render snapshot under the client lock.
+
+        Args:
+            state: Validated snapshot to publish to the renderer.
+
+        Returns:
+            None; keeps only the newest state.
+        """
         try:
             self.frames.get_nowait()
         except queue.Empty:
@@ -154,6 +261,11 @@ class RemoteSession:
         self.frames.put_nowait(state)
 
     def _worker(self):
+        """Exchange movement/state and reconnect without mutating authoritative gameplay.
+
+        Returns:
+            None; runs until the stop event is signaled.
+        """
         reconnect = False
         while not self.stop.is_set():
             self.wake.clear()
@@ -215,6 +327,11 @@ class RemoteSession:
         self.connected = False
 
     def close(self):
+        """Stop the worker and best-effort release this client's session.
+
+        Returns:
+            None; shutdown waits are bounded.
+        """
         self.motion = (0.0, 0.0)
         self.stop.set()
         self.wake.set()

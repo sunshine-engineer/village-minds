@@ -1,3 +1,10 @@
+<!--
+File: docs/HELD_OUT_VALIDATION.md
+Purpose: Held-out coordination validation.
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+-->
+
 # Held-out coordination validation
 
 > Scope: v1 scripted holdout. Results describe the frozen source identified below,

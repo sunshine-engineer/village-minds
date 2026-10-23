@@ -1,18 +1,36 @@
-"""Bounded per-role repair-allocation diagnostics on explicit controlled fixtures."""
+"""Bounded per-role repair-allocation diagnostics on explicit controlled fixtures.
 
-from copy import deepcopy
+File: village/inference_probe.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
+
+import argparse
+import json
+import math
+import statistics
+import time
+import uuid
 from datetime import datetime, timezone
-import argparse, json, time, uuid, statistics, math
 from pathlib import Path
-from .cli import prepare, attach_profile
+
+from .cli import attach_profile, prepare
 from .config import get_settings
 from .inference import bounded_decision
 
 
 def fixture(role):
-    from .world import World
-    from .entities import Monster
+    """Create a controlled damaged-gate world for one requested proposer role.
+
+    Args:
+        role: Configured villager role name.
+
+    Returns:
+        World, proposer and compact observation tuple.
+    """
     from .allocation import strategy_observation
+    from .entities import Monster
+    from .world import World
 
     settings = get_settings()["inference_probe"]
     w = World(seed=settings["seed"])
@@ -29,6 +47,11 @@ def fixture(role):
 
 
 def main():
+    """Measure per-role schema-valid responses within strict request and suite deadlines.
+
+    Returns:
+        None; writes artifacts or exits with a nonzero status on failure.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     settings = prepare(parser)
     parser.add_argument("--output", default="artifacts/inference")
@@ -46,8 +69,11 @@ def main():
     (root / "config.json").write_text(json.dumps(settings, indent=2))
     options = settings["inference_probe"]
     deadline = time.monotonic() + options["suite_seconds"]
+    import os
+    import platform
+    import sys
+
     from .validation import source_hashes
-    import platform, os, sys
 
     frozen_sources = source_hashes()
     rows = []
@@ -142,7 +168,7 @@ def main():
         )
         + "\n"
     )
-    print(f'Report: {root / "summary.json"}', flush=True)
+    print(f"Report: {root / 'summary.json'}", flush=True)
     if not passed:
         raise SystemExit(1)
 

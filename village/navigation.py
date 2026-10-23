@@ -1,15 +1,39 @@
-"""Grid navigation shared by simulation and controllers."""
+"""Grid navigation shared by simulation and controllers.
 
-import math
+File: village/navigation.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
+
 import heapq
-from .map_data import LIMIT, BUILDINGS, W
+import math
+
+from .map_data import BUILDINGS, LIMIT, W
 
 
 def distance(a, b):
+    """Measure Euclidean distance between two planar positions.
+
+    Args:
+        a: First planar point or RGB endpoint.
+        b: Second planar point or RGB endpoint.
+
+    Returns:
+        Distance in world units.
+    """
     return math.hypot(a[0] - b[0], a[1] - b[1])
 
 
 def walkable(x, y):
+    """Test map bounds, wall openings and configured building clearance.
+
+    Args:
+        x: Planar x coordinate.
+        y: Planar y coordinate.
+
+    Returns:
+        Whether the grid position can be occupied.
+    """
     at_wall = (
         abs(abs(x) - W["wall_coordinate"]) < W["wall_half_thickness"]
         and abs(y) > W["gate_half_opening"]
@@ -32,7 +56,15 @@ def walkable(x, y):
 
 
 def pathfind(start, goal):
-    """Four-neighbor A* on a one-unit grid, avoiding houses."""
+    """Four-neighbor A* on a one-unit grid, avoiding houses.
+
+    Args:
+        start: Initial planar world position.
+        goal: Requested planar destination.
+
+    Returns:
+        Route excluding the start; empty for an unreachable or already-reached goal.
+    """
     exact_start = tuple(start)
     start = tuple(round(v) for v in start)
     goal = tuple(round(v) for v in goal)
@@ -64,6 +96,15 @@ def work_point(start, center, radius, offset=(0, 0)):
 
     Prefer a personal offset to reduce crowding, then nearby alternatives. A plot
     center may be blocked by a building; working beside it can still be legal.
+
+    Args:
+        start: Initial planar world position.
+        center: Center of the action work area.
+        radius: Strict action work radius in world units.
+        offset: Preferred personal planar offset from the service center.
+
+    Returns:
+        Work position, or None when no legal reachable cell exists.
     """
     preferred = tuple(round(v + delta) for v, delta in zip(center, offset))
     candidates = [

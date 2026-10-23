@@ -1,23 +1,35 @@
-"""Authoritative simulation, bounded commands, disconnect and real HTTP checks."""
+"""Authoritative simulation, bounded commands, disconnect and real HTTP checks.
 
-from copy import deepcopy
-import json
-from pathlib import Path
+File: tests/test_server.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
+
 import subprocess
 import sys
 import tempfile
 import threading
 import time
 import unittest
-from village.config import get_settings
-from village.world import World
+from copy import deepcopy
+from pathlib import Path
+
 from village.brains import BrainScheduler
+from village.config import get_settings
+from village.network import RemoteError, RemoteSession
 from village.server import VillageServer, make_http_server
-from village.network import RemoteSession, RemoteError
+from village.world import World
 
 
 class ServerTests(unittest.TestCase):
+    """Regression cases for server."""
+
     def setUp(self):
+        """Create isolated state for each regression case.
+
+        Returns:
+            None.
+        """
         self.world = World(seed=301)
         self.brains = BrainScheduler(self.world, "", "", demo=True)
         self.now = 10.0
@@ -26,6 +38,15 @@ class ServerTests(unittest.TestCase):
         self.token = self.server.handle("/session", None, {})[1]["token"]
 
     def command(self, kind, **fields):
+        """Send the next sequenced command through the test authority.
+
+        Args:
+            kind: Entity or request category used by the owning operation.
+            **fields: Additional structured intent fields.
+
+        Returns:
+            HTTP status and acknowledgement pair.
+        """
         return self.server.handle(
             "/command",
             self.token,
@@ -33,6 +54,11 @@ class ServerTests(unittest.TestCase):
         )
 
     def test_exclusive_session_and_forged_token(self):
+        """Verify exclusive session and forged token.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         self.assertEqual(self.server.handle("/session", None, {})[0], 409)
         self.assertEqual(
             self.server.handle(
@@ -47,6 +73,11 @@ class ServerTests(unittest.TestCase):
         self.assertEqual(self.world.controlled, 0)
 
     def test_duplicate_command_is_idempotent(self):
+        """Verify duplicate command is idempotent.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         self.command("takeover", index=0)
         body = dict(sequence=2, command=dict(kind="say", text="Hello"))
         a = self.server.handle("/command", self.token, body)
@@ -64,6 +95,11 @@ class ServerTests(unittest.TestCase):
         )
 
     def test_movement_uses_server_time_and_expires(self):
+        """Verify movement uses server time and expires.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         self.command("takeover", index=0)
         self.assertEqual(self.command("move", dx=float("nan"), dy=0)[0], 400)
         before = self.world.villagers[0].position
@@ -81,6 +117,11 @@ class ServerTests(unittest.TestCase):
         self.assertEqual(self.world.villagers[0].position, after)
 
     def test_disconnect_and_lease_expiry_restore_autonomy(self):
+        """Verify disconnect and lease expiry restore autonomy.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         self.command("takeover", index=0)
         self.now += self.server.settings["lease_seconds"] + 0.01
         self.server.step(0.05)
@@ -90,6 +131,11 @@ class ServerTests(unittest.TestCase):
         self.assertGreater(self.brains.local_decisions, 0)
 
     def test_invalid_action_and_possession_cannot_mutate_world(self):
+        """Verify invalid action and possession cannot mutate world.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         self.assertEqual(self.command("takeover", index=True)[0], 400)
         self.assertEqual(self.command("action", action="harvest", target="")[0], 409)
         self.command("takeover", index=0)
@@ -101,7 +147,14 @@ class ServerTests(unittest.TestCase):
 
 
 class HTTPTests(unittest.TestCase):
+    """Regression cases for server."""
+
     def setUp(self):
+        """Create isolated state for each regression case.
+
+        Returns:
+            None.
+        """
         world = World(seed=301)
         self.runtime = VillageServer(world, BrainScheduler(world, "", "", demo=True))
         self.http = make_http_server(self.runtime, "127.0.0.1", 0)
@@ -111,6 +164,11 @@ class HTTPTests(unittest.TestCase):
         self.worker.start()
 
         def simulate():
+            """Advance the fixture authority until its test stop signal is set.
+
+            Returns:
+                None; performs the side effects described above.
+            """
             while not self.stop.is_set():
                 self.runtime.step(0.02)
                 self.stop.wait(0.02)
@@ -119,6 +177,11 @@ class HTTPTests(unittest.TestCase):
         self.sim.start()
 
     def tearDown(self):
+        """Restore state and release resources after each regression case.
+
+        Returns:
+            None.
+        """
         self.stop.set()
         self.sim.join(timeout=3)
         self.http.shutdown()
@@ -126,6 +189,11 @@ class HTTPTests(unittest.TestCase):
         self.worker.join(timeout=3)
 
     def test_http_takeover_reconnect_and_continuous_world(self):
+        """Verify http takeover reconnect and continuous world.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         session = RemoteSession(self.url, autostart=False)
         try:
             with self.assertRaises(RemoteError):
@@ -148,6 +216,11 @@ class HTTPTests(unittest.TestCase):
             session.close()
 
     def test_background_client_receives_snapshots_and_releases_on_close(self):
+        """Verify background client receives snapshots and releases on close.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         session = RemoteSession(self.url)
         try:
             self.assertTrue(session.submit(dict(kind="takeover", index=0)))
@@ -172,6 +245,11 @@ class HTTPTests(unittest.TestCase):
             other.close()
 
     def test_release_command_does_not_disconnect_from_stale_control_snapshot(self):
+        """Verify release command does not disconnect from stale control snapshot.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         session = RemoteSession(self.url)
         try:
             session.submit(dict(kind="takeover", index=0))
@@ -200,6 +278,11 @@ class HTTPTests(unittest.TestCase):
             session.close()
 
     def test_incompatible_client_is_rejected_and_releases_session(self):
+        """Verify incompatible client is rejected and releases session.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         from unittest.mock import patch
 
         with patch("village.network.fingerprint", return_value="wrong"):
@@ -209,7 +292,13 @@ class HTTPTests(unittest.TestCase):
         session.close()
 
     def test_malformed_and_oversized_requests_do_not_claim_session(self):
-        import urllib.request, urllib.error
+        """Verify malformed and oversized requests do not claim session.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
+        import urllib.error
+        import urllib.request
 
         for body in [
             b"[]",
@@ -226,7 +315,14 @@ class HTTPTests(unittest.TestCase):
 
 
 class ServerProcessTests(unittest.TestCase):
+    """Regression cases for server."""
+
     def test_server_restart_resumes_saved_time_and_memories(self):
+        """Verify server restart resumes saved time and memories.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         from village.persistence import SaveStore
 
         with tempfile.TemporaryDirectory() as d:
@@ -257,6 +353,11 @@ class ServerProcessTests(unittest.TestCase):
             self.assertIsNone(final.controlled)
 
     def test_new_attempt_archives_existing_server_save(self):
+        """Verify new attempt archives existing server save.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         from village.persistence import SaveStore
 
         with tempfile.TemporaryDirectory() as d:

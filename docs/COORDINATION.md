@@ -1,3 +1,10 @@
+<!--
+File: docs/COORDINATION.md
+Purpose: Help requests and task assignments.
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+-->
+
 # Help requests and task assignments
 
 Example: a worker sees insufficient shared wood and posts `wood:storehouse`. An elder offers that request to a villager. The recipient accepts, collects wood, delivers it, and closes the request when the shared stock reaches the configured goal. Food, repair and defense requests follow the same structure.

@@ -1,12 +1,16 @@
 """Render a temporary custom model and exercise configured plugin input/save hooks.
 
 Uses Panda3D messenger dispatch, not OS keyboard events or human playtesting.
+
+File: scripts/check_extensions.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
 """
 
 import json
-from pathlib import Path
 import sys
 import tempfile
+from pathlib import Path
 from types import SimpleNamespace
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -14,6 +18,11 @@ sys.path.insert(0, str(ROOT))
 
 
 def main():
+    """Run the check extensions diagnostic and write its evidence.
+
+    Returns:
+        None; writes artifacts or exits with a nonzero status on failure.
+    """
     artifacts = ROOT / "artifacts"
     artifacts.mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory(dir=artifacts) as directory:

@@ -1,3 +1,10 @@
+<!--
+File: docs/DOCUMENTATION_AUDIT.md
+Purpose: Documentation handover audit — 22 October 2026.
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+-->
+
 # Documentation handover audit — 22 October 2026
 
 The audit covers all root Markdown guides and every top-level `docs/*.md` guide:

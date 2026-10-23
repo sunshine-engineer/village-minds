@@ -1,30 +1,50 @@
-"""World lifecycle, perception, movement and validated action dispatch."""
+"""World lifecycle, perception, movement and validated action dispatch.
 
-from collections import deque
+File: village/world.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
+
 import math
 import random
+from collections import deque
+
 from .config import get_settings
+from .entities import Crop, Villager
+from .entities import Monster as Monster
+from .extensions import load_extensions
 from .map_data import (
     CAST,
-    LOCATIONS,
-    GATES,
-    GATE_MAX,
-    SIGHT,
-    HEARING,
     CROP_GROW_SECONDS,
+    GATE_MAX,
+    GATES,
+    HEARING,
+    LOCATIONS,
+    SIGHT,
 )
-from .entities import Villager, Crop, Monster
 from .navigation import distance, pathfind, walkable, work_point
-from .survival import SurvivalRules
 from .policies import default_policy
-from .extensions import load_extensions
+from .survival import SurvivalRules
 
 S = get_settings()
 R, P, W = S["rules"], S["policy"], S["world"]
 
 
 class World(SurvivalRules):
+    """Authoritative village state with validated intents, perception and movement."""
+
     def __init__(self, seed=None, campaign=None, extensions=None, decision_log=None):
+        """Initialize World and its owned state.
+
+        Args:
+            seed: Nonnegative deterministic world/randomization seed.
+            campaign: Optional retained attempt/failure history.
+            extensions: Optional trusted extension registry.
+            decision_log: Optional bounded telemetry sink.
+
+        Returns:
+            None.
+        """
         self.decision_log = decision_log
         self._movement_log_at = 0.0
         self.extensions = extensions if extensions is not None else load_extensions()
@@ -60,10 +80,26 @@ class World(SurvivalRules):
         )
 
     def log(self, text):
+        """Append a timestamped event to bounded village history.
+
+        Args:
+            text: Dialogue or event text to validate and publish.
+
+        Returns:
+            None.
+        """
         self.events.append(text)
 
     def possess(self, index):
         # Invalidate all in-flight decisions across both takeover and release.
+        """Change player ownership and invalidate affected pending model orders.
+
+        Args:
+            index: Villager roster index selected by the caller.
+
+        Returns:
+            None; index=None releases to observer mode. Callers must validate roster bounds.
+        """
         for bot in self.villagers:
             bot.revision += 1
         if self.controlled is not None:
@@ -88,6 +124,14 @@ class World(SurvivalRules):
             self.log("Observer mode: all villagers are autonomous.")
 
     def observe(self, bot):
+        """Build role, surroundings, legal-action, memory and public-task context for a villager.
+
+        Args:
+            bot: Villager whose current state or work is being considered.
+
+        Returns:
+            Observation dictionary; no executable code or mutable world object is exposed.
+        """
         return {
             "name": bot.name,
             "role": bot.role,
@@ -169,6 +213,17 @@ class World(SurvivalRules):
         }
 
     def say(self, bot, text, target=None, *, source="system"):
+        """Publish bounded dialogue to nearby listeners and append conversational memory.
+
+        Args:
+            bot: Villager whose current state or work is being considered.
+            text: Dialogue or event text to validate and publish.
+            target: Action target token or destination.
+            source: Provenance label identifying the caller or decision layer.
+
+        Returns:
+            None; records speech provenance when telemetry is enabled.
+        """
         text = " ".join(str(text).split())[: S["memory"]["dialogue_chars"]]
         if not text or not bot.alive:
             return
@@ -194,14 +249,25 @@ class World(SurvivalRules):
     def apply(
         self, bot, decision, *, source="external", request_id=None, observation=None
     ):
+        """Apply a proposed intent and record acceptance with compact before/after state.
+
+        Args:
+            bot: Villager whose current state or work is being considered.
+            decision: Proposed structured action with optional target/dialogue fields.
+            source: Provenance label identifying the caller or decision layer.
+            request_id: Optional correlation identifier for decision telemetry.
+            observation: Request-time context containing legal choices and relevant world state.
+
+        Returns:
+            Whether current-state validation accepted the intent.
+        """
         if self.decision_log is None:
             accepted = self._apply(bot, decision)
             if accepted:
                 self.task_board.note_progress(bot, decision)
             return accepted
-        from .telemetry import state_summary
-
         from .logistics import delivery_reason
+        from .telemetry import state_summary
 
         delivery = (
             delivery_reason(self, bot)
@@ -243,7 +309,15 @@ class World(SurvivalRules):
         return accepted
 
     def _apply(self, bot, decision):
-        """Validate model intents against current state, never execute model code."""
+        """Validate model intents against current state, never execute model code.
+
+        Args:
+            bot: Villager whose current state or work is being considered.
+            decision: Proposed structured action with optional target/dialogue fields.
+
+        Returns:
+            Whether a built-in or registered action succeeded.
+        """
         if self.failed or not bot.alive or not isinstance(decision, dict):
             return False
         action = decision.get("action")
@@ -367,6 +441,16 @@ class World(SurvivalRules):
         return True
 
     def move_player(self, dx, dy, dt):
+        """Move the possessed living villager using bounded direction and collision checks.
+
+        Args:
+            dx: Horizontal movement axis; server input is bounded to [-1, 1].
+            dy: Vertical movement axis; server input is bounded to [-1, 1].
+            dt: Elapsed simulation seconds; rendering overrides receive real frame seconds.
+
+        Returns:
+            None; uses caller-supplied elapsed time.
+        """
         if self.controlled is None or self.failed:
             return
         bot = self.villagers[self.controlled]
@@ -396,6 +480,14 @@ class World(SurvivalRules):
             )
 
     def tick(self, dt):
+        """Advance survival, registered systems and queued movement for one simulation step.
+
+        Args:
+            dt: Elapsed simulation seconds; rendering overrides receive real frame seconds.
+
+        Returns:
+            None; a failed world remains frozen.
+        """
         if self.failed:
             return
         dt = max(0, min(dt, S["runtime"]["max_step_seconds"]))
@@ -444,7 +536,15 @@ class World(SurvivalRules):
                 )
 
     def destination(self, bot, place):
-        """Personal work slots reduce crowding at shared destinations."""
+        """Personal work slots reduce crowding at shared destinations.
+
+        Args:
+            bot: Villager whose current state or work is being considered.
+            place: Configured service or gate name.
+
+        Returns:
+            Planar destination tuple.
+        """
         if place == "farm":
             point = self.crop_destination(bot)
             if point is not None:
@@ -457,6 +557,14 @@ class World(SurvivalRules):
         return point if walkable(*point) else (x, y)
 
     def fallback(self, bot):
+        """Select urgent deliveries, owned task work or the role's default policy.
+
+        Args:
+            bot: Villager whose current state or work is being considered.
+
+        Returns:
+            Intent dictionary, False to keep task work, or None when idle.
+        """
         if self.failed or not bot.alive:
             return None
         from .logistics import delivery_intent
@@ -475,6 +583,14 @@ class World(SurvivalRules):
         return policy(self, bot)
 
     def role_index(self, bot):
+        """Find this actor's stable index among villagers sharing its role.
+
+        Args:
+            bot: Villager whose current state or work is being considered.
+
+        Returns:
+            Zero-based role-local index.
+        """
         return next(
             i
             for i, v in enumerate(v for v in self.villagers if v.role == bot.role)
@@ -482,7 +598,14 @@ class World(SurvivalRules):
         )
 
     def crop_destination(self, bot):
-        """Choose reachable work beside a ripe/empty plot, not just the farm sign."""
+        """Choose reachable work beside a ripe/empty plot, not just the farm sign.
+
+        Args:
+            bot: Villager whose current state or work is being considered.
+
+        Returns:
+            Planar position, or None when no useful crop work point exists.
+        """
         index = next(i for i, v in enumerate(self.villagers) if v is bot)
         offsets = W["work_offsets"]
         offset = offsets[index % len(offsets)]

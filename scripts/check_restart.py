@@ -1,12 +1,18 @@
-"""Verify actual CLI startup/normal exit saving across two temporary game processes."""
+"""Verify actual CLI startup/normal exit saving across two temporary game processes.
+
+File: scripts/check_restart.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
+
 import json
-from pathlib import Path
 import subprocess
 import sys
 import tempfile
+from pathlib import Path
 
-ROOT=Path(__file__).resolve().parents[1]
-CHILD='''
+ROOT = Path(__file__).resolve().parents[1]
+CHILD = """
 import sys
 from village.game import VillageGame
 from village.__main__ import main
@@ -29,27 +35,41 @@ def checked_run(self):
 VillageGame.run=checked_run
 sys.argv=['village','--demo','--save-path',path]
 main()
-'''
+"""
 
 
 def main():
-    output=ROOT/'artifacts'
+    """Run the check restart diagnostic and write its evidence.
+
+    Returns:
+        None; writes artifacts or exits with a nonzero status on failure.
+    """
+    output = ROOT / "artifacts"
     output.mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory(dir=output) as directory:
-        path=Path(directory)/'restart.json'
-        for mode in ('seed','resume'):
-            result=subprocess.run([sys.executable,'-c',CHILD,mode,str(path)],cwd=ROOT,
-                                  text=True,capture_output=True,timeout=30)
-            print(result.stdout,flush=True)
+        path = Path(directory) / "restart.json"
+        for mode in ("seed", "resume"):
+            result = subprocess.run(
+                [sys.executable, "-c", CHILD, mode, str(path)],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                timeout=30,
+            )
+            print(result.stdout, flush=True)
             if result.returncode:
                 raise RuntimeError(result.stderr)
-            assert path.exists(), 'Normal exit did not save'
-        report={'passed':['CLI normal exit saves changed state',
-                          'next CLI launch restores shared food, village health, and dialogue memory'],
-                'method':'two actual game processes with scheduled normal userExit; isolated temporary save'}
-        (output/'restart-check.json').write_text(json.dumps(report,indent=2))
-        print(json.dumps(report,indent=2),flush=True)
+            assert path.exists(), "Normal exit did not save"
+        report = {
+            "passed": [
+                "CLI normal exit saves changed state",
+                "next CLI launch restores shared food, village health, and dialogue memory",
+            ],
+            "method": "two actual game processes with scheduled normal userExit; isolated temporary save",
+        }
+        (output / "restart-check.json").write_text(json.dumps(report, indent=2))
+        print(json.dumps(report, indent=2), flush=True)
 
 
-if __name__=='__main__':
+if __name__ == "__main__":
     main()

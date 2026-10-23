@@ -1,11 +1,28 @@
-"""Deterministic role-balanced model checkpoints for bounded comparisons."""
+"""Deterministic role-balanced model checkpoints for bounded comparisons.
 
-from collections import Counter
+File: village/evaluation_schedule.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
+
 import hashlib
+from collections import Counter
 
 
 class CheckpointSchedule:
+    """Seed-deterministic role rotation and horizon-spread threat-aware checkpoints."""
+
     def __init__(self, world, seed, options):
+        """Initialize CheckpointSchedule and its owned state.
+
+        Args:
+            world: Authoritative simulation world used by this operation.
+            seed: Nonnegative deterministic world/randomization seed.
+            options: Validated run settings and budgets.
+
+        Returns:
+            None.
+        """
         self.strategy = options["checkpoint_strategy"]
         self.gap = options["checkpoint_seconds"]
         self.budget = options["max_model_calls"]
@@ -30,6 +47,14 @@ class CheckpointSchedule:
         self.history = []
 
     def ready(self, world):
+        """Check the next planned slot, spacing and optional active-threat requirement.
+
+        Args:
+            world: Authoritative simulation world used by this operation.
+
+        Returns:
+            Whether a model checkpoint can be considered now.
+        """
         issued = len(self.history)
         if world.failed or issued >= self.budget:
             return False
@@ -41,7 +66,15 @@ class CheckpointSchedule:
         )
 
     def take(self, world, eligible=None):
-        """Issue at most once per slot; missing/dead roles are skipped explicitly."""
+        """Issue at most once per slot; missing/dead roles are skipped explicitly.
+
+        Args:
+            world: Authoritative simulation world used by this operation.
+            eligible: Optional predicate restricting candidate proposers.
+
+        Returns:
+            Actor index/context pair, or None when no eligible checkpoint can be issued.
+        """
         if not self.ready(world):
             return None
         for offset in range(len(self.roles)):
@@ -75,6 +108,11 @@ class CheckpointSchedule:
         return None
 
     def coverage(self):
+        """Report actual role/threat requests separately from unused call budget.
+
+        Returns:
+            JSON-compatible coverage dictionary.
+        """
         return {
             "roles_expected": self.expected_roles,
             "roles_requested": sorted({r["role"] for r in self.history}),

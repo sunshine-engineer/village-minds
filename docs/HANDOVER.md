@@ -1,6 +1,14 @@
+<!--
+File: docs/HANDOVER.md
+Purpose: Developer handover.
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+-->
+
 # Developer handover
 
-Reviewed 22 October 2026. This is a handover for a portfolio prototype, not a
+Original handover review: 22 October 2026. See the [23 October consistency review](CONSISTENCY_REVIEW.md)
+for the later formatting/documentation and diagnostic-config changes. This is a handover for a portfolio prototype, not a
 production service. Use the [documentation index](INDEX.md) for all guides and
 historical studies. The validated production snapshot is `e1cc748`; release
 fixture/evidence fixes are in `28d766a`. Subsequent documentation revisions do not

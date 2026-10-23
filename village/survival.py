@@ -1,8 +1,14 @@
-"""Crop, resource, combat, wave and failure rules."""
+"""Crop, resource, combat, wave and failure rules.
+
+File: village/survival.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
 
 from .config import get_settings
-from .map_data import LOCATIONS, GATES, GATE_MAX, CROP_GROW_SECONDS, SIGHT, HEARING
-from .entities import Crop, Monster
+from .entities import Crop as Crop
+from .entities import Monster
+from .map_data import CROP_GROW_SECONDS, GATE_MAX, GATES, HEARING, LOCATIONS, SIGHT
 from .navigation import distance, pathfind
 
 S = get_settings()
@@ -10,7 +16,18 @@ R, P, W = S["rules"], S["policy"], S["world"]
 
 
 class SurvivalRules:
+    """Simulation-only farming, resources, combat, monster waves and failure mechanics."""
+
     def local_crop(self, bot, stage):
+        """Find the nearest plot in a required stage within the actor's work radius.
+
+        Args:
+            bot: Villager whose current state or work is being considered.
+            stage: Required crop stage.
+
+        Returns:
+            Matching Crop, or None when no local plot is usable.
+        """
         return next(
             (
                 c
@@ -24,6 +41,14 @@ class SurvivalRules:
         )
 
     def can_gather(self, bot):
+        """Check orchard distance, remaining wood, energy and work cooldown.
+
+        Args:
+            bot: Villager whose current state or work is being considered.
+
+        Returns:
+            Whether wood gathering is legal now.
+        """
         return (
             distance(bot.position, LOCATIONS["orchard"]) < R["gather_radius"]
             and self.resources["orchard"] > 0
@@ -31,6 +56,14 @@ class SurvivalRules:
         )
 
     def available_actions(self, bot):
+        """List currently legal survival actions and their valid targets.
+
+        Args:
+            bot: Villager whose current state or work is being considered.
+
+        Returns:
+            Action/target mapping; empty for dead actors or a failed world.
+        """
         if self.failed or not bot.alive:
             return {}
         actions = {
@@ -121,6 +154,15 @@ class SurvivalRules:
         return actions
 
     def survival_action(self, bot, decision):
+        """Apply resource, farm, repair, guard, rally or attack mechanics after validation.
+
+        Args:
+            bot: Villager whose current state or work is being considered.
+            decision: Proposed structured action with optional target/dialogue fields.
+
+        Returns:
+            Whether the action succeeded.
+        """
         action, target = decision.get("action"), decision.get("target", "")
         allowed = self.available_actions(bot)
         if action not in allowed or target not in allowed[action]:
@@ -202,6 +244,11 @@ class SurvivalRules:
         return True
 
     def gate_threats(self):
+        """Count living monsters assigned to each currently threatened gate.
+
+        Returns:
+            Gate-name to living-monster-count mapping.
+        """
         return {
             name: sum(m.health > 0 and m.gate == name for m in self.monsters)
             for name in GATES
@@ -209,6 +256,15 @@ class SurvivalRules:
         }
 
     def strike(self, bot, monster):
+        """Apply a legal in-range attack, role damage, cooldown and kill attribution.
+
+        Args:
+            bot: Villager whose current state or work is being considered.
+            monster: Target living monster.
+
+        Returns:
+            Whether an attack was performed.
+        """
         if (
             self.time < bot.attack_at
             or bot.energy < R["attack_energy"]
@@ -234,6 +290,11 @@ class SurvivalRules:
         return True
 
     def spawn_wave(self):
+        """Spawn the next configured monster wave outside the village walls.
+
+        Returns:
+            None; respects active-monster limits and advances wave bookkeeping.
+        """
         self.wave += 1
         for _ in range(
             min(R["wave_max_spawn"], 1 + self.wave // R["wave_growth_every"])
@@ -258,6 +319,14 @@ class SurvivalRules:
             bot.next_think = min(bot.next_think, self.time)
 
     def survival_tick(self, dt):
+        """Advance crops, hunger, cooldown work, monsters, damage and failure checks.
+
+        Args:
+            dt: Elapsed simulation seconds; rendering overrides receive real frame seconds.
+
+        Returns:
+            None; changes authoritative simulation state.
+        """
         for crop in self.crops:
             if crop.stage == "growing":
                 crop.age = min(CROP_GROW_SECONDS, crop.age + dt)
@@ -345,6 +414,14 @@ class SurvivalRules:
             self.fail("All villagers fell: food and defense cooperation failed.")
 
     def fail(self, reason):
+        """Record village destruction once and retain factual campaign lessons.
+
+        Args:
+            reason: Recorded explanation for the lifecycle transition.
+
+        Returns:
+            None; marks the current attempt failed without resetting it.
+        """
         if self.failed:
             return
         self.failed, self.failure_reason = True, reason

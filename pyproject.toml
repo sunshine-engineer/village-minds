@@ -1,3 +1,8 @@
+# File: pyproject.toml
+# Purpose: Build metadata, runtime dependencies and developer tooling.
+# Maintainer: sunshine-engineer
+# Modified: 2026-10-23
+
 [build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
@@ -10,6 +15,9 @@ readme = "README.md"
 license = {file = "LICENSE"}
 requires-python = ">=3.11"
 dependencies = ["panda3d==1.10.16"]
+
+[project.optional-dependencies]
+dev = ["ruff==0.17.2"]
 
 [project.urls]
 Repository = "https://github.com/sunshine-engineer/village-minds"
@@ -26,3 +34,18 @@ include = ["village*"]
 
 [tool.setuptools.package-data]
 village = ["data/*.json", "data/prompts/*.txt", "data/assets/*", "data/assets/**/*"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+include = ["village/**/*.py", "scripts/**/*.py", "tests/**/*.py"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "D100", "D101", "D102", "D103", "D104", "D105", "D106", "D107", "D201", "D202", "D209", "D300"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+# Directly executable helpers add the checkout to sys.path before package imports.
+"scripts/*.py" = ["E402"]

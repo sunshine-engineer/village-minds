@@ -1,11 +1,17 @@
-"""Model transport adapters. Only decision dictionaries cross this boundary."""
+"""Model transport adapters. Only decision dictionaries cross this boundary.
+
+File: village/models.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
 
 import json
 import os
 import time
+import urllib.request
 from pathlib import Path
 from typing import Protocol
-import urllib.request
+
 from .config import get_settings
 from .decisions import decision_schema
 
@@ -13,16 +19,48 @@ MAX_RESPONSE_BYTES = 1_048_576  # Defensive protocol bound.
 
 
 class InferenceDecision(dict):
+    """Decision dictionary carrying optional provider timing/token metrics."""
+
     def __init__(self, decision, metrics=None):
+        """Initialize InferenceDecision and its owned state.
+
+        Args:
+            decision: Proposed structured action with optional target/dialogue fields.
+            metrics: Optional provider latency/token metadata.
+
+        Returns:
+            None.
+        """
         super().__init__(decision)
         self.metrics = metrics or {}
 
 
 class ModelBackend(Protocol):
-    def decide(self, profile: dict, observation: dict, timeout: float) -> dict: ...
+    """Structured-decision protocol implemented by trusted provider adapters."""
+
+    def decide(self, profile: dict, observation: dict, timeout: float) -> dict:
+        """Request a structured decision using this backend's profile and output contract.
+
+        Args:
+            profile: Resolved model profile containing backend and generation options.
+            observation: Request-time context containing legal choices and relevant world state.
+            timeout: Maximum request wall time in seconds.
+
+        Returns:
+            Decision dictionary; the authoritative world must validate it before execution.
+        """
+        ...
 
 
 def messages(observation):
+    """Build role-aware or compact repair chat messages from configured prompt assets.
+
+    Args:
+        observation: Request-time context containing legal choices and relevant world state.
+
+    Returns:
+        System/user message dictionaries ready for a transport request.
+    """
     if observation.get("decision_layer") in ("repair_allocation", "repair_priority"):
         prompt = Path(get_settings()["ai"]["repair_strategy"]["prompt"]).read_text(
             encoding="utf-8"
@@ -56,6 +94,21 @@ def messages(observation):
 
 
 def post_json(url, payload, timeout, api_key_env=""):
+    """POST bounded JSON with optional environment-provided credentials.
+
+    Args:
+        url: Configured model endpoint, or loopback server URL for network sessions.
+        payload: JSON request object to serialize.
+        timeout: Maximum request wall time in seconds.
+        api_key_env: Environment variable name containing an optional credential; never the credential itself.
+
+    Returns:
+        Decoded response object; no credential value is stored in configuration.
+
+    Raises:
+        ValueError: If the named credential is absent or the response exceeds its size bound.
+        OSError: If the endpoint cannot complete the HTTP request.
+    """
     headers = {"Content-Type": "application/json"}
     if api_key_env:
         key = os.environ.get(api_key_env)
@@ -73,7 +126,19 @@ def post_json(url, payload, timeout, api_key_env=""):
 
 
 class OllamaBackend:
+    """Ollama chat adapter using JSON-schema output and optional timing metadata."""
+
     def decide(self, profile, observation, timeout):
+        """Request a structured decision using this backend's profile and output contract.
+
+        Args:
+            profile: Resolved model profile containing backend and generation options.
+            observation: Request-time context containing legal choices and relevant world state.
+            timeout: Maximum request wall time in seconds.
+
+        Returns:
+            Decision dictionary; the authoritative world must validate it before execution.
+        """
         payload = {
             "model": profile["model"],
             "stream": False,
@@ -118,6 +183,16 @@ class OpenAICompatibleBackend:
     """For local servers implementing /v1/chat/completions and JSON schema output."""
 
     def decide(self, profile, observation, timeout):
+        """Request a structured decision using this backend's profile and output contract.
+
+        Args:
+            profile: Resolved model profile containing backend and generation options.
+            observation: Request-time context containing legal choices and relevant world state.
+            timeout: Maximum request wall time in seconds.
+
+        Returns:
+            Decision dictionary; the authoritative world must validate it before execution.
+        """
         payload = {
             "model": profile["model"],
             "stream": False,
@@ -146,6 +221,18 @@ BACKENDS = {"ollama": OllamaBackend, "openai_compatible": OpenAICompatibleBacken
 
 
 def register_backend(name, factory):
+    """Register a callable adapter factory without replacing a different existing factory.
+
+    Args:
+        name: Registered identity or name selected by the caller.
+        factory: Zero-argument trusted backend/state factory.
+
+    Returns:
+        None; repeated registration of the same factory is idempotent.
+
+    Raises:
+        ValueError: If the input violates the validation contract described above.
+    """
     if BACKENDS.get(name) is factory:
         return  # The same plugin may register for multiple World instances.
     if (
@@ -159,6 +246,22 @@ def register_backend(name, factory):
 
 
 def resolve_profile(name=None, *, url=None, model=None):
+    """Resolve a named profile and explicit endpoint/model overrides.
+
+    Args:
+        name: Registered identity or name selected by the caller.
+        url: Configured model endpoint, or loopback server URL for network sessions.
+        model: Installed model tag selected for inference.
+
+    Returns:
+        Independent profile dictionary.
+
+    Raises:
+        ValueError: If the requested profile does not exist.
+
+    Example:
+        profile = resolve_profile('local_qwen', model='qwen2.5:1.5b')
+    """
     ai = get_settings()["ai"]
     name = name or ai["default_profile"]
     if name not in ai["profiles"]:
@@ -172,10 +275,26 @@ def resolve_profile(name=None, *, url=None, model=None):
 
 
 def request_decision(url, model, observation, timeout=None, *, profile=None):
+    """Request or compute a bounded intent and translate compact strategy choices.
+
+    Args:
+        url: Configured model endpoint, or loopback server URL for network sessions.
+        model: Installed model tag selected for inference.
+        observation: Request-time context containing legal choices and relevant world state.
+        timeout: Maximum request wall time in seconds.
+        profile: Resolved model profile containing backend and generation options.
+
+    Returns:
+        Decision dictionary, with provider metrics when the backend supplies them.
+
+    Raises:
+        ValueError: If the backend or structured response is invalid.
+        OSError: If provider transport or prompt-file I/O fails.
+    """
     profile = (profile or resolve_profile()).copy()
     profile.update(url=url, model=model)
     if profile["backend"] not in BACKENDS:
-        raise ValueError(f'Unknown model backend: {profile["backend"]}')
+        raise ValueError(f"Unknown model backend: {profile['backend']}")
     if (
         observation.get("decision_layer") == "repair_priority"
         and get_settings()["ai"]["repair_strategy"]["controller"] == "scripted"

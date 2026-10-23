@@ -1,3 +1,10 @@
+<!--
+File: docs/COORDINATION_RESULTS.md
+Purpose: Coordination comparison: 21 October 2026.
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+-->
+
 # Coordination comparison: 21 October 2026
 
 > Scope: development coordination comparison. Results describe the frozen source identified below,

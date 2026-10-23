@@ -1,18 +1,31 @@
-"""Causal controls use real survival rules, not fabricated AI outcomes."""
+"""Causal controls use real survival rules, not fabricated AI outcomes.
+
+File: tests/test_cooperation_scenario.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
 
 import json
-from pathlib import Path
 import subprocess
 import sys
 import tempfile
 import unittest
+from pathlib import Path
+
 from village.config import get_settings
-from village.evaluation import run_scenario, aggregate
+from village.evaluation import aggregate, run_scenario
 from village.evaluation_controls import EvaluationWorld
 
 
 class CooperationTests(unittest.TestCase):
+    """Regression cases for cooperation scenario."""
+
     def test_intervention_blocks_sharing_before_state_changes(self):
+        """Verify intervention blocks sharing before state changes.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         world = EvaluationWorld(disabled_actions=["deposit"])
         bot = world.villagers[0]
         bot.position = tuple(get_settings()["world"]["locations"]["storehouse"])
@@ -29,12 +42,22 @@ class CooperationTests(unittest.TestCase):
         self.assertTrue(normal.apply(bot, {"action": "deposit"}))
 
     def test_interventions_cannot_be_mislabeled_as_ai_comparisons(self):
+        """Verify interventions cannot be mislabeled as ai comparisons.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         options = dict(get_settings()["evaluation"], control="no-defense")
         with self.assertRaisesRegex(ValueError, "scripted mode"):
             run_scenario(7, "hybrid", options, {}, Path("/unused"), Path("/unused"))
 
     def test_siege_survival_depends_on_sharing_defense_and_repairs(self):
         # Startup-only settings: exercise the packaged config through fresh CLI processes.
+        """Verify siege survival depends on sharing defense and repairs.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         root = Path(__file__).resolve().parents[1]
         with tempfile.TemporaryDirectory() as folder:
             outcomes = {}

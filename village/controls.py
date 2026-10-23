@@ -1,9 +1,22 @@
-"""Configured keyboard bindings; simulation actions remain engine independent."""
+"""Configured keyboard bindings; simulation actions remain engine independent.
+
+File: village/controls.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
 
 from .config import get_settings
 
 
 def bind_controls(game):
+    """Bind configured input keys and contextual actions to the game callbacks.
+
+    Args:
+        game: Game instance owning scene/UI references.
+
+    Returns:
+        None; registers Panda3D event handlers.
+    """
     keys = get_settings()["controls"]
     display = get_settings()["display"]
     for name in ("forward", "left", "backward", "right", "orbit_left", "orbit_right"):

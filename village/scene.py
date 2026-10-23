@@ -1,4 +1,9 @@
-"""Procedural geometry and configured scene construction; no game rules."""
+"""Procedural geometry and configured scene construction; no game rules.
+
+File: village/scene.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
 
 from panda3d.core import (
     AmbientLight,
@@ -12,8 +17,9 @@ from panda3d.core import (
     TextNode,
     TransparencyAttrib,
 )
+
 from .config import get_settings
-from .map_data import BUILDINGS, LOCATIONS, GATES, GATE_MAX, CROP_GROW_SECONDS
+from .map_data import BUILDINGS, CROP_GROW_SECONDS, GATE_MAX, GATES, LOCATIONS
 
 D = get_settings()["display"]
 R = get_settings()["rules"]
@@ -21,6 +27,11 @@ W = get_settings()["world"]
 
 
 def cube_node():
+    """Create the reusable procedural cube geometry.
+
+    Returns:
+        Panda3D geometry node.
+    """
     data = GeomVertexData("cube", GeomVertexFormat.getV3n3(), Geom.UHStatic)
     vertex, normal = GeomVertexWriter(data, "vertex"), GeomVertexWriter(data, "normal")
     faces = [
@@ -47,7 +58,14 @@ def cube_node():
 
 
 class SceneBuilder:
+    """Procedural/catalog scene construction and presentation-only state synchronization."""
+
     def setup_lights(self):
+        """Install configured ambient/directional lighting in the scene.
+
+        Returns:
+            None; attaches light nodes.
+        """
         ambient = AmbientLight("sky")
         ambient.setColor(tuple(D["ambient"]))
         self.render.setLight(self.render.attachNewNode(ambient))
@@ -58,6 +76,17 @@ class SceneBuilder:
         self.render.setLight(node)
 
     def box(self, parent, pos, scale, color):
+        """Instantiate a scaled and colored procedural box.
+
+        Args:
+            parent: Parent scene node, or parent IPC endpoint in worker helpers.
+            pos: Scene-local position.
+            scale: Geometry scale vector.
+            color: Optional RGB tint for this visual.
+
+        Returns:
+            Panda3D node path.
+        """
         node = self.cube.copyTo(parent)
         node.setPos(*pos)
         node.setScale(*scale)
@@ -65,6 +94,18 @@ class SceneBuilder:
         return node
 
     def label(self, parent, text, pos, size=None, color=None):
+        """Create a styled world label under a scene parent.
+
+        Args:
+            parent: Parent scene node, or parent IPC endpoint in worker helpers.
+            text: Dialogue or event text to validate and publish.
+            pos: Scene-local position.
+            size: Optional text size.
+            color: Optional RGB tint for this visual.
+
+        Returns:
+            Node-path and text-node pair.
+        """
         size = self.assets.catalog["style"]["label_size"] if size is None else size
         color = self.assets.catalog["style"]["label_color"] if color is None else color
         node = TextNode("label")
@@ -79,9 +120,24 @@ class SceneBuilder:
         return path, node
 
     def prefab(self, parent, name, **options):
+        """Instantiate a validated catalog prefab through the asset boundary.
+
+        Args:
+            parent: Parent scene node, or parent IPC endpoint in worker helpers.
+            name: Registered identity or name selected by the caller.
+            **options: Validated run settings and budgets.
+
+        Returns:
+            Mapping of named part nodes.
+        """
         return self.assets.instantiate(self, parent, name, **options)
 
     def build_village(self):
+        """Construct village buildings, services, crops and gate visuals from configured content.
+
+        Returns:
+            None; attaches static and dynamic scene nodes.
+        """
         style = self.assets.catalog["style"]
         for instance in self.assets.catalog["instances"]:
             node = self.render.attachNewNode(instance["prefab"])
@@ -165,6 +221,14 @@ class SceneBuilder:
         )
 
     def build_actor(self, bot):
+        """Build a villager's body, accessories, legs and speech label.
+
+        Args:
+            bot: Villager whose current state or work is being considered.
+
+        Returns:
+            Root/body/legs/speech-path/text-node tuple.
+        """
         style = self.assets.catalog["style"]
         root = self.render.attachNewNode(bot.name)
         parts = self.prefab(root, "villager", color=bot.color)
@@ -186,9 +250,24 @@ class SceneBuilder:
         return root, parts["body"], legs, speech_path, speech
 
     def display_position(self, kind, identity, authoritative):
+        """Provide the authoritative pose hook used by single-process scene rendering.
+
+        Args:
+            kind: Entity or request category used by the owning operation.
+            identity: Stable entity identifier used to match presentation history.
+            authoritative: Newest confirmed position used when a buffered pose is unavailable.
+
+        Returns:
+            The supplied authoritative position; remote clients override this hook.
+        """
         return authoritative
 
     def update_survival_visuals(self):
+        """Synchronize crops, gate damage, monsters and villager health with current state.
+
+        Returns:
+            None; updates scene nodes without changing simulation state.
+        """
         style = self.assets.catalog["style"]
         for crop, (stalks, label) in zip(self.world.crops, self.crop_nodes):
             for stalk in stalks:
@@ -212,7 +291,9 @@ class SceneBuilder:
             label.setText(crop.stage.upper())
         for name, node in self.gate_nodes.items():
             hp = self.world.gates[name]
-            self.gate_labels[name].setText(f"{name.replace('_',' ').upper()} {int(hp)}")
+            self.gate_labels[name].setText(
+                f"{name.replace('_', ' ').upper()} {int(hp)}"
+            )
             if hp <= 0:
                 node.hide()
             else:
@@ -252,4 +333,14 @@ class SceneBuilder:
 
     @staticmethod
     def damage_color(broken, healthy, ratio):
+        """Blend damaged and healthy RGB colors by the health ratio.
+
+        Args:
+            broken: RGB color at zero gate health.
+            healthy: RGB color at full gate health.
+            ratio: Health interpolation fraction.
+
+        Returns:
+            Interpolated RGB tuple.
+        """
         return tuple(a + (b - a) * ratio for a, b in zip(broken, healthy))

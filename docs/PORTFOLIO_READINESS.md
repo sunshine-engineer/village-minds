@@ -1,3 +1,10 @@
+<!--
+File: docs/PORTFOLIO_READINESS.md
+Purpose: Portfolio readiness checklist.
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+-->
+
 # Portfolio readiness checklist
 
 This is a working acceptance plan. Passing automated checks does not establish

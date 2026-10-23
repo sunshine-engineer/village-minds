@@ -1,19 +1,32 @@
-"""Ownership/physics boundaries for responsive transport and causal fixtures."""
+"""Ownership/physics boundaries for responsive transport and causal fixtures.
+
+File: tests/test_readiness.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
 
 import json
-from pathlib import Path
 import tempfile
 import unittest
 from copy import deepcopy
-from village.config import get_settings
-from village.server import VillageServer, Envelope
-from village.world import World
+from pathlib import Path
+
 from village.brains import BrainScheduler
+from village.config import get_settings
 from village.priority_benchmark import run_case, validate_plan
+from village.server import Envelope, VillageServer
+from village.world import World
 
 
 class ReadinessTests(unittest.TestCase):
+    """Regression cases for readiness."""
+
     def test_exchange_returns_applied_movement_without_duplicate_action(self):
+        """Verify exchange returns applied movement without duplicate action.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         w = World(seed=301)
         server = VillageServer(w, BrainScheduler(w, "", "", demo=True))
         token = server.handle("/session", None, {})[1]["token"]
@@ -39,6 +52,11 @@ class ReadinessTests(unittest.TestCase):
         self.assertEqual(server.sequence, 2)
 
     def test_exchange_cannot_publish_after_disconnect_or_replacement_session(self):
+        """Verify exchange cannot publish after disconnect or replacement session.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         w = World(seed=301)
         server = VillageServer(w, BrainScheduler(w, "", "", demo=True))
         token = server.handle("/session", None, {})[1]["token"]
@@ -55,6 +73,11 @@ class ReadinessTests(unittest.TestCase):
         self.assertNotEqual(server.token, token)
 
     def test_invalid_exchange_does_not_move_or_publish_state(self):
+        """Verify invalid exchange does not move or publish state.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         w = World(seed=301)
         server = VillageServer(w, BrainScheduler(w, "", "", demo=True))
         token = server.handle("/session", None, {})[1]["token"]
@@ -70,6 +93,11 @@ class ReadinessTests(unittest.TestCase):
         self.assertNotIn("state", reply)
 
     def test_fixture_protocol_rejects_duplicate_seeds_and_invalid_step(self):
+        """Verify fixture protocol rejects duplicate seeds and invalid step.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         plan = json.loads(
             Path("configs/portfolio/priority-development.json").read_text()
         )
@@ -84,7 +112,14 @@ class ReadinessTests(unittest.TestCase):
 
 
 class ContentionTests(unittest.TestCase):
+    """Regression cases for readiness."""
+
     def setUp(self):
+        """Create isolated state for each regression case.
+
+        Returns:
+            None.
+        """
         self.settings = get_settings()
         self.saved = deepcopy(self.settings)
         from tests.test_strategy import StrategyTests
@@ -106,9 +141,19 @@ class ContentionTests(unittest.TestCase):
         )
 
     def tearDown(self):
+        """Restore state and release resources after each regression case.
+
+        Returns:
+            None.
+        """
         self.restore_settings()
 
     def test_adverse_choice_changes_owner_and_causes_breach_in_both_cases(self):
+        """Verify adverse choice changes owner and causes breach in both cases.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         with tempfile.TemporaryDirectory() as temp:
             for case in self.plan["cases"]:
                 rows = {
@@ -135,6 +180,11 @@ class ContentionTests(unittest.TestCase):
                     self.assertTrue(rows["baseline"]["primary_gate_breached"])
 
     def test_tick_boundary_response_is_not_credited_before_existing_claim(self):
+        """Verify tick boundary response is not credited before existing claim.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         case = self.plan["cases"][1]
         with tempfile.TemporaryDirectory() as temp:
             result = run_case(
@@ -156,6 +206,11 @@ class ContentionTests(unittest.TestCase):
         self.assertFalse(result["applied_before_first_claim"])
 
     def test_model_timeout_keeps_baseline_local_behavior(self):
+        """Verify model timeout keeps baseline local behavior.
+
+        Returns:
+            None; unittest assertions report a regression on failure.
+        """
         case = self.plan["cases"][1]
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

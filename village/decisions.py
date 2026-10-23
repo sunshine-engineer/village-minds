@@ -1,10 +1,22 @@
-"""JSON action schema shared by model backends; Python revalidates results."""
+"""JSON action schema shared by model backends; Python revalidates results.
+
+File: village/decisions.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
 
 from .config import get_settings
 
 
 def decision_schema(observation):
-    """Constrain choices at request time; Python rechecks them on arrival."""
+    """Constrain choices at request time; Python rechecks them on arrival.
+
+    Args:
+        observation: Request-time context containing legal choices and relevant world state.
+
+    Returns:
+        JSON schema for one current decision or repair choice.
+    """
     if observation.get("decision_layer") in ("repair_allocation", "repair_priority"):
         return {
             "type": "object",
@@ -20,6 +32,16 @@ def decision_schema(observation):
     branches = []
 
     def add(action, targets=None, speaking=False):
+        """Append one action-specific schema branch to the enclosing decision schema.
+
+        Args:
+            action: Registered action name.
+            targets: Legal target strings for this action-specific schema branch.
+            speaking: Whether the branch permits a speaking action payload.
+
+        Returns:
+            None; extends the local branches collection.
+        """
         branches.append(
             {
                 "type": "object",

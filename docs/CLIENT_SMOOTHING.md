@@ -1,3 +1,10 @@
+<!--
+File: docs/CLIENT_SMOOTHING.md
+Purpose: Network client movement smoothing.
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+-->
+
 # Network client movement smoothing
 
 The client now renders villagers, monsters and the follow camera from a bounded

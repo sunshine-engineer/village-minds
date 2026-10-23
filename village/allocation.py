@@ -1,10 +1,25 @@
-"""Repair candidates priced by useful HP, wood, travel and opportunity cost."""
+"""Repair candidates priced by useful HP, wood, travel and opportunity cost.
+
+File: village/allocation.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
 
 from .config import get_settings
-from .navigation import pathfind, distance
+from .navigation import distance, pathfind
 
 
 def travel_seconds(world, bot, place):
+    """Estimate a villager's navigation time to a service or gate.
+
+    Args:
+        world: Authoritative simulation world used by this operation.
+        bot: Villager whose current state or work is being considered.
+        place: Configured service or gate name.
+
+    Returns:
+        Travel seconds, or None when the destination is unreachable.
+    """
     goal = world.destination(bot, place)
     path = pathfind(bot.position, goal)
     if not path:
@@ -17,9 +32,18 @@ def travel_seconds(world, bot, place):
 
 
 def repair_features(world, task, bot):
+    """Price a repair using useful HP, wood scarcity, travel and guard opportunity cost.
+
+    Args:
+        world: Authoritative simulation world used by this operation.
+        task: Task-board job dictionary with kind, target and ownership state.
+        bot: Villager whose current state or work is being considered.
+
+    Returns:
+        Feature dictionary, or None for an unreachable repair.
+    """
     s = get_settings()["coordination"]["resource_aware"]
     r = get_settings()["rules"]
-    p = get_settings()["policy"]
     travel = travel_seconds(world, bot, task["target"])
     if travel is None:
         return None
@@ -59,7 +83,16 @@ def repair_features(world, task, bot):
 
 
 def can_handoff(board, bot, gate):
-    """Only lower-priority supply work may be interrupted for a real repair."""
+    """Only lower-priority supply work may be interrupted for a real repair.
+
+    Args:
+        board: Task board providing current jobs, ownership and coordination settings.
+        bot: Villager whose current state or work is being considered.
+        gate: Configured cardinal gate name.
+
+    Returns:
+        Whether the proposed helper can take the repair.
+    """
     if bot.action.startswith("guarding ") and board.world.gate_threats().get(
         bot.action.removeprefix("guarding ")
     ):
@@ -86,6 +119,15 @@ def can_handoff(board, bot, gate):
 
 
 def repair_candidates(board, proposer=None):
+    """List feasible recipient/gate choices, respecting ownership and proposer board constraints.
+
+    Args:
+        board: Task board providing current jobs, ownership and coordination settings.
+        proposer: Optional villager proposing a strategic repair.
+
+    Returns:
+        Bounded, deterministically ranked candidate dictionaries.
+    """
     w = board.world
     s = get_settings()["ai"]["repair_strategy"]
     if s["enabled"] and s["mode"] == "priority_plan":
@@ -157,6 +199,16 @@ def repair_candidates(board, proposer=None):
 
 
 def strategy_observation(world, bot, lessons=()):
+    """Build the compact repair-planning observation supplied to a model.
+
+    Args:
+        world: Authoritative simulation world used by this operation.
+        bot: Villager whose current state or work is being considered.
+        lessons: Prior factual lesson strings, bounded by configuration.
+
+    Returns:
+        Observation dictionary with choices and bounded lessons.
+    """
     candidates = repair_candidates(world.task_board, bot)
     choices = [
         dict(id=f"r{i}", **{k: v for k, v in c.items() if k != "cost"})
@@ -178,7 +230,14 @@ def strategy_observation(world, bot, lessons=()):
 
 
 def priority_candidates(board):
-    """Gate-level plans remain useful when helpers are busy or wood is absent."""
+    """Gate-level plans remain useful when helpers are busy or wood is absent.
+
+    Args:
+        board: Task board providing current jobs, ownership and coordination settings.
+
+    Returns:
+        Bounded gate candidate dictionaries ordered by urgency.
+    """
     w = board.world
     settings = get_settings()
     if (

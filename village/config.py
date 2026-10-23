@@ -1,11 +1,16 @@
-"""Validated startup configuration. Import this module before simulation/rendering."""
+"""Validated startup configuration. Import this module before simulation/rendering.
 
-from copy import deepcopy
+File: village/config.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
+
 import hashlib
 import json
 import math
-from string import Formatter
+from copy import deepcopy
 from pathlib import Path
+from string import Formatter
 from urllib.parse import urlparse
 
 DATA = Path(__file__).with_name("data")
@@ -14,7 +19,31 @@ DEFAULT_PATH = DATA / "default.json"
 
 
 def read_json(path):
+    """Read strict JSON while rejecting duplicate properties and nonfinite numbers.
+
+    Args:
+        path: Input/output filesystem path for the described resource.
+
+    Returns:
+        Decoded JSON value.
+
+    Raises:
+        ValueError: If JSON repeats properties or contains nonfinite constants.
+        OSError: If the JSON file cannot be read.
+    """
+
     def unique(pairs):
+        """Reject duplicate JSON properties while building an object.
+
+        Args:
+            pairs: JSON object key/value pairs before duplicate detection.
+
+        Returns:
+            Dictionary containing each supplied property once.
+
+        Raises:
+            ValueError: If the input violates the validation contract described above.
+        """
         result = {}
         for key, value in pairs:
             if key in result:
@@ -23,6 +52,17 @@ def read_json(path):
         return result
 
     def invalid_constant(value):
+        """Reject nonstandard JSON numeric constants.
+
+        Args:
+            value: Value to validate, convert or publish as described above.
+
+        Returns:
+            Never returns; invalid numeric constants raise ValueError.
+
+        Raises:
+            ValueError: If the input violates the validation contract described above.
+        """
         raise ValueError(f"Invalid JSON number: {value}")
 
     return json.loads(
@@ -33,8 +73,21 @@ def read_json(path):
 
 
 def _merge(base, override, prefix=""):
+    """Merge an override into defaults while rejecting unknown configuration paths.
+
+    Args:
+        base: Default dictionary updated by recursive configuration merging.
+        override: Caller-supplied configuration values.
+        prefix: Dotted configuration prefix used in validation errors.
+
+    Returns:
+        None; mutates the base configuration recursively.
+
+    Raises:
+        ValueError: If an override is not an object or names an unknown setting.
+    """
     if not isinstance(override, dict):
-        raise ValueError(f'{prefix or "config"} must be an object')
+        raise ValueError(f"{prefix or 'config'} must be an object")
     for key, value in override.items():
         name = f"{prefix}.{key}".strip(".")
         if key not in base:
@@ -58,7 +111,19 @@ def _merge(base, override, prefix=""):
 
 
 def _validate_types(value, reference, path="config"):
-    """Reject wrong types/nonfinite values before importing game modules."""
+    """Reject wrong types/nonfinite values before importing game modules.
+
+    Args:
+        value: Value to validate, convert or publish as described above.
+        reference: Default schema used to check names and types.
+        path: Input/output filesystem path for the described resource.
+
+    Returns:
+        None when all checked values have compatible types and ranges.
+
+    Raises:
+        ValueError: If the input violates the validation contract described above.
+    """
     if isinstance(reference, dict):
         if not isinstance(value, dict):
             raise ValueError(f"{path} must be an object")
@@ -132,6 +197,21 @@ def _validate_types(value, reference, path="config"):
 
 
 def _vector(value, length, name, low=None, high=None):
+    """Validate a fixed-length finite numeric vector and optional bounds.
+
+    Args:
+        value: Value to validate, convert or publish as described above.
+        length: Required vector length.
+        name: Registered identity or name selected by the caller.
+        low: Optional inclusive lower bound.
+        high: Optional inclusive upper bound.
+
+    Returns:
+        None when the vector satisfies its contract.
+
+    Raises:
+        ValueError: If the input violates the validation contract described above.
+    """
     if not isinstance(value, (list, tuple)) or len(value) != length:
         raise ValueError(f"{name} must contain {length} numbers")
     for item in value:
@@ -146,6 +226,18 @@ def _vector(value, length, name, low=None, high=None):
 
 
 def validate(config, reference):
+    """Validate cross-field gameplay, model, controls and network constraints.
+
+    Args:
+        config: Resolved settings; omitted values use the current process configuration.
+        reference: Default schema used to check names and types.
+
+    Returns:
+        None when configuration is consistent.
+
+    Raises:
+        ValueError: If configuration violates a type, range or cross-field constraint.
+    """
     _validate_types(config, reference)
     if not 1 <= config["ai"]["repair_strategy"]["max_choices"] <= 12:
         raise ValueError("repair_strategy.max_choices must be between 1 and 12")
@@ -359,7 +451,7 @@ def validate(config, reference):
         ):
             raise ValueError("Villager identity/personality must be nonempty text")
         if bot["role"] not in config["roles"]:
-            raise ValueError(f'Unknown role: {bot["role"]}')
+            raise ValueError(f"Unknown role: {bot['role']}")
         names.append(bot["name"])
         _vector(
             bot["position"], 2, "villager position", -world["limit"], world["limit"]
@@ -451,6 +543,22 @@ def validate(config, reference):
 
 
 def load_config(path=None):
+    """Merge defaults and an optional override, validate settings and resolve asset/save paths.
+
+    Args:
+        path: Input/output filesystem path for the described resource.
+
+    Returns:
+        A new resolved configuration dictionary.
+
+    Raises:
+        ValueError: If settings or required assets are invalid.
+        OSError: If a settings or prompt file cannot be read.
+
+    Example:
+        settings = load_config('examples/custom.json')
+        settings['runtime']['pace']  # 0.75
+    """
     reference = read_json(DEFAULT_PATH)
     result = deepcopy(reference)
     override = {}
@@ -525,7 +633,17 @@ def load_config(path=None):
 
 
 def configure(path=None):
-    """Call once at startup, before importing world, rendering or persistence."""
+    """Call once at startup, before importing world, rendering or persistence.
+
+    Args:
+        path: Input/output filesystem path for the described resource.
+
+    Returns:
+        The initialized settings dictionary.
+
+    Raises:
+        RuntimeError: If a different configuration is requested after startup initialization.
+    """
     import sys
 
     loaded = load_config(path)
@@ -542,6 +660,14 @@ def configure(path=None):
 
 def fingerprint(config=None):
     # Visual/backend/runtime overrides are safe across restarts; rule/map changes aren't.
+    """Hash gameplay and extension settings that determine save compatibility.
+
+    Args:
+        config: Resolved settings; omitted values use the current process configuration.
+
+    Returns:
+        Hexadecimal SHA-256 fingerprint.
+    """
     content = {
         k: (config or get_settings())[k]
         for k in ("world", "rules", "roles", "memory", "plugins", "extension_settings")
@@ -553,13 +679,28 @@ SETTINGS = {}  # Populated by CLI or lazily by get_settings, after files are ins
 
 
 def get_settings():
+    """Read the process-wide startup settings, loading defaults when needed.
+
+    Returns:
+        Shared settings dictionary; callers must respect startup-only configuration.
+    """
     if not SETTINGS:
         SETTINGS.update(load_config())
     return SETTINGS
 
 
 def configure_snapshot(settings):
-    """Initialize a spawned worker from trusted parent settings, before World imports."""
+    """Initialize a spawned worker from trusted parent settings, before World imports.
+
+    Args:
+        settings: Validated configuration for this component.
+
+    Returns:
+        Initialized settings dictionary.
+
+    Raises:
+        RuntimeError: If settings have already been initialized in this process.
+    """
     import sys
 
     loaded = deepcopy(settings)

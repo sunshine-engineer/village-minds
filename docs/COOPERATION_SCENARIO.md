@@ -1,3 +1,10 @@
+<!--
+File: docs/COOPERATION_SCENARIO.md
+Purpose: Cooperation siege.
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+-->
+
 # Cooperation siege
 
 The default village can survive the current evaluation horizon at full health. This opt-in scenario puts food sharing, gate repairs and defense under simultaneous pressure. It uses the same map, villagers, legal actions and model interfaces.

@@ -1,19 +1,26 @@
-"""Procedural Panda3D scene and controls. All scene mutations stay on this thread."""
+"""Procedural Panda3D scene and controls. All scene mutations stay on this thread.
+
+File: village/game.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
 
 import math
 import sys
 import time
 from pathlib import Path
-from panda3d.core import NodePath, loadPrcFileData
+
 from direct.showbase.ShowBase import ShowBase
-from .world import World
+from panda3d.core import NodePath, loadPrcFileData
+
+from .assets import AssetCatalog
+from .brains import BrainScheduler
+from .config import get_settings
 from .map_data import GATES, HEARING, LOCATIONS
 from .navigation import distance
-from .persistence import SaveStore, DEFAULT_SAVE_PATH
-from .brains import BrainScheduler
+from .persistence import DEFAULT_SAVE_PATH, SaveStore
 from .scene import SceneBuilder, cube_node
-from .assets import AssetCatalog
-from .config import get_settings
+from .world import World
 
 D = get_settings()["display"]
 C = get_settings()["controls"]
@@ -22,10 +29,23 @@ R = get_settings()["rules"]
 
 
 class VillageGame(SceneBuilder, ShowBase):
+    """Single-player Panda3D lifecycle owning authoritative simulation and campaign saves."""
+
     def __init__(self, args):
         # WSLg supplies keyboard/mouse through the window, but may not expose
         # Linux's raw gamepad device directory. Avoid alarming evdev diagnostics
         # only in that known case; leave graphics and other errors visible.
+        """Initialize VillageGame and its owned state.
+
+        Args:
+            args: Parsed command-line options for this entry point.
+
+        Returns:
+            None.
+
+        Raises:
+            ValueError: If the input violates the validation contract described above.
+        """
         if sys.platform.startswith("linux"):
             # Request explicit repeat detection for X11 keyboard/text input.
             loadPrcFileData("x11-keyboard", "x-detectable-auto-repeat true")
@@ -146,24 +166,58 @@ class VillageGame(SceneBuilder, ShowBase):
         self.smoke_frames = 0 if args.smoke_test else None
 
     def build_ui(self):
+        """Build configured HUD widgets and bind their references to the game.
+
+        Returns:
+            None; creates UI nodes.
+        """
         from .ui import build_ui
 
         build_ui(self)
 
     def takeover(self, index):
+        """Possess an eligible villager or return to observer mode.
+
+        Args:
+            index: Villager roster index selected by the caller.
+
+        Returns:
+            None; invalidates pending decisions for changed possession.
+        """
         if self.typing:
             return
         self.keys.clear()
         self.world.possess(index)
 
     def cycle(self):
+        """Select the next living villager for player control.
+
+        Returns:
+            None; updates possession through the normal takeover path.
+        """
         index = self.world.controlled
         self.takeover(0 if index is None else (index + 1) % len(self.world.villagers))
 
     def change_zoom(self, amount):
+        """Adjust camera distance within configured bounds.
+
+        Args:
+            amount: Requested local camera zoom adjustment.
+
+        Returns:
+            None; updates the local zoom value.
+        """
         self.zoom = max(D["zoom_min"], min(D["zoom_max"], self.zoom + amount))
 
     def player_action(self, action):
+        """Dispatch a contextual work action for the controlled villager.
+
+        Args:
+            action: Registered action name.
+
+        Returns:
+            None; world validation determines whether it takes effect.
+        """
         if self.typing or self.paused or self.world.controlled is None:
             return
         bot = self.world.villagers[self.world.controlled]
@@ -184,6 +238,11 @@ class VillageGame(SceneBuilder, ShowBase):
             )
 
     def open_chat(self):
+        """Open the dialogue editor for the current player-controlled villager.
+
+        Returns:
+            None; schedules input focus when eligible.
+        """
         if self.typing or self.world.controlled is None:
             return
         self.typing = True
@@ -198,11 +257,27 @@ class VillageGame(SceneBuilder, ShowBase):
         )
 
     def focus_chat(self, task):
+        """Focus the dialogue widget after its deferred input transition.
+
+        Args:
+            task: Panda3D task context providing continuation/completion status.
+
+        Returns:
+            Panda3D task completion status.
+        """
         if self.typing and not self.entry.isHidden():
             self.entry["focus"] = 1
         return task.done
 
     def submit_chat(self, text):
+        """Submit bounded dialogue through the player-intent validation path.
+
+        Args:
+            text: Dialogue or event text to validate and publish.
+
+        Returns:
+            None; updates chat state and closes the editor.
+        """
         if not self.typing:
             return
         if self.world.controlled is not None:
@@ -211,6 +286,11 @@ class VillageGame(SceneBuilder, ShowBase):
         self.close_chat()
 
     def close_chat(self):
+        """Hide the editor and defer restoration of normal key handling.
+
+        Returns:
+            None; schedules the end of typing mode.
+        """
         self.taskMgr.remove("focus-chat")
         self.entry["focus"] = 0
         self.entry.hide()
@@ -221,19 +301,49 @@ class VillageGame(SceneBuilder, ShowBase):
         )
 
     def finish_chat(self, task):
+        """Complete the deferred transition out of typing mode.
+
+        Args:
+            task: Panda3D task context providing continuation/completion status.
+
+        Returns:
+            Panda3D task completion status.
+        """
         self.typing = False
         return task.done
 
     def escape(self):
+        """Cancel active dialogue or request a graceful game exit.
+
+        Returns:
+            None; normal exit follows the save path.
+        """
         if self.typing:
             self.close_chat()
         else:
             self.userExit()
 
     def apply_player_decision(self, bot, decision):
+        """Apply a player intent with player provenance to the authoritative world.
+
+        Args:
+            bot: Villager whose current state or work is being considered.
+            decision: Proposed structured action with optional target/dialogue fields.
+
+        Returns:
+            Whether current-state validation accepted the action.
+        """
         return self.world.apply(bot, decision, source="player")
 
     def advance_world(self, dt):
+        """Advance the single-process simulation and background decision arbitration.
+
+        Args:
+            dt: Elapsed simulation seconds; rendering overrides receive real frame seconds.
+
+        Returns:
+            None; uses bounded substeps and keeps frame backlog.
+        """
         if not self.typing and not self.paused:
             self.orbit += (
                 (int(C["orbit_left"] in self.keys) - int(C["orbit_right"] in self.keys))
@@ -256,9 +366,22 @@ class VillageGame(SceneBuilder, ShowBase):
             self.failure_saved = self.world.failed
 
     def display_time(self):
+        """Expose authoritative simulation time for single-process animation.
+
+        Returns:
+            Current simulation time in seconds.
+        """
         return self.world.time
 
     def update(self, task):
+        """Process input, simulation, visuals, camera and HUD for one frame.
+
+        Args:
+            task: Panda3D task context providing continuation/completion status.
+
+        Returns:
+            Panda3D task continuation status.
+        """
         dt = min(self.clock_dt(), RT["max_step_seconds"])
         self.advance_world(dt)
         self.update_survival_visuals()
@@ -324,7 +447,7 @@ class VillageGame(SceneBuilder, ShowBase):
         for i, bot in enumerate(self.world.villagers):
             marker = ">" if i == self.world.controlled else " "
             rows.append(
-                f"{marker} {C['takeover_keys'][i]} {bot.name} / {bot.role}\n     HP {int(bot.health)}  Energy {int(bot.energy)}  Hunger {int(bot.hunger)}\n     Food {bot.supplies} Wood {bot.wood} | {bot.action[:D['roster_action_chars']]}\n"
+                f"{marker} {C['takeover_keys'][i]} {bot.name} / {bot.role}\n     HP {int(bot.health)}  Energy {int(bot.energy)}  Hunger {int(bot.hunger)}\n     Food {bot.supplies} Wood {bot.wood} | {bot.action[: D['roster_action_chars']]}\n"
             )
         self.roster.setText("\n".join(rows))
         self.feed.setText("\n".join(list(self.world.events)[-D["feed_lines"] :]))
@@ -332,7 +455,7 @@ class VillageGame(SceneBuilder, ShowBase):
             self.brains.status
             + f"\nSpeed {self.pace:g}x | Local actions {self.brains.local_decisions} | AI decisions {self.brains.model_decisions}"
             + f"\nVillage {int(self.world.village_health)}/{R['village_health']:g} | Attempt {self.world.campaign['attempt']} | Wave {self.world.wave}"
-            + f"\nShared food {self.world.store['food']} | Wood {self.world.store['wood']} | Next wave {max(0,int(self.world.next_wave-self.world.time))}s"
+            + f"\nShared food {self.world.store['food']} | Wood {self.world.store['wood']} | Next wave {max(0, int(self.world.next_wave - self.world.time))}s"
             + f"\nTasks: {self.world.task_board.mode} | Active {sum(t['status'] in ('open', 'offered', 'accepted') for t in self.world.task_board.tasks)}"
             + "\n"
             + self.save_status
@@ -345,7 +468,7 @@ class VillageGame(SceneBuilder, ShowBase):
             self.hint.setText(f"PAUSED | {C['pause']} resumes | {C['save']} saves")
         elif self.world.controlled is None:
             self.hint.setText(
-                f"OBSERVER MODE | Pick a villager: {'/'.join(C['takeover_keys'][:len(self.world.villagers)])}"
+                f"OBSERVER MODE | Pick a villager: {'/'.join(C['takeover_keys'][: len(self.world.villagers)])}"
             )
         else:
             bot = self.world.villagers[self.world.controlled]
@@ -377,6 +500,11 @@ class VillageGame(SceneBuilder, ShowBase):
         return task.cont
 
     def cycle_speed(self):
+        """Select the next configured single-player simulation pace.
+
+        Returns:
+            None; does nothing while typing.
+        """
         if self.typing:
             return
         speeds = RT["speed_steps"]
@@ -384,6 +512,11 @@ class VillageGame(SceneBuilder, ShowBase):
         self.pace = speeds[(index + 1) % len(speeds)]
 
     def close_decision_log(self):
+        """Close an enabled decision trace without creating one.
+
+        Returns:
+            None; flushes/closes the existing log.
+        """
         if self.world.decision_log and not self.world.decision_log.handle.closed:
             self.world.decision_log.record(
                 "session_end",
@@ -394,11 +527,21 @@ class VillageGame(SceneBuilder, ShowBase):
             self.world.decision_log.close()
 
     def toggle_pause(self):
+        """Toggle single-player simulation and decision-application pause.
+
+        Returns:
+            None; camera/editor behavior remains local.
+        """
         if not self.typing:
             self.paused = not self.paused
             self.keys.clear()
 
     def save_world(self):
+        """Persist the campaign when saving is enabled and report errors to the HUD.
+
+        Returns:
+            True on success or temporary sessions; False when saving failed.
+        """
         if not self.save_store:
             return True
         try:
@@ -415,6 +558,11 @@ class VillageGame(SceneBuilder, ShowBase):
 
     @staticmethod
     def clock_dt():
+        """Read the engine's elapsed real frame time.
+
+        Returns:
+            Frame duration in seconds.
+        """
         from panda3d.core import ClockObject
 
         return ClockObject.getGlobalClock().getDt()

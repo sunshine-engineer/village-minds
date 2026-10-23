@@ -1,9 +1,12 @@
-"""Loopback prototype server. Only the simulation thread may mutate World."""
+"""Loopback prototype server. Only the simulation thread may mutate World.
+
+File: village/server.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
 
 import argparse
-from dataclasses import dataclass, field
 import hmac
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 import math
 import queue
@@ -11,13 +14,26 @@ import secrets
 import threading
 import time
 import uuid
-from .config import get_settings, fingerprint
+from dataclasses import dataclass, field
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+from .config import fingerprint, get_settings
 
 PROTOCOL = 2
 
 
 @dataclass
 class Envelope:
+    """Queued HTTP request and one-result reply channel owned by the simulation boundary.
+
+    Attributes:
+        route: Allowed HTTP route.
+        token: Current session token or structured task-selection token.
+        body: Parsed JSON request payload.
+        reply: One-result response queue for the originating HTTP handler.
+        cancelled: Stored cancelled value.
+    """
+
     route: str
     token: str | None
     body: dict
@@ -29,6 +45,17 @@ class VillageServer:
     """One active client lease; disconnect/release returns control to local AI."""
 
     def __init__(self, world, brains, store=None, *, clock=time.monotonic):
+        """Initialize VillageServer and its owned state.
+
+        Args:
+            world: Authoritative simulation world used by this operation.
+            brains: Scheduler responsible for local policies and bounded inference.
+            store: Optional SaveStore for server persistence.
+            clock: Injectable monotonic clock used for leases and tests.
+
+        Returns:
+            None.
+        """
         self.world, self.brains, self.store, self.clock = world, brains, store, clock
         self.settings = get_settings()["network"]
         self.inbox = queue.Queue(maxsize=self.settings["queue_capacity"])
@@ -44,10 +71,20 @@ class VillageServer:
         self.failure_saved = False
 
     def expire(self):
+        """Expire stale input and release a session whose heartbeat lease elapsed.
+
+        Returns:
+            None; returns expired possession to local autonomy.
+        """
         if self.token and self.clock() >= self.expires:
             self.release_session()
 
     def release_session(self):
+        """Release ownership, movement and session sequencing state.
+
+        Returns:
+            None; invalidates the current session token.
+        """
         self.world.possess(None)
         self.token = None
         self.motion = (0.0, 0.0)
@@ -55,6 +92,14 @@ class VillageServer:
         self.last_reply = None
 
     def authorized(self, token):
+        """Compare a supplied bearer token against the active session in constant time.
+
+        Args:
+            token: Current session token or structured task-selection token.
+
+        Returns:
+            Whether the token identifies the active session.
+        """
         return (
             isinstance(token, str)
             and self.token is not None
@@ -62,6 +107,11 @@ class VillageServer:
         )
 
     def state(self):
+        """Capture authoritative world state with protocol, frame and possession metadata.
+
+        Returns:
+            Snapshot dictionary; must be called by the simulation owner.
+        """
         from .persistence import snapshot
 
         return dict(
@@ -80,6 +130,16 @@ class VillageServer:
         )
 
     def handle(self, route, token, body):
+        """Handle one validated route on the simulation thread with sequenced idempotence.
+
+        Args:
+            route: Allowed HTTP route.
+            token: Current session token or structured task-selection token.
+            body: Parsed JSON request payload.
+
+        Returns:
+            HTTP status and JSON response pair.
+        """
         self.expire()
         if route == "/health":
             return 200, dict(
@@ -130,6 +190,14 @@ class VillageServer:
         return result
 
     def command(self, command):
+        """Validate and apply a bounded possession, movement, action or dialogue command.
+
+        Args:
+            command: Sequenced player input command dictionary.
+
+        Returns:
+            HTTP status and acknowledgement/error dictionary pair.
+        """
         if not isinstance(command, dict):
             return 400, dict(error="Expected command object")
         kind = command.get("kind")
@@ -186,6 +254,14 @@ class VillageServer:
         return 400, dict(error="Unknown command kind")
 
     def step(self, dt):
+        """Process queued commands, advance ordinary physics and reply to post-tick exchanges.
+
+        Args:
+            dt: Elapsed simulation seconds; rendering overrides receive real frame seconds.
+
+        Returns:
+            None; performs world mutations only on the simulation thread.
+        """
         self.expire()
         exchanges = []
         for _ in range(self.settings["max_commands_per_tick"]):
@@ -232,25 +308,68 @@ class VillageServer:
 
 
 def make_http_server(runtime, host, port):
+    """Create a bounded threaded HTTP listener whose handlers enqueue simulation work.
+
+    Args:
+        runtime: Authoritative VillageServer serviced by the HTTP listener.
+        host: Validated loopback listener host.
+        port: Listener port; zero requests an ephemeral port.
+
+    Returns:
+        Configured ThreadingHTTPServer; the caller owns serving and shutdown.
+    """
     settings = runtime.settings
 
     class Handler(BaseHTTPRequestHandler):
+        """Bounded HTTP parser that forwards requests to the simulation thread."""
+
         disable_nagle_algorithm = settings["tcp_no_delay"]
 
         def setup(self):
+            """Configure each connection and bound socket read/write waits.
+
+            Returns:
+                None; initializes the standard request-handler streams.
+            """
             super().setup()
             self.connection.settimeout(settings["request_seconds"])
 
         def log_message(self, *args):
+            """Suppress standard HTTP request logging to avoid exposing session traffic.
+
+            Args:
+                *args: Parsed command-line options for this entry point.
+
+            Returns:
+                None; request lines are not printed.
+            """
             pass
 
         def do_GET(self):
+            """Dispatch an HTTP GET through the bounded queue boundary.
+
+            Returns:
+                None; writes a bounded response.
+            """
             self.dispatch(False)
 
         def do_POST(self):
+            """Dispatch an HTTP POST through the bounded queue boundary.
+
+            Returns:
+                None; parses bounded JSON before enqueueing.
+            """
             self.dispatch(True)
 
         def dispatch(self, post):
+            """Parse allowed routes/body/token and enqueue work without touching the world.
+
+            Args:
+                post: Whether this request has a POST JSON body.
+
+            Returns:
+                None; sends the queued result or an explicit transport error response.
+            """
             try:
                 allowed = (
                     ("/session", "/command", "/exchange", "/disconnect")
@@ -294,6 +413,15 @@ def make_http_server(runtime, host, port):
                 return
 
         def respond(self, status, value):
+            """Serialize a JSON response with explicit status and content length.
+
+            Args:
+                status: HTTP status code.
+                value: Value to validate, convert or publish as described above.
+
+            Returns:
+                None; writes to the current HTTP response stream.
+            """
             payload = json.dumps(value, allow_nan=False).encode("utf-8")
             if len(payload) > settings["max_state_bytes"]:
                 status, payload = 503, b'{"error":"State too large"}'
@@ -309,7 +437,12 @@ def make_http_server(runtime, host, port):
 
 
 def main():
-    from .cli import prepare, attach_profile
+    """Run the authoritative loopback simulation until interruption or the bounded run ends.
+
+    Returns:
+        None; writes artifacts or exits with a nonzero status on failure.
+    """
+    from .cli import attach_profile, prepare
 
     parser = argparse.ArgumentParser(description=__doc__)
     settings = prepare(parser)
@@ -335,15 +468,16 @@ def main():
         or args.run_seconds < 0
     ):
         parser.error("Invalid port or run duration")
+    from .brains import BrainScheduler
     from .persistence import SaveStore
     from .world import World
-    from .brains import BrainScheduler
 
     store = SaveStore(args.save_path)
     world = (store.new_attempt() if args.new_game else store.load()) or World()
     world.task_board.mode = settings["coordination"]["mode"]
     if args.decision_log:
         from pathlib import Path
+
         from .telemetry import DecisionLog
 
         if Path(args.decision_log).resolve() == store.path:

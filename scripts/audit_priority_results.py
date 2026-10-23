@@ -1,4 +1,9 @@
-"""Compare non-planner decisions and task ownership in a frozen strategy batch."""
+"""Compare non-planner decisions and task ownership in a frozen strategy batch.
+
+File: scripts/audit_priority_results.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
 
 import argparse
 import hashlib
@@ -7,12 +12,28 @@ from pathlib import Path
 
 
 def digest(rows):
+    """Hash normalized decision or ownership rows for exact paired comparison.
+
+    Args:
+        rows: Verified run-result records.
+
+    Returns:
+        Hexadecimal SHA-256 digest.
+    """
     return hashlib.sha256(
         json.dumps(rows, sort_keys=True, separators=(",", ":")).encode()
     ).hexdigest()
 
 
 def audit(root):
+    """Compare actual non-planner decisions and task ownership across matched conditions.
+
+    Args:
+        root: Root artifact directory searched for result files.
+
+    Returns:
+        Audit dictionary containing trace digests and paired comparisons.
+    """
     report = json.loads((root / "summary.json").read_text())
     rows = []
     for run in report["runs"]:
@@ -80,6 +101,11 @@ def audit(root):
 
 
 def main():
+    """Run the audit priority results diagnostic and write its evidence.
+
+    Returns:
+        None; writes artifacts or exits with a nonzero status on failure.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--batch", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)

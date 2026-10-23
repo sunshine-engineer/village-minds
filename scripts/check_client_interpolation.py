@@ -1,6 +1,15 @@
-"""Offscreen render check: run from the repository root with Panda3D installed."""
+"""Offscreen render check: run from the repository root with Panda3D installed.
 
-import sys, pathlib, json, argparse, math
+File: scripts/check_client_interpolation.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
+
+import argparse
+import json
+import math
+import pathlib
+import sys
 from copy import deepcopy
 from unittest.mock import patch
 
@@ -8,11 +17,16 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 
 
 def main():
-    from village.world import World
+    """Run the check client interpolation diagnostic and write its evidence.
+
+    Returns:
+        None; writes artifacts or exits with a nonzero status on failure.
+    """
+    from village.client import game_class
+    from village.config import get_settings
     from village.entities import Monster
     from village.persistence import snapshot
-    from village.config import get_settings
-    from village.client import game_class
+    from village.world import World
 
     world = World(seed=301)
     world.monsters = [Monster("m1", "north_gate", (0, 10))]
@@ -20,6 +34,15 @@ def main():
     current = [0.0]
 
     def packet(t, frame):
+        """Build a controlled confirmed snapshot at a known simulation/receive time.
+
+        Args:
+            t: Controlled simulation/receive timestamp in seconds.
+            frame: Monotonically increasing fixture snapshot number.
+
+        Returns:
+            Snapshot dictionary with deterministic poses and connection metadata.
+        """
         state = deepcopy(base)
         state["world"]["time"] = t
         state["world"]["villagers"][0]["position"] = [t * 5, 0]
@@ -35,7 +58,14 @@ def main():
         )
 
     class Session:
+        """Render-fixture session supplying controlled snapshots without HTTP."""
+
         def __init__(self):
+            """Initialize Session and its owned state.
+
+            Returns:
+                None.
+            """
             self.latest = packet(0, 0)
             self.pending = None
             self.connected = True
@@ -44,11 +74,24 @@ def main():
             self.motion = (0, 0)
 
         def poll(self):
+            """Deliver the fixture's next confirmed snapshot without an HTTP connection.
+
+            Returns:
+                Next pending snapshot, or None when the fixture has no update.
+            """
             result = self.pending
             self.pending = None
             return result
 
         def submit(self, command):
+            """Accept a fixture command without mutating authoritative simulation state.
+
+            Args:
+                command: Sequenced player input command dictionary.
+
+            Returns:
+                None; this render-only session stub does not execute server actions.
+            """
             return True
 
     session = Session()

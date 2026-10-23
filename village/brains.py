@@ -1,13 +1,20 @@
-"""Independent local routines and bounded asynchronous model scheduling."""
+"""Independent local routines and bounded asynchronous model scheduling.
+
+File: village/brains.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+"""
 
 import queue
 import threading
 import time
+
 from .config import get_settings
-from .decisions import decision_schema
-from .models import InferenceDecision, request_decision, resolve_profile, BACKENDS
+from .decisions import decision_schema as decision_schema
 from .inference import bounded_decision
 from .map_data import GATES, HEARING
+from .models import BACKENDS, InferenceDecision, resolve_profile
+from .models import request_decision as request_decision
 from .navigation import distance, pathfind
 
 S = get_settings()
@@ -18,6 +25,21 @@ class BrainScheduler:
     """Fast local autonomy for everyone; one slow model request for extra decisions."""
 
     def __init__(self, world, url, model, demo=False, profile=None):
+        """Initialize BrainScheduler and its owned state.
+
+        Args:
+            world: Authoritative simulation world used by this operation.
+            url: Configured model endpoint, or loopback server URL for network sessions.
+            model: Installed model tag selected for inference.
+            demo: Whether to use local scripted routines without model requests.
+            profile: Resolved model profile containing backend and generation options.
+
+        Returns:
+            None.
+
+        Raises:
+            ValueError: If the input violates the validation contract described above.
+        """
         self.world, self.url, self.model = world, url, model
         self.demo = demo
         self.profile = profile or resolve_profile(url=url, model=model)
@@ -62,6 +84,11 @@ class BrainScheduler:
             ).start()
 
     def _worker(self):
+        """Process queued inference requests and publish results without mutating the world.
+
+        Returns:
+            None; runs as a daemon and communicates through bounded queues.
+        """
         while True:
             index, revision, sent_at, observation = self.jobs.get()
             try:
@@ -92,6 +119,14 @@ class BrainScheduler:
                 )
 
     def _urgent(self, bot):
+        """Detect needs or role emergencies that should interrupt a model order.
+
+        Args:
+            bot: Villager whose current state or work is being considered.
+
+        Returns:
+            Whether urgent local work should take precedence.
+        """
         if bot.hunger >= P["urgent_hunger"] or bot.energy < P["urgent_energy"]:
             return True
         threats = self.world.gate_threats()
@@ -102,6 +137,15 @@ class BrainScheduler:
         return False
 
     def _keep_model_task(self, index, bot):
+        """Check whether a still-useful model order may continue.
+
+        Args:
+            index: Villager roster index selected by the caller.
+            bot: Villager whose current state or work is being considered.
+
+        Returns:
+            Whether the current model order remains eligible.
+        """
         if self._urgent(bot):
             return False
         task = self.model_tasks[index]
@@ -121,6 +165,15 @@ class BrainScheduler:
         return True
 
     def _patrol(self, index, bot):
+        """Issue a configured patrol destination to an idle villager.
+
+        Args:
+            index: Villager roster index selected by the caller.
+            bot: Villager whose current state or work is being considered.
+
+        Returns:
+            None; may update the villager's movement order.
+        """
         world = self.world
         if (
             bot.path
@@ -160,6 +213,15 @@ class BrainScheduler:
         )
 
     def _idle_activity(self, index, bot):
+        """Schedule role-appropriate activity when no urgent job is available.
+
+        Args:
+            index: Villager roster index selected by the caller.
+            bot: Villager whose current state or work is being considered.
+
+        Returns:
+            None; may dispatch a local intent.
+        """
         world = self.world
         if (
             bot.path
@@ -172,7 +234,9 @@ class BrainScheduler:
         place = (
             "farm"
             if bot.role == "farmer"
-            else "storehouse" if bot.role == "worker" else "square"
+            else "storehouse"
+            if bot.role == "worker"
+            else "square"
         )
         x, y = world.destination(bot, place)
         offsets = A["activity_offsets"]
@@ -183,7 +247,9 @@ class BrainScheduler:
             bot.action = (
                 "checking crops"
                 if bot.role == "farmer"
-                else "checking stores" if bot.role == "worker" else "checking village"
+                else "checking stores"
+                if bot.role == "worker"
+                else "checking village"
             )
             self.local_decisions += 1
             if world.decision_log:
@@ -201,6 +267,11 @@ class BrainScheduler:
         )
 
     def _routines(self):
+        """Run due needs and role policies independently for each eligible villager.
+
+        Returns:
+            None; updates local work and scheduling counters.
+        """
         world = self.world
         for index, bot in enumerate(world.villagers):
             if (
@@ -224,7 +295,11 @@ class BrainScheduler:
         self._social()
 
     def _social(self):
-        """Occasional scripted context barks; never stop walking or a work order."""
+        """Occasional scripted context barks; never stop walking or a work order.
+
+        Returns:
+            None; may append dialogue and advance social cooldowns.
+        """
         world = self.world
         if world.time < self.next_social:
             return
@@ -270,6 +345,11 @@ class BrainScheduler:
             break
 
     def tick(self):
+        """Apply completed responses and schedule local work and the next model request.
+
+        Returns:
+            None; the caller retains authority over world updates.
+        """
         world = self.world
         if world.failed:
             self.status = "VILLAGE LOST | lessons saved with the world"
@@ -339,6 +419,14 @@ class BrainScheduler:
                 break
 
     def profile_for(self, name):
+        """Resolve the explicit per-villager profile or scheduler fallback.
+
+        Args:
+            name: Registered identity or name selected by the caller.
+
+        Returns:
+            Resolved model profile dictionary.
+        """
         assigned = A["villager_profiles"].get(name)
         return resolve_profile(assigned) if assigned else self.profile
 
@@ -355,7 +443,22 @@ class BrainScheduler:
         latency_ms=None,
         profile=None,
     ):
-        """Common validation/arbitration for live async and evaluation checkpoints."""
+        """Common validation/arbitration for live async and evaluation checkpoints.
+
+        Args:
+            index: Villager roster index selected by the caller.
+            revision: Actor revision captured when inference was requested.
+            sent_at: Simulation timestamp captured for the original request.
+            result: Returned decision or result envelope being consumed.
+            error: Optional failure description from a worker.
+            request_id: Optional correlation identifier for decision telemetry.
+            observation: Request-time context containing legal choices and relevant world state.
+            latency_ms: Optional measured request wall latency in milliseconds.
+            profile: Resolved model profile containing backend and generation options.
+
+        Returns:
+            Outcome label recording acceptance, rejection, staleness or error.
+        """
         world = self.world
         bot = world.villagers[index]
         profile = profile or self.active_profile

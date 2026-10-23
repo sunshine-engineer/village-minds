@@ -1,21 +1,30 @@
 """Post-hoc timing control: replay a model run's delays while deferring every plan.
 
 This diagnostic is not a predeclared holdout and makes no provider calls.
+
+File: scripts/replay_priority_control.py
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
 """
 
 import argparse
-from copy import deepcopy
 import json
-from pathlib import Path
 import sys
+from copy import deepcopy
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 
 def main():
+    """Run the replay priority control diagnostic and write its evidence.
+
+    Returns:
+        None; writes artifacts or exits with a nonzero status on failure.
+    """
     from village.config import configure, get_settings
-    from village.models import resolve_profile
     from village.evaluation import run_scenario
+    from village.models import resolve_profile
     from village.validation import source_hashes
 
     parser = argparse.ArgumentParser(description=__doc__)
@@ -25,7 +34,18 @@ def main():
     parser.add_argument("--seed", type=int, required=True)
     args = parser.parse_args()
     report = json.loads((args.batch / "summary.json").read_text())
-    normalized = lambda x: {k.replace("\\", "/"): v for k, v in x.items()}
+
+    def normalized(hashes):
+        """Normalize source-hash path separators for cross-platform comparison.
+
+        Args:
+            hashes: Mapping from source paths to SHA-256 digests.
+
+        Returns:
+            Mapping with forward-slash source paths.
+        """
+        return {key.replace("\\", "/"): value for key, value in hashes.items()}
+
     if normalized(source_hashes()) != normalized(report["protocol"]["sources"]):
         parser.error("Source differs from original batch; use its frozen checkout")
     args.output.mkdir(parents=True, exist_ok=False)
@@ -51,6 +71,20 @@ def main():
         used = []
 
         def request(profile, observation, path, timeout):
+            """Replay the retained response or declared inert control without a provider request.
+
+            Args:
+                profile: Resolved model profile containing backend and generation options.
+                observation: Request-time context containing legal choices and relevant world state.
+                path: Input/output filesystem path for the described resource.
+                timeout: Maximum request wall time in seconds.
+
+            Returns:
+                Recorded or synthetic bounded-response envelope for the diagnostic case.
+
+            Raises:
+                RuntimeError: If the input violates the validation contract described above.
+            """
             if len(used) >= len(records):
                 raise RuntimeError("Control diverged: extra checkpoint")
             record = records[len(used)]

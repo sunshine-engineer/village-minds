@@ -1,3 +1,10 @@
+<!--
+File: README.md
+Purpose: Village Minds — Willowbrook survival prototype.
+Maintainer: sunshine-engineer
+Modified: 2026-10-23
+-->
+
 # Village Minds — Willowbrook survival prototype
 
 A Python/Panda3D village with six villagers using fast local role routines and background plans from a Docker-hosted model. Take over any villager, grow and share food, supply repairs, and defend the village from respawning monster waves. The village and its memories resume when you restart.
@@ -285,7 +292,41 @@ The smoke test renders offscreen and saves `artifacts/village-smoke.png`; a grap
 
 This remains a flat-grid prototype with radius combat, simplified monster steering, and procedural art. Monsters target gates and then the center; they do not use full physics/interior navigation. Villagers can overlap. Networking supports one loopback client and one possessed villager; there is no multi-player hosting, model training, sophisticated relationship system, crafting tree, or final victory objective. Failure lessons and personalities are prompts, not proof of reliable reasoning.
 
-## Source layout and references
+## Directory structure
+
+```text
+.
+├── .github/workflows/       # Windows/Linux CI, lint, docs and packaging checks
+├── configs/                # Opt-in game scenarios and separately named batch plans
+│   ├── portfolio/          # Causal contention and four-role reliability protocols
+│   ├── strategy-v2/        # Frozen assignment/logistics experiment and dev preset
+│   ├── strategy-v3/        # Frozen component, confirmation and timing protocols
+│   ├── strategy-v4/        # Frozen gate-priority and corrected replay protocols
+│   └── validation/         # Scripted holdout matrix and resource/travel variants
+├── docs/                   # Architecture, operations, extension and study guides
+│   └── results/            # Immutable published evidence, audits, traces and images
+├── examples/               # Small validated configuration and contributor examples
+├── scripts/                # Developer diagnostics, release checks and evidence audits
+├── tests/                  # Provider-free unittest regressions and controlled fixtures
+├── village/                # Installable Python simulation, rendering and transport
+│   ├── data/               # Packaged startup defaults
+│   │   ├── assets/         # Visual prefab/style/UI catalog
+│   │   └── prompts/        # Exact model prompt inputs; not editorial comments
+│   └── plugins/            # Trusted action/state and offline-backend examples
+├── compose.yaml            # Loopback Ollama container and persistent model volume
+├── pyproject.toml          # Build metadata, Panda3D pin and pinned dev tooling
+├── .env.example            # Optional environment names; no automatic dotenv loading
+└── .editorconfig           # Shared text/indentation conventions
+```
+
+Local-only `.venv` / `.venv-win`, `saves/`, `artifacts/`, `build/` and `dist/` are
+ignored runtime/build data, not source to hand over in Git. File placement matches
+these responsibilities; no relocation is required for this consistency pass.
+See the [complete file inventory](docs/FILE_INVENTORY.md) for individual purposes
+and [project standards](docs/PROJECT_STANDARDS.md) for headers, docstrings, formatting,
+configuration/environment variables and protected evidence formats.
+
+## Source ownership and references
 
 The code separates simulation, local policies, model transports, rendering, assets,
 controls and persistence. Existing `village.simulation` imports remain supported.
